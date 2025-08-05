@@ -1,0 +1,218 @@
+﻿@{
+    ViewBag.Title = "Cliente";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!-- Se incluye SweetAlert2 para notificaciones modernas -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<div class="card">
+    <div class="card-header">
+        <i class="fas fa-users"></i> Lista de Clientes
+    </div>
+
+    <div class="card-body">
+        <div class="row">
+            <div class="col-12">
+                <button type="button" class="btn btn-success" onclick="abrirModal(null)">Crear Nuevo</button>
+            </div>
+        </div>
+
+        <hr />
+
+        <table id="tablacliente" class="display cell-border" style="width:100%">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>CI NIT</th>
+                    <th>Telefono</th>
+                    <th>Dirección</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+<!-- Modal para Crear/Editar Cliente -->
+<div class="modal fade" id="FormModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title" id="modalTitle">Cliente</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body ">
+
+                <!-- Campo oculto para el ID del cliente -->
+                <input id="txtid" type="hidden" value="0" />
+
+                <div class="row g-2">
+
+                    <div class="col-sm-6">
+                        <label for="txtNombre" class="form-label">Nombre Completo</label>
+                        <input type="text" class="form-control" id="txtNombre" placeholder="Juan Carlos" autocomplete="off">
+                    </div>
+
+                    <div class="col-sm-6">
+                        <label for="txtci_nit" class="form-label">CI o NIT</label>
+                        <input type="text" class="form-control" id="txtci_nit" placeholder="12345678" autocomplete="off">
+                    </div>
+
+                    <div class="col-sm-6">
+                        <label for="txtTelefono" class="form-label">Telefono</label>
+                        <input type="number" class="form-control" id="txtTelefono" placeholder="77555555" autocomplete="off">
+                    </div>
+
+                    <div class="col-sm-6">
+                        <label for="txtDireccion" class="form-label">Dirección</label>
+                        <input type="text" class="form-control" id="txtDireccion" placeholder="Cotoca" autocomplete="off">
+                    </div>
+
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-primary" onclick="Guardar()">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <script>
+        var tabladata;
+        var filaSeleccionada;
+
+        document.addEventListener('DOMContentLoaded', function () {
+            tabladata = $('#tablacliente').DataTable({
+                responsive: true,
+                ordering: false,
+                "ajax": {
+                    "url": '@Url.Action("Listar", "Cliente")',
+                    "type": "GET",
+                    "datatype": "json"
+                },
+                "columns": [
+                    { "data": "nombre_completo" },
+                    { "data": "ci_nit" },
+                    { "data": "telefono" },
+                    { "data": "direccion" },
+                    {
+                        "defaultContent": '<button type="button" class="btn btn-warning btn-sm btn-editar">Editar</button>',
+                        "orderable": false,
+                        "searchable": false,
+                        "width": "125px"
+                    }
+                ],
+                "language": {
+                    "url": '//cdn.datatables.net/plug-ins/2.2.1/i18n/es-ES.json',
+                },
+            });
+
+            $("#tablacliente tbody").on("click", '.btn-editar', function () {
+                filaSeleccionada = $(this).closest("tr");
+                var data = tabladata.row(filaSeleccionada).data();
+                abrirModal(data);
+            });
+        });
+
+        function Limpiar() {
+            document.getElementById("txtid").value = 0;
+            document.getElementById("txtNombre").value = "";
+            document.getElementById("txtci_nit").value = "";
+            document.getElementById("txtTelefono").value = "";
+            document.getElementById("txtDireccion").value = "";
+        }
+
+        function abrirModal(json) {
+            Limpiar();
+            if (json != null) {
+                document.getElementById("txtid").value = json.id_cliente;
+                document.getElementById("txtNombre").value = json.nombre_completo;
+                document.getElementById("txtci_nit").value = json.ci_nit;
+                document.getElementById("txtTelefono").value = json.telefono;
+                document.getElementById("txtDireccion").value = json.direccion;
+            }
+            $('#FormModal').modal('show');
+        }
+
+        async function Guardar() {
+            const cliente = {
+                id_cliente: parseInt(document.getElementById("txtid").value),
+                nombre_completo: document.getElementById("txtNombre").value,
+                ci_nit: document.getElementById("txtci_nit").value,
+                telefono: document.getElementById("txtTelefono").value,
+                direccion: document.getElementById("txtDireccion").value
+            };
+
+            const tituloCargando = cliente.id_cliente === 0 ? "Registrando cliente..." : "Actualizando datos del cliente...";
+            const mensajeCargando = cliente.id_cliente === 0 ? "Por favor, espera mientras se registra el nuevo cliente." : "Por favor, espera mientras se actualizan los datos.";
+
+            Swal.fire({
+                title: tituloCargando,
+                html: mensajeCargando,
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            try {
+                // Hacemos la petición con fetch
+                const response = await fetch('@Url.Action("GuardarCliente", "Cliente")', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json; charset=utf-8'
+                    },
+                    body: JSON.stringify({ objeto: cliente })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Error en la petición: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+
+                if (data.resultado) {
+                    // Si la operación fue exitosa
+                    const tituloExito = cliente.id_cliente === 0 ? "¡Cliente Registrado!" : "¡Datos Actualizados!";
+                    const mensajeExito = cliente.id_cliente === 0 ? "El cliente se ha registrado correctamente." : "Los datos del cliente se han actualizado correctamente.";
+
+                    if (cliente.id_cliente === 0) {
+                        cliente.id_cliente = data.resultado; // Asignamos el nuevo ID
+                        tabladata.row.add(cliente).draw(false);
+                    } else {
+                        tabladata.row(filaSeleccionada).data(cliente).draw(false);
+                    }
+
+                    Swal.fire({
+                        title: tituloExito,
+                        text: mensajeExito,
+                        icon: 'success'
+                    });
+
+                    $('#FormModal').modal("hide");
+                } else {
+                    Swal.fire({
+                        title: "¡Error!",
+                        text: data.mensaje,
+                        icon: 'error'
+                    });
+                }
+            } catch (error) {
+                Swal.fire({
+                    title: "¡Error!",
+                    text: "Ocurrió un error inesperado al guardar el cliente.",
+                    icon: 'error'
+                });
+                console.error(error);
+            }
+        }
+    </script>
+}

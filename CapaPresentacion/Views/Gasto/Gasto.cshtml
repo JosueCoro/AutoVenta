@@ -1,0 +1,220 @@
+﻿
+@{
+    ViewBag.Title = "Gasto";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<div class="card">
+    <div class="card-header">
+        <i class="fas fa-list-alt"></i> Lista de Tipos de Gasto
+    </div>
+
+    <div class="card-body">
+        <div class="row">
+            <div class="col-12">
+                <button type="button" class="btn btn-success mb-3" onclick="abrirModal(null)">Crear Nuevo</button>
+            </div>
+        </div>
+
+        <table id="tablatipogasto" class="display cell-border" style="width:100%">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Modal para Crear/Editar Tipo de Gasto -->
+<div class="modal fade" id="FormModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title" id="modalTitle">Tipo de Gasto</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body ">
+                <input id="txtid" type="hidden" value="0" />
+                <div class="row g-2">
+                    <div class="col-12">
+                        <label for="txtNombre" class="form-label">Nombre</label>
+                        <input type="text" class="form-control" id="txtNombre" placeholder="Ej: Servicios" autocomplete="off">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-primary" onclick="Guardar()">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <script>
+        // Se usa jQuery para DataTables, ya que es una dependencia de esa librería
+        var tabladata;
+        var filaSeleccionada;
+
+        document.addEventListener('DOMContentLoaded', function () {
+            tabladata = $('#tablatipogasto').DataTable({
+                responsive: true,
+                ordering: false,
+                "ajax": {
+                    "url": '@Url.Action("Listar", "Gasto")',
+                    "type": "GET",
+                    "datatype": "json"
+                },
+                "columns": [
+                    { "data": "nombre" },
+                    {
+                        "defaultContent": '<button type="button" class="btn btn-primary btn-sm btn-editar me-2"><i class="fas fa-pen"></i></button>' +
+                                          '<button type="button" class="btn btn-danger btn-sm btn-eliminar"><i class="fas fa-trash"></i></button>',
+                        "orderable": false,
+                        "searchable": false,
+                        "width": "125px"
+                    }
+                ],
+                "language": {
+                    "url": '//cdn.datatables.net/plug-ins/2.2.1/i18n/es-ES.json',
+                },
+            });
+
+            // Evento de clic para el botón Editar de la tabla
+            $("#tablatipogasto tbody").on("click", '.btn-editar', function () {
+                filaSeleccionada = $(this).closest("tr");
+                var data = tabladata.row(filaSeleccionada).data();
+                abrirModal(data);
+            });
+
+            // Evento de clic para el botón Eliminar de la tabla
+            $("#tablatipogasto tbody").on("click", '.btn-eliminar', function () {
+                filaSeleccionada = $(this).closest("tr");
+                var data = tabladata.row(filaSeleccionada).data();
+                Eliminar(data);
+            });
+        });
+
+        // Limpia el formulario del modal
+        function Limpiar() {
+            document.getElementById("txtid").value = 0;
+            document.getElementById("txtNombre").value = "";
+        }
+
+        // Abre el modal para crear o editar
+        function abrirModal(json) {
+            Limpiar();
+            if (json != null) {
+                document.getElementById("txtid").value = json.id_tipo_gasto;
+                document.getElementById("txtNombre").value = json.nombre;
+                document.getElementById("modalTitle").textContent = "Editar Tipo de Gasto";
+            } else {
+                document.getElementById("modalTitle").textContent = "Crear Nuevo Tipo de Gasto";
+            }
+            $('#FormModal').modal('show');
+        }
+
+        // Función para guardar un tipo de gasto usando FETCH y SweetAlert2
+        async function Guardar() {
+            const tipoGasto = {
+                id_tipo_gasto: parseInt(document.getElementById("txtid").value),
+                nombre: document.getElementById("txtNombre").value
+            };
+
+            const esNuevo = tipoGasto.id_tipo_gasto === 0;
+
+            Swal.fire({
+                title: esNuevo ? "Registrando tipo de gasto..." : "Actualizando tipo de gasto...",
+                html: esNuevo ? "Por favor, espera..." : "Por favor, espera...",
+                allowOutsideClick: false,
+                didOpen: () => { Swal.showLoading(); }
+            });
+
+            try {
+                const response = await fetch('@Url.Action("GuardarGasto", "Gasto")', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json; charset=utf-8' },
+                    body: JSON.stringify({ objeto: tipoGasto })
+                });
+
+                if (!response.ok) throw new Error("Error en la petición.");
+
+                const data = await response.json();
+
+                if (data.resultado) {
+                    Swal.fire({
+                        title: esNuevo ? "¡Registrado!" : "¡Actualizado!",
+                        text: esNuevo ? "El tipo de gasto se ha registrado correctamente." : "El tipo de gasto se ha actualizado correctamente.",
+                        icon: 'success'
+                    });
+
+                    if (esNuevo) {
+                        tipoGasto.id_tipo_gasto = data.resultado;
+                        tabladata.row.add(tipoGasto).draw(false);
+                    } else {
+                        tabladata.row(filaSeleccionada).data(tipoGasto).draw(false);
+                    }
+
+                    $('#FormModal').modal("hide");
+                } else {
+                    Swal.fire({ title: "¡Error!", text: data.mensaje, icon: 'error' });
+                }
+            } catch (error) {
+                Swal.fire({ title: "¡Error!", text: "Ocurrió un error inesperado al guardar.", icon: 'error' });
+                console.error(error);
+            }
+        }
+
+        // Función para eliminar un tipo de gasto usando FETCH y SweetAlert2
+        async function Eliminar(tipoGasto) {
+            Swal.fire({
+                title: '¿Estás seguro?',
+                text: "No podrás revertir esta acción.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar'
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({
+                        title: "Eliminando...",
+                        text: "Por favor, espera.",
+                        allowOutsideClick: false,
+                        didOpen: () => { Swal.showLoading(); }
+                    });
+
+                    try {
+                        const response = await fetch('@Url.Action("EliminarGasto", "Gasto")', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json; charset=utf-8' },
+                            body: JSON.stringify({ id: tipoGasto.id_tipo_gasto })
+                        });
+
+                        if (!response.ok) throw new Error("Error en la petición.");
+
+                        const data = await response.json();
+
+                        if (data.resultado) {
+                            tabladata.row(filaSeleccionada).remove().draw();
+                            Swal.fire('¡Eliminado!', 'El tipo de gasto ha sido eliminado.', 'success');
+                        } else {
+                            Swal.fire('Error', data.mensaje, 'error');
+                        }
+                    } catch (error) {
+                        Swal.fire('Error', 'Ocurrió un error inesperado al eliminar.', 'error');
+                        console.error(error);
+                    }
+                }
+            });
+        }
+    </script>
+}
+
