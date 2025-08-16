@@ -1,0 +1,149 @@
+﻿
+@{
+    ViewBag.Title = "Login";
+    Layout = null;
+}
+
+<!-- Bootstrap CSS -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<!-- Font Awesome para iconos -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+<!-- SweetAlert2 para notificaciones -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
+<style>
+    body {
+        background-color: #f8f9fa;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+    }
+
+    .login-card {
+        max-width: 400px;
+        width: 100%;
+        padding: 2rem;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        background-color: #fff;
+    }
+
+    .login-header {
+        text-align: center;
+        margin-bottom: 1.5rem;
+    }
+
+        .login-header h2 {
+            color: #343a40;
+            font-weight: 600;
+        }
+
+    .form-control:focus {
+        box-shadow: 0 0 0 0.25rem rgba(0, 123, 255, 0.25);
+        border-color: #007bff;
+    }
+
+    .btn-login {
+        background-color: #007bff;
+        border-color: #007bff;
+        color: white;
+        width: 100%;
+        padding: 0.75rem;
+        font-size: 1.1rem;
+        border-radius: 8px;
+    }
+
+        .btn-login:hover {
+            background-color: #0056b3;
+            border-color: #0056b3;
+        }
+</style>
+
+<div class="login-card">
+    <div class="login-header">
+        <h2><i class="fas fa-car"></i> Autoventa Login</h2>
+    </div>
+    <form id="loginForm">
+        <div class="mb-3">
+            <label for="txtCorreo" class="form-label">Correo Electrónico</label>
+            <input type="email" class="form-control" id="txtCorreo" placeholder="Ingrese su correo" autocomplete="off" required>
+        </div>
+        <div class="mb-4">
+            <label for="txtContrasena" class="form-label">Contraseña</label>
+            <input type="password" class="form-control" id="txtContrasena" placeholder="Ingrese su contraseña" autocomplete="off" required>
+        </div>
+        <button type="button" class="btn btn-login" onclick="validarLogin()">Iniciar Sesión</button>
+    </form>
+</div>
+
+<!-- Bootstrap JS Bundle (popper.js incluido) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<!-- SweetAlert2 JS -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    async function validarLogin() {
+        const correo = document.getElementById('txtCorreo').value;
+        const contrasena = document.getElementById('txtContrasena').value;
+
+        if (!correo || !contrasena) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Campos Vacíos',
+                text: 'Por favor, ingrese su correo y contraseña.'
+            });
+            return;
+        }
+
+        Swal.fire({
+            title: 'Iniciando Sesión...',
+            html: 'Verificando credenciales, por favor espera.',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+
+        try {
+            const response = await fetch('@Url.Action("ValidarLogin", "Usuario")', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json; charset=utf-8'
+                },
+                body: JSON.stringify({ correo: correo, contrasena: contrasena })
+            });
+
+            if (!response.ok) {
+                throw new Error('Error en la conexión con el servidor.');
+            }
+
+            const data = await response.json();
+
+            if (data.resultado) {
+                Swal.fire({
+                    icon: 'success',
+                    title: '¡Bienvenido!',
+                    text: data.mensaje,
+                    showConfirmButton: false,
+                    timer: 1500
+                }).then(() => {
+                    window.location.href = data.redirectUrl; // Redirige al usuario
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error de Login',
+                    text: data.mensaje
+                });
+            }
+        } catch (error) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error Inesperado',
+                text: 'No se pudo conectar al servidor. Intente de nuevo.'
+            });
+            console.error('Error en la petición de login:', error);
+        }
+    }
+</script>

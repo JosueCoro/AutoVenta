@@ -150,5 +150,47 @@ namespace CapaDato
             }
             return resultado;
         }
+
+        // Método para validar el login de un usuario
+        public Usuario ValidarLogin(string correo, string contrasena)
+        {
+            Usuario objUsuario = null;
+
+            try
+            {
+                using (MySqlConnection oConexion = new MySqlConnection(Conexion.cn))
+                {
+                    oConexion.Open();
+                    MySqlCommand cmd = new MySqlCommand("sp_ValidarLogin", oConexion);
+                    cmd.Parameters.AddWithValue("p_correo", correo);
+                    cmd.Parameters.AddWithValue("p_contraseña", contrasena); // La contraseña ya debe venir hasheada
+                    cmd.CommandType = CommandType.StoredProcedure;
+
+                    using (MySqlDataReader dr = cmd.ExecuteReader())
+                    {
+                        if (dr.Read()) // Si se encontró un registro
+                        {
+                            objUsuario = new Usuario()
+                            {
+                                id_usuario = Convert.ToInt32(dr["id_usuario"]),
+                                nombre = dr["nombre"].ToString(),
+                                apellido = dr["apellido"].ToString(),
+                                ci = dr["ci"].ToString(),
+                                correo = dr["correo"].ToString(),
+                                estado = Convert.ToBoolean(dr["estado"]),
+                                rol_id_rol = Convert.ToInt32(dr["rol_id_rol"]),
+                                nombre_rol = dr["nombre_rol"].ToString()
+                            };
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                objUsuario = null; // En caso de error, retorna null
+                // Aquí podrías loggear el error: Console.WriteLine(ex.Message);
+            }
+            return objUsuario;
+        }
     }
 }

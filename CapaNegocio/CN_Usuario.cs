@@ -87,5 +87,43 @@ namespace CapaNegocio
 
             return cdusuario.Eliminar(id, out Mensaje);
         }
+
+
+        // ... (otros métodos Listar, Registrar, Editar, Eliminar existentes) ...
+
+        // Nuevo método para validar el login
+        public Usuario ValidarLogin(string correo, string contrasena, out string Mensaje)
+        {
+            Mensaje = string.Empty;
+
+            // Validaciones básicas
+            if (string.IsNullOrEmpty(correo))
+            {
+                Mensaje = "El correo es obligatorio.";
+                return null;
+            }
+            if (string.IsNullOrEmpty(contrasena))
+            {
+                Mensaje = "La contraseña es obligatoria.";
+                return null;
+            }
+
+            // Hashear la contraseña antes de enviarla a la capa de datos
+            string contrasenaHasheada = ConvertirSha256(contrasena);
+
+            // Llamar al método de la capa de datos
+            Usuario usuarioEncontrado = cdusuario.ValidarLogin(correo, contrasenaHasheada);
+
+            if (usuarioEncontrado == null)
+            {
+                Mensaje = "Credenciales incorrectas o usuario inactivo.";
+            }
+            else
+            {
+                Mensaje = "Login exitoso.";
+            }
+
+            return usuarioEncontrado;
+        }
     }
 }
