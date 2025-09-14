@@ -71,22 +71,24 @@ namespace CapaPresentacion.Controllers
         public ActionResult ValidarLogin(string correo, string contrasena)
         {
             string mensaje = string.Empty;
-            Usuario oUsuario = new CN_Usuario().ValidarLogin(correo, contrasena, out mensaje);
+            Usuario_Activo oUsuario = new CN_Usuario().ValidarLogin(correo, contrasena, out mensaje);
 
             if (oUsuario != null)
             {
                 // Si el login es exitoso, puedes establecer la autenticación de formularios
-                FormsAuthentication.SetAuthCookie(oUsuario.correo, false); // El segundo parámetro es para "recordarme"
 
                 // Almacenar datos del usuario en la sesión
                 Session["Usuario"] = oUsuario;
+                Session["NombreUsuario"] = oUsuario.nombre + " " + oUsuario.apellido;
+                Session["Email"] = oUsuario.correo;
+                Session["RolUsuario"] = oUsuario.nombre_rol;
 
-                // Retornar éxito y la URL de redirección (ej. al Dashboard)
+                FormsAuthentication.SetAuthCookie(oUsuario.correo, false); 
+
                 return Json(new { resultado = true, mensaje = mensaje, redirectUrl = Url.Action("Index", "Home") });
             }
             else
             {
-                // Login fallido
                 return Json(new { resultado = false, mensaje = mensaje });
             }
         }
@@ -96,6 +98,7 @@ namespace CapaPresentacion.Controllers
         public ActionResult CerrarSesion()
         {
             FormsAuthentication.SignOut();
+            Session["Usuario"] = null;
             Session.Clear();
             Session.Abandon();
             return RedirectToAction("Login", "Usuario"); // Redirige a la página de login

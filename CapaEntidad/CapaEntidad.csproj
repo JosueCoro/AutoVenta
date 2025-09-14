@@ -100,6 +100,7 @@
     <Compile Include="Rol.cs" />
     <Compile Include="TipoGasto.cs" />
     <Compile Include="Usuario.cs" />
+    <Compile Include="Usuario_Activo.cs" />
     <Compile Include="Vehiculo.cs" />
     <Compile Include="Venta.cs" />
   </ItemGroup>

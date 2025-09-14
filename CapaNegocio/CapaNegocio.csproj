@@ -95,6 +95,7 @@
   <ItemGroup>
     <Compile Include="CN_Cliente.cs" />
     <Compile Include="CN_Marca.cs" />
+    <Compile Include="CN_Recursos.cs" />
     <Compile Include="CN_Rol.cs" />
     <Compile Include="CN_TipoGasto.cs" />
     <Compile Include="CN_Usuario.cs" />

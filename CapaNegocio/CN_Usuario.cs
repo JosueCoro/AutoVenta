@@ -12,22 +12,10 @@ namespace CapaNegocio
     public class CN_Usuario
     {
         private CD_Usuario cdusuario = new CD_Usuario();
+        private CN_Recursos recursos = new CN_Recursos();
 
-        // Función privada para convertir una cadena a hash SHA256
-        private string ConvertirSha256(string texto)
-        {
-            StringBuilder Sb = new StringBuilder();
-            using (SHA256 hash = SHA256Managed.Create())
-            {
-                Encoding enc = Encoding.UTF8;
-                byte[] result = hash.ComputeHash(enc.GetBytes(texto));
-                foreach (byte b in result)
-                {
-                    Sb.Append(b.ToString("x2"));
-                }
-            }
-            return Sb.ToString();
-        }
+
+       
 
         public List<Usuario> Listar()
         {
@@ -45,7 +33,7 @@ namespace CapaNegocio
             }
 
             // Se encripta la contraseña antes de guardarla
-            obj.contraseña = ConvertirSha256(obj.contraseña);
+            obj.contraseña = recursos.ConvertirSha256(obj.contraseña);
 
             return cdusuario.Registrar(obj, out Mensaje);
         }
@@ -69,7 +57,7 @@ namespace CapaNegocio
             // Solo se encripta la nueva contraseña si se proporciona un valor
             if (!string.IsNullOrEmpty(obj.contraseña))
             {
-                obj.contraseña = ConvertirSha256(obj.contraseña);
+                obj.contraseña = recursos.ConvertirSha256(obj.contraseña);
             }
 
             return cdusuario.Editar(obj, out Mensaje);
@@ -92,7 +80,7 @@ namespace CapaNegocio
         // ... (otros métodos Listar, Registrar, Editar, Eliminar existentes) ...
 
         // Nuevo método para validar el login
-        public Usuario ValidarLogin(string correo, string contrasena, out string Mensaje)
+        public Usuario_Activo ValidarLogin(string correo, string contrasena, out string Mensaje)
         {
             Mensaje = string.Empty;
 
@@ -109,10 +97,10 @@ namespace CapaNegocio
             }
 
             // Hashear la contraseña antes de enviarla a la capa de datos
-            string contrasenaHasheada = ConvertirSha256(contrasena);
+            string contrasenaHasheada = recursos.ConvertirSha256(contrasena);
 
             // Llamar al método de la capa de datos
-            Usuario usuarioEncontrado = cdusuario.ValidarLogin(correo, contrasenaHasheada);
+            Usuario_Activo usuarioEncontrado = cdusuario.ValidarLogin(correo, contrasenaHasheada);
 
             if (usuarioEncontrado == null)
             {

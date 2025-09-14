@@ -8,6 +8,7 @@ using System.Web.Mvc;
 
 namespace CapaPresentacion.Controllers
 {
+    [Authorize]
     public class GastoController : Controller
     {
         // GET: Gasto

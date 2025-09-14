@@ -152,9 +152,9 @@ namespace CapaDato
         }
 
         // Método para validar el login de un usuario
-        public Usuario ValidarLogin(string correo, string contrasena)
+        public Usuario_Activo ValidarLogin(string correo, string contrasena)
         {
-            Usuario objUsuario = null;
+            Usuario_Activo objUsuario = null;
 
             try
             {
@@ -168,11 +168,11 @@ namespace CapaDato
 
                     using (MySqlDataReader dr = cmd.ExecuteReader())
                     {
-                        if (dr.Read()) // Si se encontró un registro
+                        if (dr.Read()) 
                         {
-                            objUsuario = new Usuario()
+                            objUsuario = new Usuario_Activo()
                             {
-                                id_usuario = Convert.ToInt32(dr["id_usuario"]),
+                                id_usuario_activo = Convert.ToInt32(dr["id_usuario"]),
                                 nombre = dr["nombre"].ToString(),
                                 apellido = dr["apellido"].ToString(),
                                 ci = dr["ci"].ToString(),

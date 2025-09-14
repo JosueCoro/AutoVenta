@@ -10,6 +10,7 @@ using CapaNegocio;
 
 namespace CapaPresentacion.Controllers
 {
+    [Authorize]
     public class ClienteController : Controller
     {
         // GET: Cliente
