@@ -18,10 +18,6 @@ namespace CapaPresentacion.Controllers
         {
             return View();
         }
-        //public ActionResult Marca()
-        //{
-        //    return View();
-        //}
 
         // Acción para listar todas las marcas
         [HttpGet]
