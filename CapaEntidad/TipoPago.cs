@@ -6,15 +6,15 @@ using System.Threading.Tasks;
 
 namespace CapaEntidad
 {
-    public class Marca
+    public class TipoPago
     {
-        /*CREATE TABLE comercial.marca 
+        /*CREATE TABLE comercial.tipo_pago 
             (
-             id_marca INTEGER NOT NULL IDENTITY(1,1), 
+             id_tipo_pago INTEGER NOT NULL IDENTITY(1,1), 
              nombre VARCHAR (150) NOT NULL 
             )
         GO*/
-        public int id_marca { get; set; }
+        public int id_tipo_pago { get; set; }
         public string nombre { get; set; }
     }
 }

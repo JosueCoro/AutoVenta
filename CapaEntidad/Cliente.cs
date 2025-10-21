@@ -8,14 +8,15 @@ namespace CapaEntidad
 {
     public class Cliente
     {
-        /*CREATE TABLE cliente (
-            id_cliente INT NOT NULL AUTO_INCREMENT,
-            nombre_completo VARCHAR(150) NOT NULL,
-            ci_nit VARCHAR(150) NOT NULL,
-            telefono VARCHAR(20) NOT NULL,
-            direccion VARCHAR(150),
-            PRIMARY KEY (id_cliente)
-        );
+        /*CREATE TABLE comercial.cliente 
+            (
+             id_cliente INTEGER NOT NULL IDENTITY(1,1), 
+             nombre_completo VARCHAR (150) NOT NULL , 
+             ci_nit VARCHAR (150) NOT NULL , 
+             telefono VARCHAR (20) NOT NULL , 
+             direccion VARCHAR (150) 
+            )
+        GO
         */
         public int id_cliente { get; set; }
         public string nombre_completo { get; set; }

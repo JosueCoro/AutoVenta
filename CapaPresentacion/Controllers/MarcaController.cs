@@ -9,7 +9,7 @@ using System.Web.Security;
 
 namespace CapaPresentacion.Controllers
 {
-    [Authorize]
+   // [Authorize]
     public class MarcaController : Controller
     {
 

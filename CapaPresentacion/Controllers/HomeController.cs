@@ -8,7 +8,7 @@ using System.Web.Mvc;
 
 namespace CapaPresentacion.Controllers
 {
-    [Authorize]
+    //[Authorize]
     public class HomeController : Controller
     {
         public ActionResult Index()
