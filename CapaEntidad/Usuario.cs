@@ -27,9 +27,12 @@ namespace CapaEntidad
         public string ci { get; set; }
         public string correo { get; set; }
         public string contraseña { get; set; }
+        public string telefono { get; set; }
         public bool estado { get; set; }
-        public int rol_id_rol { get; set; }
+        public int id_rol { get; set; }
         public Rol _rol { get; set; }
         public string nombre_rol { get; set; }
+
+        
     }
 }

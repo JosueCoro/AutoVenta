@@ -34,7 +34,7 @@ namespace CapaDato
                                 ci = dr["ci"].ToString(),
                                 correo = dr["correo"].ToString(),
                                 estado = Convert.ToBoolean(dr["estado"]),
-                                rol_id_rol = Convert.ToInt32(dr["rol_id_rol"]),
+                                id_rol = Convert.ToInt32(dr["rol_id_rol"]),
                                 nombre_rol = dr["nombre_rol"].ToString()
                             });
                         }
@@ -64,7 +64,7 @@ namespace CapaDato
                     cmd.Parameters.AddWithValue("p_ci", obj.ci);
                     cmd.Parameters.AddWithValue("p_correo", obj.correo);
                     cmd.Parameters.AddWithValue("p_contraseña", obj.contraseña);
-                    cmd.Parameters.AddWithValue("p_rol_id_rol", obj.rol_id_rol);
+                    cmd.Parameters.AddWithValue("p_rol_id_rol", obj.id_rol);
                     cmd.Parameters.Add("p_id_usuario", MySqlDbType.Int32).Direction = ParameterDirection.Output;
                     cmd.Parameters.Add("p_Mensaje", MySqlDbType.VarChar, 500).Direction = ParameterDirection.Output;
                     cmd.CommandType = CommandType.StoredProcedure;
@@ -102,7 +102,7 @@ namespace CapaDato
                     cmd.Parameters.AddWithValue("p_correo", obj.correo);
                     cmd.Parameters.AddWithValue("p_contraseña", obj.contraseña ?? "");
                     cmd.Parameters.AddWithValue("p_estado", obj.estado);
-                    cmd.Parameters.AddWithValue("p_rol_id_rol", obj.rol_id_rol);
+                    cmd.Parameters.AddWithValue("p_rol_id_rol", obj.id_rol);
                     cmd.Parameters.Add("p_Mensaje", MySqlDbType.VarChar, 500).Direction = ParameterDirection.Output;
                     cmd.CommandType = CommandType.StoredProcedure;
 
@@ -172,13 +172,13 @@ namespace CapaDato
                         {
                             objUsuario = new Usuario_Activo()
                             {
-                                id_usuario_activo = Convert.ToInt32(dr["id_usuario"]),
+                                id_usuario = Convert.ToInt32(dr["id_usuario"]),
                                 nombre = dr["nombre"].ToString(),
                                 apellido = dr["apellido"].ToString(),
                                 ci = dr["ci"].ToString(),
                                 correo = dr["correo"].ToString(),
                                 estado = Convert.ToBoolean(dr["estado"]),
-                                rol_id_rol = Convert.ToInt32(dr["rol_id_rol"]),
+                                id_rol = Convert.ToInt32(dr["rol_id_rol"]),
                                 nombre_rol = dr["nombre_rol"].ToString()
                             };
                         }

@@ -9,6 +9,7 @@ using System.Web.Security;
 
 namespace CapaPresentacion.Controllers
 {
+    [Authorize]
     public class UsuarioController : Controller
     {
 
@@ -67,42 +68,7 @@ namespace CapaPresentacion.Controllers
             return View();
         }
 
-        [HttpPost]
-        public ActionResult ValidarLogin(string correo, string contrasena)
-        {
-            string mensaje = string.Empty;
-            Usuario_Activo oUsuario = new CN_Usuario().ValidarLogin(correo, contrasena, out mensaje);
-
-            if (oUsuario != null)
-            {
-                // Si el login es exitoso, puedes establecer la autenticación de formularios
-
-                // Almacenar datos del usuario en la sesión
-                Session["Usuario"] = oUsuario;
-                Session["NombreUsuario"] = oUsuario.nombre + " " + oUsuario.apellido;
-                Session["Email"] = oUsuario.correo;
-                Session["RolUsuario"] = oUsuario.nombre_rol;
-
-                FormsAuthentication.SetAuthCookie(oUsuario.correo, false); 
-
-                return Json(new { resultado = true, mensaje = mensaje, redirectUrl = Url.Action("Index", "Home") });
-            }
-            else
-            {
-                return Json(new { resultado = false, mensaje = mensaje });
-            }
-        }
-
-        // NUEVA ACCIÓN: Para cerrar la sesión
-        [HttpPost]
-        public ActionResult CerrarSesion()
-        {
-            FormsAuthentication.SignOut();
-            Session["Usuario"] = null;
-            Session.Clear();
-            Session.Abandon();
-            return RedirectToAction("Login", "Usuario"); // Redirige a la página de login
-        }
+        
 
     }
 }

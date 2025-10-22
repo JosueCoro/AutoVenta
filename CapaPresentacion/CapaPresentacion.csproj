@@ -171,11 +171,20 @@
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
+    <Compile Include="Controllers\AsesorController.cs" />
+    <Compile Include="Controllers\BitacoraController.cs" />
     <Compile Include="Controllers\ClienteController.cs" />
+    <Compile Include="Controllers\ComisionController.cs" />
     <Compile Include="Controllers\GastoController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
+    <Compile Include="Controllers\LoginController.cs" />
     <Compile Include="Controllers\MarcaController.cs" />
+    <Compile Include="Controllers\PagoController.cs" />
+    <Compile Include="Controllers\PermisoController.cs" />
+    <Compile Include="Controllers\RolController.cs" />
     <Compile Include="Controllers\UsuarioController.cs" />
+    <Compile Include="Controllers\VehiculoController.cs" />
+    <Compile Include="Controllers\VentaController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -2401,8 +2410,15 @@
     <Content Include="Views\Gasto\Gasto.cshtml" />
     <Content Include="Views\Usuario\Usuario.cshtml" />
     <Content Include="Views\Marca\Marca.cshtml" />
-    <Content Include="Views\Usuario\Login.cshtml" />
-    <Content Include="Views\Shared\_LayoutLogin.cshtml" />
+    <Content Include="Views\Login\Login.cshtml" />
+    <Content Include="Views\Asesor\Asesor.cshtml" />
+    <Content Include="Views\Comision\Comision.cshtml" />
+    <Content Include="Views\Pago\Pago.cshtml" />
+    <Content Include="Views\Rol\Rol.cshtml" />
+    <Content Include="Views\Vehiculo\Vehiculo.cshtml" />
+    <Content Include="Views\Venta\Venta.cshtml" />
+    <Content Include="Views\Bitacora\Bitacora.cshtml" />
+    <Content Include="Views\Permiso\Permiso.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
