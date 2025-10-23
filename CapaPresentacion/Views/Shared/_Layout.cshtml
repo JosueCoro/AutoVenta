@@ -1,4 +1,6 @@
-﻿<!DOCTYPE html>
+﻿@using CapaEntidad
+
+<!DOCTYPE html>
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
@@ -16,14 +18,26 @@
 
 </head>
 <body id="page-top">
+    @{
+        // Castear el objeto de sesión para poder acceder a la lista de permisos
+        CapaEntidad.Usuario_Activo oUsuario = (CapaEntidad.Usuario_Activo)Session["Usuario"];
+        // Inicializar la lista de permisos para evitar errores si la sesión está vacía (aunque Authorize ya lo manejaría)
+        List<CapaEntidad.Permiso> listaPermisos = oUsuario != null ? oUsuario.ListaPermisos : new List<CapaEntidad.Permiso>();
+
+        // Función de ayuda para verificar permisos
+        bool TienePermiso(string nombreAccion)
+        {
+            return listaPermisos != null && listaPermisos.Any(p => p.accion.ToUpper() == nombreAccion.ToUpper());
+        }
+    }
     <div id="wrapper">
 
         <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
 
             <a class="sidebar-brand d-flex align-items-center justify-content-center" href="index.html">
                 <!--<div class="sidebar-brand-icon rotate-n-15">
-                    <i class="fas fa-laugh-wink"></i>
-                </div>-->
+            <i class="fas fa-laugh-wink"></i>
+        </div>-->
                 <div class="sidebar-brand-text mx-3">Carsys AutoVenta</div>
             </a>
 
@@ -36,98 +50,194 @@
                 </a>
             </li>
 
-            <!-- Divider -->
             <hr class="sidebar-divider">
 
-            <!-- Heading -->
-            <!-- Divider -->
-            <hr class="sidebar-divider">
+            @{
+                bool tienePermisosComercial =
+                    TienePermiso("Gestionar Cliente") ||
+                    TienePermiso("Gestionar Asesores") ||
+                    TienePermiso("Gestionar Vehiculo") ||
+                    TienePermiso("Gestionar Comisiones") ||
+                    TienePermiso("Gestionar Pago") ||
+                    TienePermiso("Gestionar Venta");
+            }
 
-            <!-- Heading -->
-            <div class="sidebar-heading">
-                Comercial
-            </div>
-
-            <!-- Nav Item - Pages Collapse Menu -->
-            <!--<li class="nav-item">
-                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapsePages"
-                   aria-expanded="true" aria-controls="collapsePages">
-                    <i class="fas fa-fw fa-folder"></i>
-                    <span>Pages</span>
-                </a>
-                <div id="collapsePages" class="collapse" aria-labelledby="headingPages" data-parent="#accordionSidebar">
-                    <div class="bg-white py-2 collapse-inner rounded">
-                        <h6 class="collapse-header">Login Screens:</h6>
-                        <a class="collapse-item" href="@Url.Action("Cliente", "Cliente")">Cliente</a>
-                        <a class="collapse-item" href="register.html">Register</a>
-                        <a class="collapse-item" href="forgot-password.html">Forgot Password</a>
-                        <div class="collapse-divider"></div>
-                        <h6 class="collapse-header">Other Pages:</h6>
-                        <a class="collapse-item" href="404.html">404 Page</a>
-                        <a class="collapse-item" href="blank.html">Blank Page</a>
-                    </div>
+            @if (tienePermisosComercial)
+            {
+                <hr class="sidebar-divider">
+                <div class="sidebar-heading">
+                    Gestion Comercial
                 </div>
-            </li>-->
-            <!-- Nav Item - Charts -->
-            <li class="nav-item active">
-                <a class="nav-link" href="@Url.Action("Pago", "Pago")">
-                    <i class="fas fa-fw fa-chart-area"></i>
-                    <span>Pago</span>
-                </a>
-            </li>
-
-            <!-- Ventas -->
-            <li class="nav-item">
-                <a class="nav-link" href="@Url.Action("Venta", "Venta")">
-                    <i class="fas fa-fw fa-table"></i>
-                    <span>Venta</span>
-                </a>
-            </li>
-
-            <div class="sidebar-heading">
-                Mantenimiento
-            </div>
-
-            <li class="nav-item">
-                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseMantenimiento"
-                   aria-expanded="true" aria-controls="collapseUsuarios">
-                    <i class="fas fa-fw fa-user"></i>
-                    <span>Mantenimiento</span>
-                </a>
-                <div id="collapseMantenimiento" class="collapse" aria-labelledby="headingPages" data-parent="#accordionSidebar">
-                    <div class="bg-white py-2 collapse-inner rounded">
-                        <h6 class="collapse-header">Opciones:</h6>
-                        <a class="collapse-item" href="@Url.Action("Vehiculo", "Vehiculo")">Vehiculo</a>
-                        <a class="collapse-item" href="@Url.Action("Marca", "Marca")">Marcas</a>
-                        <a class="collapse-item" href="@Url.Action("Gasto", "Gasto")">Gasto</a>
-                        <a class="collapse-item" href="@Url.Action("Gasto", "Mantenimiento")">Gastos</a>
+            }
 
 
-                    </div>
+
+            @if (TienePermiso("Gestionar Cliente"))
+            {
+                <li class="nav-item">
+                    <a class="nav-link" href="@Url.Action("Cliente", "Cliente")">
+                        <i class="fas fa-fw fa-users"></i>
+                        <span>Clientes</span>
+                    </a>
+                </li>
+            }
+
+            @if (TienePermiso("Gestionar Asesores"))
+            {
+                <li class="nav-item">
+                    <a class="nav-link" href="@Url.Action("Asesor", "Asesor")">
+                        <i class="fas fa-fw fa-id-badge"></i>
+                        <span>Asesores</span>
+                    </a>
+                </li>
+            }
+            @if (TienePermiso("Gestionar Vehiculo"))
+            {
+                <li class="nav-item">
+                    <a class="nav-link" href="@Url.Action("Vehiculo", "Vehiculo")">
+                        <i class="fas fa-fw fa-car"></i>
+                        <span>Vehículos</span>
+                    </a>
+                </li>
+            }
+            @if (TienePermiso("Generar Comisiones"))
+            {
+                <li class="nav-item active">
+                    <a class="nav-link" href="@Url.Action("Comision", "Comision")">
+                        <i class="fas fa-fw fa-money-check-alt"></i>
+                        <span>Comision</span>
+                    </a>
+                </li>
+            }
+
+            @if (TienePermiso("Gestionar Pagos"))
+            {
+                <li class="nav-item active">
+                    <a class="nav-link" href="@Url.Action("Pago", "Pago")">
+                        <i class="fas fa-fw fa-credit-card"></i>
+                        <span>Pago</span>
+                    </a>
+                </li>
+            }
+            @if (TienePermiso("Realizar Venta"))
+            {
+                <li class="nav-item">
+                    <a class="nav-link" href="@Url.Action("Venta", "Venta")">
+                        <i class="fas fa-fw fa-tags"></i>
+                        <span>Venta</span>
+                    </a>
+                </li>
+            }
+
+
+
+            @{
+                // Definimos una variable para saber si el usuario tiene CUALQUIER permiso de administración
+                bool tienePermisosMantenedor =
+                    TienePermiso("Gestionar Marcas") ||
+                    TienePermiso("Gestionar Tipos de Vehiculo") ||
+                    TienePermiso("Gestionar Tipos de Pago") ||
+                    TienePermiso("Gestionar Tipos de Gasto");
+            }
+
+            @if (tienePermisosMantenedor)
+            {
+                <hr class="sidebar-divider">
+                <div class="sidebar-heading">
+                    Mantenimiento
                 </div>
-            </li>
-            <div class="sidebar-heading">
-                Administracion
-            </div>
+            }
+            @if (TienePermiso("Gestionar Marcas"))
+            {
+                <li class="nav-item">
+                    <a class="nav-link" href="@Url.Action("Marca", "Marca")">
+                        <i class="fas fa-fw fa-copyright"></i>
+                        <span>Marcas</span>
+                    </a>
+                </li>
+            }
+            @if (TienePermiso("Gestionar Tipos de Vehiculo"))
+            {
+                <li class="nav-item">
+                    <a class="nav-link" href="@Url.Action("TipoVehiculo", "Vehiculo")">
+                        <i class="fas fa-fw fa-truck"></i>
+                        <span>Tipo de Vehiculo</span>
+                    </a>
+                </li>
+            }
+            @if (TienePermiso("Gestionar Tipos de Pago"))
+            {
+                <li class="nav-item">
+                    <a class="nav-link" href="@Url.Action("TipoPago", "Pago")">
+                        <i class="fas fa-fw fa-cash-register"></i>
+                        <span>Tipo de Pago</span>
+                    </a>
+                </li>
+            }
+            @if (TienePermiso("Gestionar Tipos de Gasto"))
+            {
+                <li class="nav-item">
+                    <a class="nav-link" href="@Url.Action("TipoGasto", "Gasto")">
+                        <i class="fas fa-fw fa-funnel-dollar"></i>
+                        <span>Tipo de Gastos</span>
+                    </a>
+                </li>
+            }
+            @{
+                // Definimos una variable para saber si el usuario tiene CUALQUIER permiso de administración
+                bool tienePermisosAdmin =
+                    TienePermiso("Gestionar Usuarios") ||
+                    TienePermiso("Gestionar Roles y Permisos") ||
+                    TienePermiso("Visualizar Bitacora");
+            }
 
-            <li class="nav-item">
-                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseUsuarios"
-                   aria-expanded="true" aria-controls="collapseUsuarios">
-                    <i class="fas fa-fw fa-user"></i>
-                    <span>Usuarios</span>
-                </a>
-                <div id="collapseUsuarios" class="collapse" aria-labelledby="headingPages" data-parent="#accordionSidebar">
-                    <div class="bg-white py-2 collapse-inner rounded">
-                        <h6 class="collapse-header">Opciones:</h6>
-                        <a class="collapse-item" href="@Url.Action("Usuario", "Usuario")">Usuarios</a>
-                        <a class="collapse-item" href="@Url.Action("Rol", "Rol")">Rol</a>
-                        <a class="collapse-item" href="@Url.Action("Bitacora", "Bitacora")">Bitacora</a>
-                        <a class="collapse-item" href="@Url.Action("Permiso", "Permiso")">Permisos</a>
-
-
-                    </div>
+            @if (tienePermisosAdmin)
+            {
+                <hr class="sidebar-divider">
+                <div class="sidebar-heading">
+                    Administracion
                 </div>
-            </li>
+            }
+
+            @if (TienePermiso("Gestionar Usuarios"))
+            {
+                <li class="nav-item">
+                    <a class="nav-link" href="@Url.Action("Usuario", "Usuario")">
+                        <i class="fas fa-fw fa-user"></i>
+                        <span>Tipo de Gastos</span>
+                    </a>
+                </li>
+            }
+            @if (TienePermiso("Gestionar Roles y Permisos"))
+            {
+                <li class="nav-item">
+                    <a class="nav-link" href="@Url.Action("Rol", "Rol")">
+                        <i class="fas fa-fw fa-users-cog"></i>
+                        <span>Roles</span>
+                    </a>
+                </li>
+            }
+
+            @if (TienePermiso("Gestionar Roles y Permisos"))
+            {
+                <li class="nav-item">
+                    <a class="nav-link" href="@Url.Action("Permiso", "Permiso")">
+                        <i class="fas fa-fw fa-key"></i>
+                        <span>Permisos</span>
+                    </a>
+                </li>
+            }
+            @if (TienePermiso("Visualizar Bitacora"))
+            {
+                <li class="nav-item">
+                    <a class="nav-link" href="@Url.Action("Bitacora", "Bitacora")">
+                        <i class="fas fa-fw fa-clipboard-list"></i>
+                        <span>Bitacora</span>
+                    </a>
+                </li>
+            }
+
+
 
             <!-- Nav Item - Charts -->
             <li class="nav-item active">

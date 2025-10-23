@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CapaPresentacion.Filtros;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -10,6 +11,7 @@ namespace CapaPresentacion.Controllers
     public class PermisoController : Controller
     {
         // GET: Permiso
+        [ValidarPermisos(NombrePermiso = "Gestionar Roles y Permisos")]
         public ActionResult Permiso()
         {
             return View();

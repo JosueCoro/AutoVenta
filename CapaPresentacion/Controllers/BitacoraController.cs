@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CapaPresentacion.Filtros;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -10,6 +11,7 @@ namespace CapaPresentacion.Controllers
     public class BitacoraController : Controller
     {
         // GET: Bitacora
+        [ValidarPermisos(NombrePermiso = "Visualizar Bitacora")]
         public ActionResult Bitacora()
         {
             return View();

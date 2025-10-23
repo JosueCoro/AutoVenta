@@ -1,5 +1,6 @@
 ﻿using CapaEntidad;
 using CapaNegocio;
+using CapaPresentacion.Filtros;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,6 +15,7 @@ namespace CapaPresentacion.Controllers
     {
 
         // GET: Marca
+        [ValidarPermisos(NombrePermiso = "Gestionar Marcas")]
         public ActionResult Marca()
         {
             return View();

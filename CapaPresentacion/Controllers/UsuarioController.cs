@@ -1,5 +1,6 @@
 ﻿using CapaEntidad;
 using CapaNegocio;
+using CapaPresentacion.Filtros;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,6 +15,7 @@ namespace CapaPresentacion.Controllers
     {
 
         // GET: Usuario
+        [ValidarPermisos(NombrePermiso = "Gestionar Usuarios")]
         public ActionResult Usuario()
         {
             return View();
@@ -62,11 +64,7 @@ namespace CapaPresentacion.Controllers
             return Json(new { resultado = resultado, mensaje = mensaje }, JsonRequestBehavior.AllowGet);
         }
 
-        // GET: Login (para mostrar la vista de login)
-        public ActionResult Login()
-        {
-            return View();
-        }
+        
 
         
 

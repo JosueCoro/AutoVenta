@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CapaPresentacion.Filtros;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -10,9 +11,15 @@ namespace CapaPresentacion.Controllers
     public class VehiculoController : Controller
     {
         // GET: Vehiculo
+        [ValidarPermisos(NombrePermiso = "Gestionar Vehiculo")]
         public ActionResult Vehiculo()
         {
             return View();
         }
+        public ActionResult TipoVehiculo()
+        {
+            return View();
+        }
+
     }
 }

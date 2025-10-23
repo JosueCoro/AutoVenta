@@ -60,8 +60,8 @@ namespace CapaDato
                             {
                                 usuario.ListaPermisos.Add(new Permiso()
                                 {
-                                    id_permiso = Convert.ToInt32(dr["id_permiso"])
-                                    // La acción y el estado no se devuelven aquí, solo el ID.
+                                    id_permiso = Convert.ToInt32(dr["id_permiso"]),
+                                    accion = dr["accion"].ToString()
                                 });
                             }
                         }

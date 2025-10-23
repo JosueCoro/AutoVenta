@@ -34,6 +34,7 @@ namespace CapaPresentacion.Controllers
                 Session["NombreUsuario"] = oUsuario.nombre + " " + oUsuario.apellido;
                 Session["Email"] = oUsuario.correo;
                 Session["RolUsuario"] = oUsuario.nombre_rol;
+
                 FormsAuthentication.SetAuthCookie(oUsuario.correo, false);
 
                 return Json(new
@@ -63,6 +64,12 @@ namespace CapaPresentacion.Controllers
             Session.Clear();
             Session.Abandon();
             return RedirectToAction("Login", "Login");
+        }
+
+
+        public ActionResult AccesoDenegado()
+        {
+            return View();
         }
     }
 }

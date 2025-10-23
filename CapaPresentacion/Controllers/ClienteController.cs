@@ -7,6 +7,7 @@ using CapaDato;
 using MySql.Data.MySqlClient;
 using CapaEntidad;
 using CapaNegocio;
+using CapaPresentacion.Filtros;
 
 namespace CapaPresentacion.Controllers
 {
@@ -14,6 +15,7 @@ namespace CapaPresentacion.Controllers
     public class ClienteController : Controller
     {
         // GET: Cliente
+        [ValidarPermisos(NombrePermiso = "Gestionar Cliente")]
         public ActionResult Cliente()
         {
             return View();

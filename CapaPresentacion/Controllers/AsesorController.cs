@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CapaPresentacion.Filtros;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -10,6 +11,7 @@ namespace CapaPresentacion.Controllers
     public class AsesorController : Controller
     {
         // GET: Asesor
+        [ValidarPermisos(NombrePermiso = "Gestionar Asesores")]
         public ActionResult Asesor()
         {
             return View();

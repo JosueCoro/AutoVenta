@@ -185,6 +185,7 @@
     <Compile Include="Controllers\UsuarioController.cs" />
     <Compile Include="Controllers\VehiculoController.cs" />
     <Compile Include="Controllers\VentaController.cs" />
+    <Compile Include="Filtros\ValidarPermisosAttribute.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -2419,6 +2420,10 @@
     <Content Include="Views\Venta\Venta.cshtml" />
     <Content Include="Views\Bitacora\Bitacora.cshtml" />
     <Content Include="Views\Permiso\Permiso.cshtml" />
+    <Content Include="Views\Vehiculo\TipoVehiculo.cshtml" />
+    <Content Include="Views\Pago\TipoPago.cshtml" />
+    <Content Include="Views\Gasto\TipoGasto.cshtml" />
+    <Content Include="Views\Login\AccesoDenegado.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

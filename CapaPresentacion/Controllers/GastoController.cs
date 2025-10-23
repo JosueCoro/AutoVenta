@@ -1,5 +1,6 @@
 ﻿using CapaEntidad;
 using CapaNegocio;
+using CapaPresentacion.Filtros;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +13,13 @@ namespace CapaPresentacion.Controllers
     public class GastoController : Controller
     {
         // GET: Gasto
+        [ValidarPermisos(NombrePermiso = "Gestionar Gasto")]
         public ActionResult Gasto()
+        {
+            return View();
+        }
+        [ValidarPermisos(NombrePermiso = "Gestionar Tipos de Gasto")]
+        public ActionResult TipoGasto()
         {
             return View();
         }
