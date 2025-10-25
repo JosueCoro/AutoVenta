@@ -1,25 +1,24 @@
-﻿using System;
+﻿using CapaEntidad;
+using System;
 using System.Collections.Generic;
+using System.Data;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Data;
-using CapaEntidad;
-using System.Data.SqlClient;
 
 namespace CapaDato
 {
-    public class CD_Cliente
+    public class CD_Asesor
     {
-
-        public List<Cliente> Listar()
+        public List<Asesor> Listar()
         {
-            List<Cliente> lista = new List<Cliente>();
+            List<Asesor> lista = new List<Asesor>();
             try
             {
                 using (SqlConnection oConexion = new SqlConnection(Conexion.cn))
                 {
-                    SqlCommand cmd = new SqlCommand("comercial.CRUD_CLIENTE", oConexion);
+                    SqlCommand cmd = new SqlCommand("administracion.CRUD_ASESOR", oConexion);
                     cmd.Parameters.AddWithValue("@Operacion", "SELECT");
                     cmd.Parameters.Add("@Mensaje", SqlDbType.VarChar, 500).Direction = ParameterDirection.Output;
                     cmd.Parameters.Add("@Resultado", SqlDbType.Int).Direction = ParameterDirection.Output;
@@ -30,12 +29,13 @@ namespace CapaDato
                     {
                         while (dr.Read())
                         {
-                            lista.Add(new Cliente()
+                            lista.Add(new Asesor()
                             {
-                                id_cliente = Convert.ToInt32(dr["id_cliente"]),
-                                nombre_completo = dr["nombre_completo"].ToString(),
-                                ci_nit = dr["ci_nit"].ToString(),
+                                id_asesor = Convert.ToInt32(dr["id_asesor"]),
+                                nombre = dr["nombre"].ToString(),
+                                apellidos = dr["apellidos"].ToString(),
                                 telefono = dr["telefono"].ToString(),
+                                ci = dr["ci"].ToString(),
                                 direccion = dr["direccion"].ToString()
                             });
                         }
@@ -44,14 +44,14 @@ namespace CapaDato
             }
             catch (Exception ex)
             {
-                lista = new List<Cliente>();
+                lista = new List<Asesor>();
                 // Manejo de excepción
             }
             return lista;
         }
 
-        // Método para registrar un nuevo Cliente
-        public int Registrar(Cliente obj, int idUsuario, out string Mensaje)
+        // Método para registrar un nuevo Asesor
+        public int Registrar(Asesor obj, int idUsuario, out string Mensaje)
         {
             int idGenerado = 0;
             Mensaje = string.Empty;
@@ -60,12 +60,13 @@ namespace CapaDato
             {
                 using (SqlConnection oConexion = new SqlConnection(Conexion.cn))
                 {
-                    SqlCommand cmd = new SqlCommand("comercial.CRUD_CLIENTE", oConexion);
+                    SqlCommand cmd = new SqlCommand("administracion.CRUD_ASESOR", oConexion);
 
                     cmd.Parameters.AddWithValue("@Operacion", "INSERT");
-                    cmd.Parameters.AddWithValue("@NombreCompleto", obj.nombre_completo);
-                    cmd.Parameters.AddWithValue("@CiNit", obj.ci_nit);
+                    cmd.Parameters.AddWithValue("@Nombre", obj.nombre);
+                    cmd.Parameters.AddWithValue("@Apellidos", obj.apellidos);
                     cmd.Parameters.AddWithValue("@Telefono", obj.telefono);
+                    cmd.Parameters.AddWithValue("@Ci", obj.ci);
                     cmd.Parameters.AddWithValue("@Direccion", obj.direccion);
                     cmd.Parameters.AddWithValue("@IdUsuarioAuditoria", idUsuario);
 
@@ -88,8 +89,8 @@ namespace CapaDato
             return idGenerado;
         }
 
-        // Método para editar un Cliente
-        public bool Editar(Cliente obj, int idUsuario, out string Mensaje)
+        // Método para editar un Asesor
+        public bool Editar(Asesor obj, int idUsuario, out string Mensaje)
         {
             bool resultado = false;
             Mensaje = string.Empty;
@@ -98,13 +99,14 @@ namespace CapaDato
             {
                 using (SqlConnection oConexion = new SqlConnection(Conexion.cn))
                 {
-                    SqlCommand cmd = new SqlCommand("comercial.CRUD_CLIENTE", oConexion);
+                    SqlCommand cmd = new SqlCommand("administracion.CRUD_ASESOR", oConexion);
 
                     cmd.Parameters.AddWithValue("@Operacion", "UPDATE");
-                    cmd.Parameters.AddWithValue("@IdCliente", obj.id_cliente);
-                    cmd.Parameters.AddWithValue("@NombreCompleto", obj.nombre_completo);
-                    cmd.Parameters.AddWithValue("@CiNit", obj.ci_nit);
+                    cmd.Parameters.AddWithValue("@IdAsesor", obj.id_asesor);
+                    cmd.Parameters.AddWithValue("@Nombre", obj.nombre);
+                    cmd.Parameters.AddWithValue("@Apellidos", obj.apellidos);
                     cmd.Parameters.AddWithValue("@Telefono", obj.telefono);
+                    cmd.Parameters.AddWithValue("@Ci", obj.ci);
                     cmd.Parameters.AddWithValue("@Direccion", obj.direccion);
                     cmd.Parameters.AddWithValue("@IdUsuarioAuditoria", idUsuario);
 
@@ -127,7 +129,7 @@ namespace CapaDato
             return resultado;
         }
 
-        // Método para eliminar un Cliente
+        // Método para eliminar un Asesor
         public bool Eliminar(int id, int idUsuario, out string Mensaje)
         {
             bool resultado = false;
@@ -137,10 +139,10 @@ namespace CapaDato
             {
                 using (SqlConnection oConexion = new SqlConnection(Conexion.cn))
                 {
-                    SqlCommand cmd = new SqlCommand("comercial.CRUD_CLIENTE", oConexion);
+                    SqlCommand cmd = new SqlCommand("administracion.CRUD_ASESOR", oConexion);
 
                     cmd.Parameters.AddWithValue("@Operacion", "DELETE");
-                    cmd.Parameters.AddWithValue("@IdCliente", id);
+                    cmd.Parameters.AddWithValue("@IdAsesor", id);
                     cmd.Parameters.AddWithValue("@IdUsuarioAuditoria", idUsuario);
 
                     cmd.Parameters.Add("@Mensaje", SqlDbType.VarChar, 500).Direction = ParameterDirection.Output;

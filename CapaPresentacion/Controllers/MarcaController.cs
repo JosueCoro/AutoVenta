@@ -36,13 +36,16 @@ namespace CapaPresentacion.Controllers
             object resultado;
             string Mensaje = string.Empty;
 
+            // OBTENER ID DEL USUARIO DE LA SESIÓN (REQUISITO DE AUDITORÍA)
+            int idUsuario = ((Usuario_Activo)Session["Usuario"]).id_usuario;
+
             if (objeto.id_marca == 0)
             {
-                resultado = new CN_Marca().Registrar(objeto, out Mensaje);
+                resultado = new CN_Marca().Registrar(objeto, idUsuario, out Mensaje);
             }
             else
             {
-                resultado = new CN_Marca().Editar(objeto, out Mensaje);
+                resultado = new CN_Marca().Editar(objeto, idUsuario, out Mensaje);
             }
 
             return Json(new { resultado = resultado, mensaje = Mensaje }, JsonRequestBehavior.AllowGet);
@@ -52,7 +55,11 @@ namespace CapaPresentacion.Controllers
         [HttpPost]
         public JsonResult EliminarMarca(int id)
         {
-            bool resultado = new CN_Marca().Eliminar(id, out string mensaje);
+            // OBTENER ID DEL USUARIO DE LA SESIÓN (REQUISITO DE AUDITORÍA)
+            int idUsuario = ((Usuario_Activo)Session["Usuario"]).id_usuario;
+
+            bool resultado = new CN_Marca().Eliminar(id, idUsuario, out string mensaje);
+
             return Json(new { resultado = resultado, mensaje = mensaje }, JsonRequestBehavior.AllowGet);
         }
     }

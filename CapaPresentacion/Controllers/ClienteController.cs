@@ -22,10 +22,9 @@ namespace CapaPresentacion.Controllers
         }
 
         [HttpGet]
-        public JsonResult Listar()
+        public JsonResult ListarClientes()
         {
-            List<Cliente> lista = new List<Cliente>();
-            lista = new CN_Cliente().Listar();
+            List<Cliente> lista = new CN_Cliente().Listar();
             return Json(new { data = lista }, JsonRequestBehavior.AllowGet);
         }
 
@@ -35,16 +34,30 @@ namespace CapaPresentacion.Controllers
             object resultado;
             string Mensaje = string.Empty;
 
+            // OBTENER ID DEL USUARIO DE LA SESIÓN (AUDITORÍA)
+            int idUsuario = ((Usuario_Activo)Session["Usuario"]).id_usuario;
+
             if (objeto.id_cliente == 0)
             {
-                resultado = new CN_Cliente().Registrar(objeto, out Mensaje);
+                resultado = new CN_Cliente().Registrar(objeto, idUsuario, out Mensaje);
             }
             else
             {
-                resultado = new CN_Cliente().Editar(objeto, out Mensaje);
+                resultado = new CN_Cliente().Editar(objeto, idUsuario, out Mensaje);
             }
-            return Json(new { resultado = resultado, mensaje = Mensaje }, JsonRequestBehavior.AllowGet);
 
+            return Json(new { resultado = resultado, mensaje = Mensaje }, JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpPost]
+        public JsonResult EliminarCliente(int id)
+        {
+            // OBTENER ID DEL USUARIO DE LA SESIÓN (AUDITORÍA)
+            int idUsuario = ((Usuario_Activo)Session["Usuario"]).id_usuario;
+
+            bool resultado = new CN_Cliente().Eliminar(id, idUsuario, out string mensaje);
+
+            return Json(new { resultado = resultado, mensaje = mensaje }, JsonRequestBehavior.AllowGet);
         }
 
 

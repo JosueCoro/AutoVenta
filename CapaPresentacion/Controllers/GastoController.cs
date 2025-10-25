@@ -24,40 +24,42 @@ namespace CapaPresentacion.Controllers
             return View();
         }
 
-        // Acción para listar los tipos de gasto
         [HttpGet]
-        public JsonResult Listar()
+        public JsonResult ListarTiposGasto()
         {
             List<TipoGasto> lista = new CN_TipoGasto().Listar();
             return Json(new { data = lista }, JsonRequestBehavior.AllowGet);
         }
 
-        // Acción para registrar o editar un tipo de gasto
         [HttpPost]
-        public JsonResult GuardarGasto(TipoGasto objeto)
+        public JsonResult GuardarTipoGasto(TipoGasto objeto)
         {
             object resultado;
             string Mensaje = string.Empty;
 
+            // OBTENER ID DEL USUARIO DE LA SESIÓN 
+            int idUsuario = ((Usuario_Activo)Session["Usuario"]).id_usuario;
+
             if (objeto.id_tipo_gasto == 0)
             {
-                // Es un nuevo registro
-                resultado = new CN_TipoGasto().Registrar(objeto, out Mensaje);
+                resultado = new CN_TipoGasto().Registrar(objeto, idUsuario, out Mensaje);
             }
             else
             {
-                // Es una edición
-                resultado = new CN_TipoGasto().Editar(objeto, out Mensaje);
+                resultado = new CN_TipoGasto().Editar(objeto, idUsuario, out Mensaje);
             }
 
             return Json(new { resultado = resultado, mensaje = Mensaje }, JsonRequestBehavior.AllowGet);
         }
 
-        // Acción para eliminar un tipo de gasto
         [HttpPost]
-        public JsonResult EliminarGasto(int id)
+        public JsonResult EliminarTipoGasto(int id)
         {
-            bool resultado = new CN_TipoGasto().Eliminar(id, out string mensaje);
+            // OBTENER ID DEL USUARIO DE LA SESIÓN 
+            int idUsuario = ((Usuario_Activo)Session["Usuario"]).id_usuario;
+
+            bool resultado = new CN_TipoGasto().Eliminar(id, idUsuario, out string mensaje);
+
             return Json(new { resultado = resultado, mensaje = mensaje }, JsonRequestBehavior.AllowGet);
         }
     }

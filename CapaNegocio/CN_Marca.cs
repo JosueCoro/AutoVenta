@@ -17,7 +17,7 @@ namespace CapaNegocio
             return cdmarca.Listar();
         }
 
-        public int Registrar(Marca obj, out string Mensaje)
+        public int Registrar(Marca obj, int idUsuario, out string Mensaje)
         {
             Mensaje = string.Empty;
 
@@ -27,10 +27,10 @@ namespace CapaNegocio
                 return 0;
             }
 
-            return cdmarca.Registrar(obj, out Mensaje);
+            return cdmarca.Registrar(obj, idUsuario, out Mensaje);
         }
 
-        public bool Editar(Marca obj, out string Mensaje)
+        public bool Editar(Marca obj, int idUsuario, out string Mensaje)
         {
             Mensaje = string.Empty;
 
@@ -46,10 +46,10 @@ namespace CapaNegocio
                 return false;
             }
 
-            return cdmarca.Editar(obj, out Mensaje);
+            return cdmarca.Editar(obj, idUsuario, out Mensaje);
         }
 
-        public bool Eliminar(int id, out string Mensaje)
+        public bool Eliminar(int id, int idUsuario, out string Mensaje)
         {
             Mensaje = string.Empty;
 
@@ -59,15 +59,8 @@ namespace CapaNegocio
                 return false;
             }
 
-            // Validación agregada: verifica si la marca está asociada antes de eliminar
-            if (cdmarca.MarcaAsociadaAVehiculo(id))
-            {
-                Mensaje = "No se puede eliminar la marca porque está asociada a uno o más vehículos.";
-                return false;
-            }
 
-            // Si no está asociada, procede con la eliminación
-            return cdmarca.Eliminar(id, out Mensaje);
+            return cdmarca.Eliminar(id, idUsuario, out Mensaje);
         }
     }
 }

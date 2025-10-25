@@ -1,8 +1,239 @@
 ﻿
 @{
-    ViewBag.Title = "TipoVehiculo";
+    ViewBag.Title = "Tipos de Vehículo";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h2>TipoVehiculo</h2>
+<!-- Se incluye SweetAlert2 para notificaciones modernas -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<!-- Se incluye Datatables CSS si no está en bundles -->
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/2.0.8/css/jquery.dataTables.css" />
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/2.0.8/js/jquery.dataTables.js"></script>
+
+
+<div class="card">
+    <div class="card-header bg-primary text-white">
+        <i class="fas fa-truck"></i> Gestión de Tipos de Vehículo
+    </div>
+
+    <div class="card-body">
+        <div class="row">
+            <div class="col-12">
+                <button type="button" class="btn btn-success mb-3" onclick="abrirModal(null)">
+                    <i class="fas fa-plus-circle"></i> Crear Nuevo Tipo
+                </button>
+            </div>
+        </div>
+
+        <table id="tablatipovehiculo" class="display cell-border w-100" style="width:100%">
+            <thead>
+                <tr>
+                    <th>Descripción</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+<!-- Modal para Crear/Editar Tipo de Vehículo -->
+<div class="modal fade" id="FormModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title" id="modalTitle">Tipo de Vehículo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input id="txtid" type="hidden" value="0" />
+                <div class="row g-2">
+                    <div class="col-sm-12">
+                        <label for="txtDescripcion" class="form-label">Descripción</label>
+                        <input type="text" class="form-control" id="txtDescripcion" autocomplete="off" maxlength="20">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-primary" onclick="Guardar()">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <script>
+        // Nota: Si usa Bootstrap 4, cambie las llamadas a modal por jQuery (ej: $('#FormModal').modal('show'))
+
+        var tabladata;
+        var filaSeleccionada;
+
+        document.addEventListener('DOMContentLoaded', function () {
+            tabladata = $('#tablatipovehiculo').DataTable({
+                responsive: true,
+                ordering: false,
+                "ajax": {
+                    "url": '@Url.Action("ListarTiposVehiculo", "Vehiculo")',
+                    "type": "GET",
+                    "datatype": "json"
+                },
+                "columns": [
+                    { "data": "descripcion" },
+                    {
+                        "defaultContent": '<button type="button" class="btn btn-primary btn-sm btn-editar me-2"><i class="fas fa-pen"></i></button>' +
+                            '<button type="button" class="btn btn-danger btn-sm btn-eliminar"><i class="fas fa-trash"></i></button>',
+                        "orderable": false,
+                        "searchable": false,
+                        "width": "125px"
+                    }
+                ],
+                "language": {
+                    "url": '//cdn.datatables.net/plug-ins/2.2.1/i18n/es-ES.json',
+                },
+            });
+
+            // Evento de clic para el botón Editar de la tabla
+            $("#tablatipovehiculo tbody").on("click", '.btn-editar', function () {
+                filaSeleccionada = $(this).closest("tr");
+                var data = tabladata.row(filaSeleccionada).data();
+                abrirModal(data);
+            });
+
+            // Evento de clic para el botón Eliminar de la tabla
+            $("#tablatipovehiculo tbody").on("click", '.btn-eliminar', function () {
+                filaSeleccionada = $(this).closest("tr");
+                var data = tabladata.row(filaSeleccionada).data();
+                Eliminar(data);
+            });
+        });
+
+        // Limpia el formulario
+        function Limpiar() {
+            document.getElementById("txtid").value = 0;
+            document.getElementById("txtDescripcion").value = "";
+        }
+
+        // Abre el modal para crear o editar
+        function abrirModal(json) {
+            Limpiar();
+            if (json != null) {
+                document.getElementById("txtid").value = json.id_tp_vehiculo;
+                document.getElementById("txtDescripcion").value = json.descripcion;
+                document.getElementById("modalTitle").textContent = "Editar Tipo de Vehículo";
+            } else {
+                document.getElementById("modalTitle").textContent = "Crear Nuevo Tipo de Vehículo";
+            }
+            // Usa jQuery para mostrar el modal si estás usando Bootstrap 4
+            $('#FormModal').modal('show');
+        }
+
+        // Función para guardar un Tipo de Vehículo usando FETCH y SweetAlert2
+        async function Guardar() {
+            const tipoVehiculo = {
+                id_tp_vehiculo: parseInt(document.getElementById("txtid").value),
+                descripcion: document.getElementById("txtDescripcion").value
+            };
+
+            const esNuevo = tipoVehiculo.id_tp_vehiculo === 0;
+
+            if (tipoVehiculo.descripcion.trim() === "") {
+                Swal.fire('Advertencia', 'La descripción no puede ser vacía.', 'warning');
+                return;
+            }
+
+            Swal.fire({
+                title: esNuevo ? "Registrando tipo..." : "Actualizando tipo...",
+                html: "Por favor, espera...",
+                allowOutsideClick: false,
+                didOpen: () => { Swal.showLoading(); }
+            });
+
+            try {
+                // Se llama a la acción GuardarTipoVehiculo del VehiculoController
+                const response = await fetch('@Url.Action("GuardarTipoVehiculo", "Vehiculo")', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json; charset=utf-8' },
+                    body: JSON.stringify({ objeto: tipoVehiculo })
+                });
+
+                if (!response.ok) throw new Error("Error en la petición.");
+
+                const data = await response.json();
+
+                if (data.resultado) {
+                    Swal.fire({
+                        title: esNuevo ? "¡Registrado!" : "¡Actualizado!",
+                        text: data.mensaje, // Usamos el mensaje devuelto por el SP/CN
+                        icon: 'success'
+                    });
+
+                    // Actualizamos la tabla
+                    if (esNuevo) {
+                        tipoVehiculo.id_tp_vehiculo = data.resultado;
+                        tabladata.row.add(tipoVehiculo).draw(false);
+                    } else {
+                        tabladata.row(filaSeleccionada).data(tipoVehiculo).draw(false);
+                    }
+
+                    $('#FormModal').modal("hide");
+                } else {
+                    Swal.fire({ title: "¡Error!", text: data.mensaje, icon: 'error' });
+                }
+            } catch (error) {
+                Swal.fire({ title: "¡Error!", text: "Ocurrió un error inesperado al guardar.", icon: 'error' });
+                console.error(error);
+            }
+        }
+
+        // Función para eliminar un Tipo de Vehículo
+        async function Eliminar(tipoVehiculo) {
+            Swal.fire({
+                title: '¿Estás seguro?',
+                text: "Esto eliminará el tipo de vehículo.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar'
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({
+                        title: "Eliminando...",
+                        text: "Verificando dependencias y eliminando.",
+                        allowOutsideClick: false,
+                        didOpen: () => { Swal.showLoading(); }
+                    });
+
+                    try {
+                        const response = await fetch('@Url.Action("EliminarTipoVehiculo", "Vehiculo")', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json; charset=utf-8' },
+                            body: JSON.stringify({ id: tipoVehiculo.id_tp_vehiculo })
+                        });
+
+                        if (!response.ok) throw new Error("Error en la petición.");
+
+                        const data = await response.json();
+
+                        if (data.resultado) {
+                            tabladata.row(filaSeleccionada).remove().draw();
+                            Swal.fire('¡Eliminado!', data.mensaje, 'success');
+                        } else {
+                            // Este error maneja la restricción de integridad referencial del SP
+                            Swal.fire('Error', data.mensaje, 'error');
+                        }
+                    } catch (error) {
+                        Swal.fire('Error', 'Ocurrió un error inesperado al eliminar.', 'error');
+                        console.error(error);
+                    }
+                }
+            });
+        }
+    </script>
+}
 

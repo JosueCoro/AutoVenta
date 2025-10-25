@@ -1,25 +1,23 @@
-﻿using System;
+﻿using CapaEntidad;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Data;
-using CapaEntidad;
 using System.Data.SqlClient;
+using System.Globalization;
+        
 
 namespace CapaDato
 {
-    public class CD_Cliente
+    public class CD_Vehiculo
     {
-
-        public List<Cliente> Listar()
+        public List<Vehiculo> Listar()
         {
-            List<Cliente> lista = new List<Cliente>();
+            List<Vehiculo> lista = new List<Vehiculo>();
             try
             {
                 using (SqlConnection oConexion = new SqlConnection(Conexion.cn))
                 {
-                    SqlCommand cmd = new SqlCommand("comercial.CRUD_CLIENTE", oConexion);
+                    SqlCommand cmd = new SqlCommand("comercial.CRUD_VEHICULO", oConexion);
                     cmd.Parameters.AddWithValue("@Operacion", "SELECT");
                     cmd.Parameters.Add("@Mensaje", SqlDbType.VarChar, 500).Direction = ParameterDirection.Output;
                     cmd.Parameters.Add("@Resultado", SqlDbType.Int).Direction = ParameterDirection.Output;
@@ -30,13 +28,29 @@ namespace CapaDato
                     {
                         while (dr.Read())
                         {
-                            lista.Add(new Cliente()
+                            lista.Add(new Vehiculo()
                             {
-                                id_cliente = Convert.ToInt32(dr["id_cliente"]),
-                                nombre_completo = dr["nombre_completo"].ToString(),
-                                ci_nit = dr["ci_nit"].ToString(),
-                                telefono = dr["telefono"].ToString(),
-                                direccion = dr["direccion"].ToString()
+                                id_vehiculo = Convert.ToInt32(dr["id_vehiculo"]),
+                                modelo = dr["modelo"].ToString(),
+                                año = dr["año"].ToString(),
+                                placa = dr["placa"].ToString(),
+                                color = dr["color"].ToString(),
+                                estado = dr["estado"].ToString(),
+                                fecha_ingreso = dr["fecha_ingreso"].ToString(),
+                                precio_compra = Convert.ToDecimal(dr["precio_compra"]),
+                                precio_venta = Convert.ToDecimal(dr["precio_venta"]),
+                                imagen = dr["imagen"].ToString(),
+
+                                oMarca = new Marca()
+                                {
+                                    id_marca = Convert.ToInt32(dr["id_marca"]),
+                                    nombre = dr["NombreMarca"].ToString()
+                                },
+                                oTipoVehiculo = new TipoVehiculo()
+                                {
+                                    id_tp_vehiculo = Convert.ToInt32(dr["id_tp_vehiculo"]),
+                                    descripcion = dr["DescripcionTipoVehiculo"].ToString()
+                                }
                             });
                         }
                     }
@@ -44,14 +58,14 @@ namespace CapaDato
             }
             catch (Exception ex)
             {
-                lista = new List<Cliente>();
+                lista = new List<Vehiculo>();
                 // Manejo de excepción
             }
             return lista;
         }
 
-        // Método para registrar un nuevo Cliente
-        public int Registrar(Cliente obj, int idUsuario, out string Mensaje)
+        // Método para registrar un nuevo Vehículo
+        public int Registrar(Vehiculo obj, int idUsuario, out string Mensaje)
         {
             int idGenerado = 0;
             Mensaje = string.Empty;
@@ -60,13 +74,20 @@ namespace CapaDato
             {
                 using (SqlConnection oConexion = new SqlConnection(Conexion.cn))
                 {
-                    SqlCommand cmd = new SqlCommand("comercial.CRUD_CLIENTE", oConexion);
+                    SqlCommand cmd = new SqlCommand("comercial.CRUD_VEHICULO", oConexion);
 
                     cmd.Parameters.AddWithValue("@Operacion", "INSERT");
-                    cmd.Parameters.AddWithValue("@NombreCompleto", obj.nombre_completo);
-                    cmd.Parameters.AddWithValue("@CiNit", obj.ci_nit);
-                    cmd.Parameters.AddWithValue("@Telefono", obj.telefono);
-                    cmd.Parameters.AddWithValue("@Direccion", obj.direccion);
+                    cmd.Parameters.AddWithValue("@Modelo", obj.modelo);
+                    cmd.Parameters.AddWithValue("@Anio", obj.año);
+                    cmd.Parameters.AddWithValue("@Placa", obj.placa);
+                    cmd.Parameters.AddWithValue("@Color", obj.color);
+                    cmd.Parameters.AddWithValue("@Estado", obj.estado);
+                    cmd.Parameters.AddWithValue("@FechaIngreso", obj.fecha_ingreso);
+                    cmd.Parameters.AddWithValue("@PrecioCompra", obj.precio_compra);
+                    cmd.Parameters.AddWithValue("@IdMarca", obj.oMarca.id_marca);
+                    cmd.Parameters.AddWithValue("@Imagen", obj.imagen);
+                    cmd.Parameters.AddWithValue("@IdTpVehiculo", obj.oTipoVehiculo.id_tp_vehiculo);
+                    cmd.Parameters.AddWithValue("@PrecioVenta", obj.precio_venta);
                     cmd.Parameters.AddWithValue("@IdUsuarioAuditoria", idUsuario);
 
                     cmd.Parameters.Add("@Mensaje", SqlDbType.VarChar, 500).Direction = ParameterDirection.Output;
@@ -88,8 +109,8 @@ namespace CapaDato
             return idGenerado;
         }
 
-        // Método para editar un Cliente
-        public bool Editar(Cliente obj, int idUsuario, out string Mensaje)
+        // Método para editar un Vehículo
+        public bool Editar(Vehiculo obj, int idUsuario, out string Mensaje)
         {
             bool resultado = false;
             Mensaje = string.Empty;
@@ -98,14 +119,21 @@ namespace CapaDato
             {
                 using (SqlConnection oConexion = new SqlConnection(Conexion.cn))
                 {
-                    SqlCommand cmd = new SqlCommand("comercial.CRUD_CLIENTE", oConexion);
+                    SqlCommand cmd = new SqlCommand("comercial.CRUD_VEHICULO", oConexion);
 
                     cmd.Parameters.AddWithValue("@Operacion", "UPDATE");
-                    cmd.Parameters.AddWithValue("@IdCliente", obj.id_cliente);
-                    cmd.Parameters.AddWithValue("@NombreCompleto", obj.nombre_completo);
-                    cmd.Parameters.AddWithValue("@CiNit", obj.ci_nit);
-                    cmd.Parameters.AddWithValue("@Telefono", obj.telefono);
-                    cmd.Parameters.AddWithValue("@Direccion", obj.direccion);
+                    cmd.Parameters.AddWithValue("@IdVehiculo", obj.id_vehiculo);
+                    cmd.Parameters.AddWithValue("@Modelo", obj.modelo);
+                    cmd.Parameters.AddWithValue("@Anio", obj.año);
+                    cmd.Parameters.AddWithValue("@Placa", obj.placa);
+                    cmd.Parameters.AddWithValue("@Color", obj.color);
+                    cmd.Parameters.AddWithValue("@Estado", obj.estado);
+                    cmd.Parameters.AddWithValue("@FechaIngreso", obj.fecha_ingreso);
+                    cmd.Parameters.AddWithValue("@PrecioCompra", obj.precio_compra);
+                    cmd.Parameters.AddWithValue("@IdMarca", obj.oMarca.id_marca);
+                    cmd.Parameters.AddWithValue("@Imagen", obj.imagen);
+                    cmd.Parameters.AddWithValue("@IdTpVehiculo", obj.oTipoVehiculo.id_tp_vehiculo);
+                    cmd.Parameters.AddWithValue("@PrecioVenta", obj.precio_venta);
                     cmd.Parameters.AddWithValue("@IdUsuarioAuditoria", idUsuario);
 
                     cmd.Parameters.Add("@Mensaje", SqlDbType.VarChar, 500).Direction = ParameterDirection.Output;
@@ -127,7 +155,7 @@ namespace CapaDato
             return resultado;
         }
 
-        // Método para eliminar un Cliente
+        // Método para eliminar un Vehículo
         public bool Eliminar(int id, int idUsuario, out string Mensaje)
         {
             bool resultado = false;
@@ -137,10 +165,10 @@ namespace CapaDato
             {
                 using (SqlConnection oConexion = new SqlConnection(Conexion.cn))
                 {
-                    SqlCommand cmd = new SqlCommand("comercial.CRUD_CLIENTE", oConexion);
+                    SqlCommand cmd = new SqlCommand("comercial.CRUD_VEHICULO", oConexion);
 
                     cmd.Parameters.AddWithValue("@Operacion", "DELETE");
-                    cmd.Parameters.AddWithValue("@IdCliente", id);
+                    cmd.Parameters.AddWithValue("@IdVehiculo", id);
                     cmd.Parameters.AddWithValue("@IdUsuarioAuditoria", idUsuario);
 
                     cmd.Parameters.Add("@Mensaje", SqlDbType.VarChar, 500).Direction = ParameterDirection.Output;

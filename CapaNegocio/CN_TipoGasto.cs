@@ -10,14 +10,14 @@ namespace CapaNegocio
 {
     public class CN_TipoGasto
     {
-        private CD_TipoGasto cdgasto = new CD_TipoGasto();
+        private CD_TipoGasto cdTipoGasto = new CD_TipoGasto();
 
         public List<TipoGasto> Listar()
         {
-            return cdgasto.Listar();
+            return cdTipoGasto.Listar();
         }
 
-        public int Registrar(TipoGasto obj, out string Mensaje)
+        public int Registrar(TipoGasto obj, int idUsuario, out string Mensaje)
         {
             Mensaje = string.Empty;
 
@@ -27,10 +27,10 @@ namespace CapaNegocio
                 return 0;
             }
 
-            return cdgasto.Registrar(obj, out Mensaje);
+            return cdTipoGasto.Registrar(obj, idUsuario, out Mensaje);
         }
 
-        public bool Editar(TipoGasto obj, out string Mensaje)
+        public bool Editar(TipoGasto obj, int idUsuario, out string Mensaje)
         {
             Mensaje = string.Empty;
 
@@ -46,10 +46,10 @@ namespace CapaNegocio
                 return false;
             }
 
-            return cdgasto.Editar(obj, out Mensaje);
+            return cdTipoGasto.Editar(obj, idUsuario, out Mensaje);
         }
 
-        public bool Eliminar(int id, out string Mensaje)
+        public bool Eliminar(int id, int idUsuario, out string Mensaje)
         {
             Mensaje = string.Empty;
 
@@ -59,15 +59,8 @@ namespace CapaNegocio
                 return false;
             }
 
-            // Validación: verifica si el tipo de gasto está asociado a algún gasto
-            if (cdgasto.TipoGastoAsociadoAGasto(id))
-            {
-                Mensaje = "No se puede eliminar este tipo de gasto porque está asociado a uno o más gastos.";
-                return false;
-            }
-
-            // Si no está asociado, procede con la eliminación
-            return cdgasto.Eliminar(id, out Mensaje);
+            // La verificación de dependencia con Gasto ya está en el SP
+            return cdTipoGasto.Eliminar(id, idUsuario, out Mensaje);
         }
     }
                 

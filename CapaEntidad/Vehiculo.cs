@@ -32,14 +32,15 @@ namespace CapaEntidad
         public string color { get; set; }
         public string estado { get; set; }
         public string imagen { get; set; }
-        public DateTime fecha_ingreso { get; set; }
+        public string fecha_ingreso { get; set; }
         public decimal precio_compra { get; set; }
         public decimal precio_venta { get; set; }
         public int id_usuario { get; set; }
         public int id_marca { get; set; }
         public int id_tp_vehiculo { get; set; }
         public Usuario _usuario { get; set; }
-        public Marca _marca { get; set; }
-        public TipoVehiculo _tipovehiculo { get; set; }
+        public Marca oMarca { get; set; }
+        public TipoVehiculo oTipoVehiculo { get; set; }
+
     }
 }

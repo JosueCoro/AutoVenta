@@ -192,12 +192,17 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CD_Asesor.cs" />
     <Compile Include="CD_Cliente.cs" />
     <Compile Include="CD_Login.cs" />
     <Compile Include="CD_Marca.cs" />
     <Compile Include="CD_Rol.cs" />
     <Compile Include="CD_TipoGasto.cs" />
+    <Compile Include="CD_TipoPago.cs" />
+    <Compile Include="CD_TipoVehiculo.cs" />
     <Compile Include="CD_Usuario.cs" />
+    <Compile Include="CD_Vehiculo.cs" />
+    <Compile Include="CN_TipoPago.cs" />
     <Compile Include="Conexion.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

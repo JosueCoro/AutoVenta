@@ -17,38 +17,31 @@ namespace CapaNegocio
         {
             return cdcliente.Listar();
         }
-        public int Registrar(Cliente obj, out string Mensaje)
+
+        public int Registrar(Cliente obj, int idUsuario, out string Mensaje)
         {
             Mensaje = string.Empty;
 
             if (string.IsNullOrEmpty(obj.nombre_completo))
             {
-                Mensaje = "El nombre del cliente no puede ser vacío.";
+                Mensaje = "El nombre completo es obligatorio.";
                 return 0;
             }
-
             if (string.IsNullOrEmpty(obj.ci_nit))
             {
-                Mensaje = "El CI/NIT del cliente no puede ser vacío.";
+                Mensaje = "El CI/NIT es obligatorio.";
                 return 0;
             }
-
             if (string.IsNullOrEmpty(obj.telefono))
             {
-                Mensaje = "El teléfono del cliente no puede ser vacío.";
+                Mensaje = "El teléfono es obligatorio.";
                 return 0;
             }
 
-            if (string.IsNullOrEmpty(obj.direccion))
-            {
-                Mensaje = "La dirección del cliente no puede ser vacío.";
-                return 0;
-            }
-            return cdcliente.Registrar(obj, out Mensaje);
+            return cdcliente.Registrar(obj, idUsuario, out Mensaje);
         }
 
-        
-        public bool Editar(Cliente obj, out string Mensaje)
+        public bool Editar(Cliente obj, int idUsuario, out string Mensaje)
         {
             Mensaje = string.Empty;
 
@@ -57,32 +50,37 @@ namespace CapaNegocio
                 Mensaje = "El ID del cliente no es válido.";
                 return false;
             }
-
             if (string.IsNullOrEmpty(obj.nombre_completo))
             {
-                Mensaje = "El nombre del cliente no puede ser vacío.";
+                Mensaje = "El nombre completo es obligatorio.";
                 return false;
             }
-
             if (string.IsNullOrEmpty(obj.ci_nit))
             {
-                Mensaje = "El CI/NIT del cliente no puede ser vacío.";
+                Mensaje = "El CI/NIT es obligatorio.";
                 return false;
             }
-
             if (string.IsNullOrEmpty(obj.telefono))
             {
-                Mensaje = "El teléfono del cliente no puede ser vacío.";
+                Mensaje = "El teléfono es obligatorio.";
                 return false;
             }
 
-            if (string.IsNullOrEmpty(obj.direccion))
+            return cdcliente.Editar(obj, idUsuario, out Mensaje);
+        }
+
+        public bool Eliminar(int id, int idUsuario, out string Mensaje)
+        {
+            Mensaje = string.Empty;
+
+            if (id == 0)
             {
-                Mensaje = "La dirección del cliente no puede ser vacío.";
+                Mensaje = "El ID del cliente no es válido.";
                 return false;
             }
 
-            return cdcliente.Editar(obj, out Mensaje);
+            // La verificación de dependencia con Venta está en el SP
+            return cdcliente.Eliminar(id, idUsuario, out Mensaje);
         }
     }
 }

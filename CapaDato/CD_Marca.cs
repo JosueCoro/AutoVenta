@@ -5,25 +5,29 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Text;
+using System.Data.SqlClient;
+using System.Data;
 using System.Threading.Tasks;
 
 namespace CapaDato
 {
     public class CD_Marca
     {
-        // Método para listar todas las marcas
         public List<Marca> Listar()
         {
             List<Marca> lista = new List<Marca>();
             try
             {
-                using (MySqlConnection oConexion = new MySqlConnection(Conexion.cn))
+                using (SqlConnection oConexion = new SqlConnection(Conexion.cn))
                 {
-                    oConexion.Open();
-                    MySqlCommand cmd = new MySqlCommand("sp_ListarMarcas", oConexion);
+                    SqlCommand cmd = new SqlCommand("comercial.CRUD_MARCA", oConexion);
+                    cmd.Parameters.AddWithValue("@Operacion", "SELECT");
+                    cmd.Parameters.Add("@Mensaje", SqlDbType.VarChar, 500).Direction = ParameterDirection.Output;
+                    cmd.Parameters.Add("@Resultado", SqlDbType.Int).Direction = ParameterDirection.Output;
                     cmd.CommandType = CommandType.StoredProcedure;
 
-                    using (MySqlDataReader dr = cmd.ExecuteReader())
+                    oConexion.Open();
+                    using (SqlDataReader dr = cmd.ExecuteReader())
                     {
                         while (dr.Read())
                         {
@@ -43,27 +47,30 @@ namespace CapaDato
             return lista;
         }
 
-        // Método para registrar una nueva marca
-        public int Registrar(Marca obj, out string Mensaje)
+        public int Registrar(Marca obj, int idUsuario, out string Mensaje)
         {
             int idGenerado = 0;
             Mensaje = string.Empty;
 
             try
             {
-                using (MySqlConnection oConexion = new MySqlConnection(Conexion.cn))
+                using (SqlConnection oConexion = new SqlConnection(Conexion.cn))
                 {
-                    MySqlCommand cmd = new MySqlCommand("sp_RegistrarMarca", oConexion);
-                    cmd.Parameters.AddWithValue("p_nombre", obj.nombre);
-                    cmd.Parameters.Add("p_id_marca", MySqlDbType.Int32).Direction = ParameterDirection.Output;
-                    cmd.Parameters.Add("p_Mensaje", MySqlDbType.VarChar, 500).Direction = ParameterDirection.Output;
+                    SqlCommand cmd = new SqlCommand("comercial.CRUD_MARCA", oConexion);
+
+                    cmd.Parameters.AddWithValue("@Operacion", "INSERT");
+                    cmd.Parameters.AddWithValue("@Nombre", obj.nombre);
+                    cmd.Parameters.AddWithValue("@IdUsuarioAuditoria", idUsuario); 
+
+                    cmd.Parameters.Add("@Mensaje", SqlDbType.VarChar, 500).Direction = ParameterDirection.Output;
+                    cmd.Parameters.Add("@Resultado", SqlDbType.Int).Direction = ParameterDirection.Output; 
                     cmd.CommandType = CommandType.StoredProcedure;
 
                     oConexion.Open();
                     cmd.ExecuteNonQuery();
 
-                    idGenerado = Convert.ToInt32(cmd.Parameters["p_id_marca"].Value);
-                    Mensaje = cmd.Parameters["p_Mensaje"].Value.ToString();
+                    idGenerado = Convert.ToInt32(cmd.Parameters["@Resultado"].Value);
+                    Mensaje = cmd.Parameters["@Mensaje"].Value.ToString();
                 }
             }
             catch (Exception ex)
@@ -74,27 +81,31 @@ namespace CapaDato
             return idGenerado;
         }
 
-        // Método para editar una marca
-        public bool Editar(Marca obj, out string Mensaje)
+        public bool Editar(Marca obj, int idUsuario, out string Mensaje)
         {
             bool resultado = false;
             Mensaje = string.Empty;
 
             try
             {
-                using (MySqlConnection oConexion = new MySqlConnection(Conexion.cn))
+                using (SqlConnection oConexion = new SqlConnection(Conexion.cn))
                 {
-                    MySqlCommand cmd = new MySqlCommand("sp_EditarMarca", oConexion);
-                    cmd.Parameters.AddWithValue("p_id_marca", obj.id_marca);
-                    cmd.Parameters.AddWithValue("p_nombre", obj.nombre);
-                    cmd.Parameters.Add("p_Mensaje", MySqlDbType.VarChar, 500).Direction = ParameterDirection.Output;
+                    SqlCommand cmd = new SqlCommand("comercial.CRUD_MARCA", oConexion);
+
+                    cmd.Parameters.AddWithValue("@Operacion", "UPDATE");
+                    cmd.Parameters.AddWithValue("@IdMarca", obj.id_marca);
+                    cmd.Parameters.AddWithValue("@Nombre", obj.nombre);
+                    cmd.Parameters.AddWithValue("@IdUsuarioAuditoria", idUsuario); 
+
+                    cmd.Parameters.Add("@Mensaje", SqlDbType.VarChar, 500).Direction = ParameterDirection.Output;
+                    cmd.Parameters.Add("@Resultado", SqlDbType.Int).Direction = ParameterDirection.Output;
                     cmd.CommandType = CommandType.StoredProcedure;
 
                     oConexion.Open();
                     cmd.ExecuteNonQuery();
 
-                    Mensaje = cmd.Parameters["p_Mensaje"].Value.ToString();
-                    resultado = Mensaje == "";
+                    resultado = Convert.ToInt32(cmd.Parameters["@Resultado"].Value) == 1;
+                    Mensaje = cmd.Parameters["@Mensaje"].Value.ToString();
                 }
             }
             catch (Exception ex)
@@ -105,26 +116,30 @@ namespace CapaDato
             return resultado;
         }
 
-        // Método para eliminar una marca
-        public bool Eliminar(int id, out string Mensaje)
+        public bool Eliminar(int id, int idUsuario, out string Mensaje)
         {
             bool resultado = false;
             Mensaje = string.Empty;
 
             try
             {
-                using (MySqlConnection oConexion = new MySqlConnection(Conexion.cn))
+                using (SqlConnection oConexion = new SqlConnection(Conexion.cn))
                 {
-                    MySqlCommand cmd = new MySqlCommand("sp_EliminarMarca", oConexion);
-                    cmd.Parameters.AddWithValue("p_id_marca", id);
-                    cmd.Parameters.Add("p_Mensaje", MySqlDbType.VarChar, 500).Direction = ParameterDirection.Output;
+                    SqlCommand cmd = new SqlCommand("comercial.CRUD_MARCA", oConexion);
+
+                    cmd.Parameters.AddWithValue("@Operacion", "DELETE");
+                    cmd.Parameters.AddWithValue("@IdMarca", id);
+                    cmd.Parameters.AddWithValue("@IdUsuarioAuditoria", idUsuario); 
+
+                    cmd.Parameters.Add("@Mensaje", SqlDbType.VarChar, 500).Direction = ParameterDirection.Output;
+                    cmd.Parameters.Add("@Resultado", SqlDbType.Int).Direction = ParameterDirection.Output;
                     cmd.CommandType = CommandType.StoredProcedure;
 
                     oConexion.Open();
                     cmd.ExecuteNonQuery();
 
-                    Mensaje = cmd.Parameters["p_Mensaje"].Value.ToString();
-                    resultado = Mensaje == "";
+                    resultado = Convert.ToInt32(cmd.Parameters["@Resultado"].Value) == 1;
+                    Mensaje = cmd.Parameters["@Mensaje"].Value.ToString();
                 }
             }
             catch (Exception ex)
@@ -133,29 +148,6 @@ namespace CapaDato
                 Mensaje = ex.Message;
             }
             return resultado;
-        }
-        public bool MarcaAsociadaAVehiculo(int id_marca)
-        {
-            bool existe = false;
-            try
-            {
-                using (MySqlConnection oConexion = new MySqlConnection(Conexion.cn))
-                {
-                    oConexion.Open();
-                    string query = "SELECT COUNT(*) FROM vehiculo WHERE marca_id_marca = @id_marca;";
-                    MySqlCommand cmd = new MySqlCommand(query, oConexion);
-                    cmd.Parameters.AddWithValue("@id_marca", id_marca);
-
-                    int count = Convert.ToInt32(cmd.ExecuteScalar());
-                    existe = count > 0;
-                }
-            }
-            catch (Exception ex)
-            {
-                // Manejo de errores
-                Console.WriteLine("Error al verificar la asociación de la marca: " + ex.Message);
-            }
-            return existe;
         }
     }
 }
