@@ -32,9 +32,19 @@ namespace CapaNegocio
                 Mensaje = "El CI/NIT es obligatorio.";
                 return 0;
             }
+            if (!obj.ci_nit.All(char.IsDigit))
+            {
+                Mensaje = "El CI/NIT debe contener solo números.";
+                return 0;
+            }
             if (string.IsNullOrEmpty(obj.telefono))
             {
                 Mensaje = "El teléfono es obligatorio.";
+                return 0;
+            }
+            if (!obj.telefono.All(char.IsDigit))
+            {
+                Mensaje = "El teléfono debe contener solo números.";
                 return 0;
             }
 

@@ -4,9 +4,11 @@ using CapaNegocio;
 using CapaPresentacion.Filtros;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
+using System.Web.Script.Serialization;
 
 namespace CapaPresentacion.Controllers
 {
@@ -21,7 +23,7 @@ namespace CapaPresentacion.Controllers
                 new SelectListItem() { Value = "En Venta", Text = "En Venta" },
                 new SelectListItem() { Value = "Vendido", Text = "Vendido" },
                 new SelectListItem() { Value = "Reservado", Text = "Reservado" },
-                new SelectListItem() { Value = "En Mantenimiento", Text = "En Mantenimiento" } // Mantenemos el estado de mantenimiento
+                new SelectListItem() { Value = "En Mantenimiento", Text = "En Mantenimiento" }
             };
             return View();
         }
@@ -31,23 +33,60 @@ namespace CapaPresentacion.Controllers
             List<Vehiculo> lista = new CN_Vehiculo().Listar();
             return Json(new { data = lista }, JsonRequestBehavior.AllowGet);
         }
-
         [HttpPost]
-        public JsonResult GuardarVehiculo(Vehiculo objeto)
+        public JsonResult GuardarVehiculo(string objeto, HttpPostedFileBase archivoImagen)
         {
             object resultado;
             string Mensaje = string.Empty;
 
-            // OBTENER ID DEL USUARIO DE LA SESIÓN 
+            Vehiculo objVehiculo = new JavaScriptSerializer().Deserialize<Vehiculo>(objeto);
             int idUsuario = ((Usuario_Activo)Session["Usuario"]).id_usuario;
+            bool hayNuevoArchivo = archivoImagen != null && archivoImagen.ContentLength > 0;
 
-            if (objeto.id_vehiculo == 0)
+            if (objVehiculo.id_vehiculo == 0)
             {
-                resultado = new CN_Vehiculo().Registrar(objeto, idUsuario, out Mensaje);
+                objVehiculo.fecha_ingreso = DateTime.Now.ToString("yyyy-MM-dd");
+                objVehiculo.imagen = "~/imagenes/default.png"; 
+
+                int idGenerado = new CN_Vehiculo().Registrar(objVehiculo, idUsuario, out Mensaje);
+                resultado = idGenerado;
+                objVehiculo.id_vehiculo = idGenerado;
             }
             else
             {
-                resultado = new CN_Vehiculo().Editar(objeto, idUsuario, out Mensaje);
+                resultado = new CN_Vehiculo().Editar(objVehiculo, idUsuario, out Mensaje);
+            }
+
+            if (Convert.ToInt32(resultado) > 0 && hayNuevoArchivo)
+            {
+                string extension = Path.GetExtension(archivoImagen.FileName);
+                string nombreArchivo = objVehiculo.id_vehiculo.ToString() + extension;
+
+                string carpetaImagenes = "~/imagenes/"; 
+                string rutaRelativa = carpetaImagenes + nombreArchivo;
+                string rutaFisica = Server.MapPath(rutaRelativa);
+
+                try
+                {
+                    string rutaDirectorio = Server.MapPath(carpetaImagenes);
+                    if (!Directory.Exists(rutaDirectorio))
+                        Directory.CreateDirectory(rutaDirectorio);
+
+                    archivoImagen.SaveAs(rutaFisica);
+
+                    objVehiculo.imagen = rutaRelativa;
+
+                    bool actualizacionExitosa = new CN_Vehiculo().ActualizarRutaImagen(objVehiculo, out string msg);
+
+                    if (!actualizacionExitosa)
+                    {
+                        Mensaje += ". Advertencia: Falló al actualizar la ruta de la imagen en DB. RUTA NO ALMACENADA.";
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Mensaje += $". Error al guardar el archivo físico: {ex.Message}";
+                }
             }
 
             return Json(new { resultado = resultado, mensaje = Mensaje }, JsonRequestBehavior.AllowGet);
@@ -56,7 +95,6 @@ namespace CapaPresentacion.Controllers
         [HttpPost]
         public JsonResult EliminarVehiculo(int id)
         {
-            // OBTENER ID DEL USUARIO DE LA SESIÓN 
             int idUsuario = ((Usuario_Activo)Session["Usuario"]).id_usuario;
 
             bool resultado = new CN_Vehiculo().Eliminar(id, idUsuario, out string mensaje);

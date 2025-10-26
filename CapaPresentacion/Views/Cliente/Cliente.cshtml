@@ -3,10 +3,8 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<!-- Se incluye SweetAlert2 para notificaciones modernas -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<!-- Se incluye Datatables CSS si no está en bundles -->
 <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/2.0.8/css/jquery.dataTables.css" />
 <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/2.0.8/js/jquery.dataTables.js"></script>
 
@@ -42,7 +40,6 @@
 </div>
 
 
-<!-- Modal para Crear/Editar Cliente -->
 <div class="modal fade" id="FormModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" data-bs-backdrop="static">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -151,7 +148,6 @@
             $('#FormModal').modal('show');
         }
 
-        // Función para guardar un cliente usando FETCH y SweetAlert2
         async function Guardar() {
             const cliente = {
                 id_cliente: parseInt(document.getElementById("txtid").value),
@@ -163,15 +159,11 @@
 
             const esNuevo = cliente.id_cliente === 0;
 
-            // Validación de campos requeridos (la CapaNegocio también los valida)
-            if (cliente.nombre_completo === "" || cliente.ci_nit === "" || cliente.telefono === "") {
-                Swal.fire('Advertencia', 'Los campos Nombre Completo, CI/NIT y Teléfono son obligatorios.', 'warning');
-                return;
-            }
+            // ***** CORRECCIÓN CLAVE: Eliminamos la validación genérica de JS para que la CN decida el mensaje. *****
 
             Swal.fire({
                 title: esNuevo ? "Registrando cliente..." : "Actualizando cliente...",
-                html: "Por favor, espera...",
+                html: "Validando datos...",
                 allowOutsideClick: false,
                 didOpen: () => { Swal.showLoading(); }
             });
@@ -187,7 +179,7 @@
 
                 const data = await response.json();
 
-                if (data.resultado) {
+                if (data.resultado && data.resultado > 0) { // Éxito
                     Swal.fire({
                         title: esNuevo ? "¡Registrado!" : "¡Actualizado!",
                         text: data.mensaje,
@@ -198,12 +190,18 @@
                         cliente.id_cliente = data.resultado;
                         tabladata.row.add(cliente).draw(false);
                     } else {
-                        tabladata.row(filaSeleccionada).data(cliente).draw(false);
+                        // Recargar la fila para asegurar que se vean los cambios
+                        tabladata.ajax.reload(null, false);
                     }
 
                     $('#FormModal').modal("hide");
                 } else {
-                    Swal.fire({ title: "¡Error!", text: data.mensaje, icon: 'error' });
+                    // ERROR: Muestra el mensaje ESPECÍFICO devuelto por la Capa de Negocio
+                    Swal.fire({
+                        title: "¡Error de Validación!",
+                        text: data.mensaje, // Este es el mensaje como "El nombre completo es obligatorio."
+                        icon: 'error'
+                    });
                 }
             } catch (error) {
                 Swal.fire({ title: "¡Error!", text: "Ocurrió un error inesperado al guardar.", icon: 'error' });
@@ -211,7 +209,7 @@
             }
         }
 
-        // Función para eliminar un cliente
+        // Función para eliminar un cliente (se mantiene sin cambios)
         async function Eliminar(cliente) {
             Swal.fire({
                 title: '¿Estás seguro?',
@@ -246,7 +244,6 @@
                             tabladata.row(filaSeleccionada).remove().draw();
                             Swal.fire('¡Eliminado!', data.mensaje, 'success');
                         } else {
-                            // Maneja el error de dependencia (cliente con ventas)
                             Swal.fire('Error', data.mensaje, 'error');
                         }
                     } catch (error) {

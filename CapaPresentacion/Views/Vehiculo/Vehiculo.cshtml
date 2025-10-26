@@ -1,10 +1,9 @@
 ﻿@{
     ViewBag.Title = "Vehículos";
     Layout = "~/Views/Shared/_Layout.cshtml";
-    List<SelectListItem> listaEstados = ViewBag.ListaEstados; // Esta lista sí se mantiene por ser estática
+    List<SelectListItem> listaEstados = ViewBag.ListaEstados;
 }
 
-<!-- Se incluye SweetAlert2 y Datatables -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/2.0.8/css/jquery.dataTables.css" />
@@ -44,9 +43,8 @@
 </div>
 
 
-<!-- Modal para Crear/Editar Vehículo -->
 <div class="modal fade" id="FormModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" data-bs-backdrop="static">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header bg-dark text-white">
                 <h5 class="modal-title" id="modalTitle">Detalle de Vehículo</h5>
@@ -55,66 +53,77 @@
             <div class="modal-body">
                 <form id="formVehiculo">
                     <input id="txtid" type="hidden" value="0" />
-                    <input id="txtFechaIngreso" type="hidden" /> <!-- Usado para Editar, si no se cambia la fecha -->
-                    <input id="txtImagen" type="hidden" value="~/Content/img/placeholder.png" /> <!-- Placeholder inicial -->
+                    <input id="txtFechaIngreso" type="hidden" />
+                    <input id="txtImagenRuta" type="hidden" value="~/Imagenes/Vehiculos/default.png" />
 
                     <div class="row g-3">
-                        <div class="col-sm-4">
-                            <label for="txtPlaca" class="form-label">Placa</label>
-                            <input type="text" class="form-control" id="txtPlaca" autocomplete="off" maxlength="10">
-                        </div>
-                        <div class="col-sm-4">
-                            <label for="txtModelo" class="form-label">Modelo</label>
-                            <input type="text" class="form-control" id="txtModelo" autocomplete="off" maxlength="20">
-                        </div>
-                        <div class="col-sm-4">
-                            <label for="txtAnio" class="form-label">Año</label>
-                            <input type="text" class="form-control" id="txtAnio" autocomplete="off" maxlength="10">
+
+                        <div class="col-sm-3 text-center">
+                            <div class="mb-3">
+                                <img id="imgVehiculo" src="@Url.Content("~/imagenes/default.png")" alt="Imagen del Vehículo"
+                                     style="max-width: 200px; max-height: 197px; border: 1px solid #ccc; padding: 5px; object-fit: contain;"
+                                     class="border rounded mx-auto d-block img-fluid" />
+                            </div>
+                            <div class="mb-3">
+                                <label for="fileImagen" class="form-label d-block">Subir Imagen (JPG/PNG)</label>
+                                <input type="file" class="form-control" id="fileImagen" accept="image/png, image/jpeg" />
+                            </div>
                         </div>
 
-                        <div class="col-sm-4">
-                            <label for="txtColor" class="form-label">Color</label>
-                            <input type="text" class="form-control" id="txtColor" autocomplete="off" maxlength="150">
+                        <div class="col-sm-3">
+                            <div class="mb-3">
+                                <label for="txtPlaca" class="form-label">Placa</label>
+                                <input type="text" class="form-control" id="txtPlaca" autocomplete="off" maxlength="10">
+                            </div>
+                            <div class="mb-3">
+                                <label for="txtModelo" class="form-label">Modelo</label>
+                                <input type="text" class="form-control" id="txtModelo" autocomplete="off" maxlength="20">
+                            </div>
+                            <div class="mb-3">
+                                <label for="txtAnio" class="form-label">Año</label>
+                                <input type="text" class="form-control" id="txtAnio" autocomplete="off" maxlength="10">
+                            </div>
+                            <div class="mb-3">
+                                <label for="txtColor" class="form-label">Color</label>
+                                <input type="text" class="form-control" id="txtColor" autocomplete="off" maxlength="150">
+                            </div>
                         </div>
 
-                        <!-- DROP DOWN DE MARCA - CARGADO POR JS -->
-                        <div class="col-sm-4">
-                            <label for="cboMarca" class="form-label">Marca</label>
-                            <select id="cboMarca" class="form-control">
-                                <option value="0">Cargando...</option>
-                            </select>
+                        <div class="col-sm-3">
+                            <div class="mb-3">
+                                <label for="cboMarca" class="form-label">Marca</label>
+                                <select id="cboMarca" class="form-control">
+                                    <option value="0">Cargando...</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="cboTipo" class="form-label">Tipo Vehículo</label>
+                                <select id="cboTipo" class="form-control">
+                                    <option value="0">Cargando...</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="cboEstado" class="form-label">Estado</label>
+                                <select id="cboEstado" class="form-control">
+                                    @foreach (var estado in listaEstados)
+                                    {
+                                        <option value="@estado.Value">@estado.Text</option>
+                                    }
+                                </select>
+                            </div>
                         </div>
 
-                        <!-- DROP DOWN DE TIPO VEHÍCULO - CARGADO POR JS -->
-                        <div class="col-sm-4">
-                            <label for="cboTipo" class="form-label">Tipo Vehículo</label>
-                            <select id="cboTipo" class="form-control">
-                                <option value="0">Cargando...</option>
-                            </select>
+                        <div class="col-sm-3">
+                            <div class="mb-3">
+                                <label for="txtPrecioCompra" class="form-label">Precio Compra (Bs.)</label>
+                                <input type="number" step="0.01" class="form-control" id="txtPrecioCompra">
+                            </div>
+                            <div class="mb-3">
+                                <label for="txtPrecioVenta" class="form-label">Precio Venta (Bs.)</label>
+                                <input type="number" step="0.01" class="form-control" id="txtPrecioVenta">
+                            </div>
                         </div>
 
-                        <div class="col-sm-4">
-                            <label for="txtPrecioCompra" class="form-label">Precio Compra ($)</label>
-                            <input type="number" step="0.01" class="form-control" id="txtPrecioCompra">
-                        </div>
-                        <div class="col-sm-4">
-                            <label for="txtPrecioVenta" class="form-label">Precio Venta ($)</label>
-                            <input type="number" step="0.01" class="form-control" id="txtPrecioVenta">
-                        </div>
-                        <div class="col-sm-4">
-                            <label for="cboEstado" class="form-label">Estado</label>
-                            <select id="cboEstado" class="form-control">
-                                @foreach (var estado in listaEstados)
-                                {
-                                    <option value="@estado.Value">@estado.Text</option>
-                                }
-                            </select>
-                        </div>
-
-                        <div class="col-sm-12 mt-3">
-                            <img id="imgVehiculo" src="~/Content/img/placeholder.png" alt="Imagen del Vehículo" style="max-width: 150px; max-height: 150px; border: 1px solid #ccc; padding: 5px;" />
-                            <small class="text-muted d-block mt-1">Nota: La imagen actual se usa como placeholder.</small>
-                        </div>
                     </div>
                 </form>
             </div>
@@ -125,27 +134,22 @@
         </div>
     </div>
 </div>
-
 @section Scripts{
     <script>
         var tabladata;
         var filaSeleccionada;
+        const DEFAULT_IMG_PATH = '@Url.Content("~/imagenes/default.png")'; // Nota: Usar el path real de tu placeholder
 
         // ===========================================
         // FUNCIONES ASÍNCRONAS PARA CARGAR DROPDOWNS
         // ===========================================
-
-        // Función para llenar el dropdown de Marcas
         async function llenarMarcas() {
             try {
-                // Llama al ListarMarcas del MarcaController
                 const response = await fetch('@Url.Action("ListarMarcas", "Marca")', { method: 'GET' });
                 const data = await response.json();
-                const marcas = data.data; // Asumiendo que el JSON devuelve { data: [...] }
+                const marcas = data.data;
                 const ddlMarca = document.getElementById("cboMarca");
-
-                ddlMarca.innerHTML = ''; // Limpiar opciones
-
+                ddlMarca.innerHTML = '';
                 marcas.forEach(marca => {
                     const option = document.createElement('option');
                     option.value = marca.id_marca;
@@ -154,21 +158,16 @@
                 });
             } catch (error) {
                 document.getElementById("cboMarca").innerHTML = '<option value="0">Error al cargar marcas</option>';
-                console.error('Error al cargar marcas:', error);
             }
         }
 
-        // Función para llenar el dropdown de Tipos de Vehículo
         async function llenarTiposVehiculo() {
             try {
-                // Llama al ListarTiposVehiculo del VehiculoController
                 const response = await fetch('@Url.Action("ListarTiposVehiculo", "Vehiculo")', { method: 'GET' });
                 const data = await response.json();
-                const tipos = data.data; // Asumiendo que el JSON devuelve { data: [...] }
+                const tipos = data.data;
                 const ddlTipo = document.getElementById("cboTipo");
-
-                ddlTipo.innerHTML = ''; // Limpiar opciones
-
+                ddlTipo.innerHTML = '';
                 tipos.forEach(tipo => {
                     const option = document.createElement('option');
                     option.value = tipo.id_tp_vehiculo;
@@ -177,13 +176,24 @@
                 });
             } catch (error) {
                 document.getElementById("cboTipo").innerHTML = '<option value="0">Error al cargar tipos</option>';
-                console.error('Error al cargar tipos de vehículo:', error);
             }
         }
 
 
+        function mostrarImagen(input) {
+             const imgElement = document.getElementById("imgVehiculo");
+             if (input.files && input.files[0]) {
+                 const reader = new FileReader();
+                 reader.onload = function(e) {
+                     imgElement.src = e.target.result;
+                 };
+                 reader.readAsDataURL(input.files[0]);
+             }
+        }
+
+
         document.addEventListener('DOMContentLoaded', function () {
-            // Cargar los Dropdowns antes de inicializar cualquier cosa que use sus IDs
+            // Cargar datos maestros al iniciar
             llenarMarcas();
             llenarTiposVehiculo();
 
@@ -198,8 +208,8 @@
                 "columns": [
                     { "data": "placa" },
                     { "data": "modelo" },
-                    { "data": "oMarca.nombre" }, // Mapeo de objeto anidado
-                    { "data": "oTipoVehiculo.descripcion" }, // Mapeo de objeto anidado
+                    { "data": "oMarca.nombre" },
+                    { "data": "oTipoVehiculo.descripcion" },
                     {
                         "data": "precio_venta",
                         "render": function (data) {
@@ -220,7 +230,7 @@
                 },
             });
 
-            // Eventos de clic
+            // Eventos de clic para la tabla
             $("#tablavehiculos tbody").on("click", '.btn-editar', function () {
                 filaSeleccionada = $(this).closest("tr");
                 var data = tabladata.row(filaSeleccionada).data();
@@ -232,6 +242,12 @@
                 var data = tabladata.row(filaSeleccionada).data();
                 Eliminar(data);
             });
+
+             // Evento para previsualizar la imagen al seleccionar un archivo
+            document.getElementById("fileImagen").addEventListener('change', function(e) {
+                 mostrarImagen(this);
+            });
+            // NOTA: ELIMINAMOS EL BLOQUE DE OCULTAR MENSAJE DE ERROR LOCAL
         });
 
         // Limpia el formulario
@@ -244,18 +260,21 @@
             document.getElementById("txtPrecioCompra").value = "";
             document.getElementById("txtPrecioVenta").value = "";
             document.getElementById("txtFechaIngreso").value = "";
-            // Restablecer comboboxes (ahora cargados por JS)
-            $('#cboMarca').val($('#cboMarca option:first').val());
-            $('#cboTipo').val($('#cboTipo option:first').val());
-            $('#cboEstado').val('Disponible');
-            document.getElementById("imgVehiculo").src = '@Url.Content("~/Content/img/placeholder.png")';
+
+            // Resetear la imagen a default placeholder y la ruta a temporal
+            document.getElementById("imgVehiculo").src = DEFAULT_IMG_PATH;
+            document.getElementById("txtImagenRuta").value = "~/imagenes/default.png";
+            document.getElementById("fileImagen").value = ""; // Limpiar input file
+
+            
+            $('#cboEstado').val('En Venta');
         }
 
         // Abre el modal para crear o editar
         function abrirModal(json) {
             Limpiar();
+
             if (json != null) {
-                // Mapeo de datos para Edición
                 document.getElementById("txtid").value = json.id_vehiculo;
                 document.getElementById("txtPlaca").value = json.placa;
                 document.getElementById("txtModelo").value = json.modelo;
@@ -265,15 +284,15 @@
                 document.getElementById("txtPrecioVenta").value = json.precio_venta;
                 document.getElementById("txtFechaIngreso").value = json.fecha_ingreso;
 
-                // Mapeo de FKs: Esperamos que los dropdowns se hayan cargado al inicio (DOMContentLoaded)
                 $('#cboMarca').val(json.oMarca.id_marca);
                 $('#cboTipo').val(json.oTipoVehiculo.id_tp_vehiculo);
                 $('#cboEstado').val(json.estado);
 
-                // Nota: Asumimos que la imagen es un string de ruta (no la gestionamos aquí)
+                // Cargar imagen actual y guardar ruta en el hidden field
                 if (json.imagen) {
-                     document.getElementById("imgVehiculo").src = json.imagen.startsWith('~/') ? '@Url.Content("'+ json.imagen +'")' : json.imagen;
-                     document.getElementById("txtImagen").value = json.imagen;
+                    const imgPath = json.imagen.startsWith('~/') ? '@Url.Content("~")' + json.imagen.substring(1) : json.imagen;
+                    document.getElementById("imgVehiculo").src = imgPath;
+                    document.getElementById("txtImagenRuta").value = json.imagen;
                 }
 
                 document.getElementById("modalTitle").textContent = "Editar Vehículo";
@@ -285,7 +304,10 @@
 
         // Función para guardar un Vehículo
         async function Guardar() {
-            const vehiculo = {
+            const esNuevo = parseInt(document.getElementById("txtid").value) === 0;
+            const archivoImagen = document.getElementById("fileImagen").files[0];
+
+            const vehiculoData = {
                 id_vehiculo: parseInt(document.getElementById("txtid").value),
                 placa: document.getElementById("txtPlaca").value.trim(),
                 modelo: document.getElementById("txtModelo").value.trim(),
@@ -295,20 +317,26 @@
                 fecha_ingreso: document.getElementById("txtFechaIngreso").value,
                 precio_compra: parseFloat(document.getElementById("txtPrecioCompra").value) || 0,
                 precio_venta: parseFloat(document.getElementById("txtPrecioVenta").value) || 0,
-                imagen: document.getElementById("txtImagen").value,
+                imagen: document.getElementById("txtImagenRuta").value,
 
-                // Mapeo de objetos anidados para el Controller
-                oMarca: { id_marca: parseInt($('#cboMarca').val()) },
-                oTipoVehiculo: { id_tp_vehiculo: parseInt($('#cboTipo').val()) }
+                oMarca: { id_marca: parseInt($('#cboMarca').val()) || 0 }, // Aseguramos que sea 0 si es NaN
+                oTipoVehiculo: { id_tp_vehiculo: parseInt($('#cboTipo').val()) || 0 }
             };
 
-            const esNuevo = vehiculo.id_vehiculo === 0;
-
-            // Validación de campos obligatorios (la CN ya valida, pero es mejor prevenir la petición)
-            if (vehiculo.placa === "" || vehiculo.modelo === "" || vehiculo.año === "" || vehiculo.precio_venta <= 0) {
-                 Swal.fire('Advertencia', 'Asegúrese de llenar Placa, Modelo, Año y Precios correctamente.', 'warning');
+            if (esNuevo && !archivoImagen) {
+                 Swal.fire('Advertencia', 'Debe seleccionar una imagen para registrar el vehículo.', 'warning');
                  return;
             }
+
+            const formData = new FormData();
+
+            if (archivoImagen) {
+                formData.append("archivoImagen", archivoImagen);
+            }
+
+            // Convertir el objeto JS a JSON string y adjuntarlo
+            formData.append("objeto", JSON.stringify(vehiculoData));
+
 
             Swal.fire({
                 title: esNuevo ? "Registrando vehículo..." : "Actualizando vehículo...",
@@ -320,27 +348,29 @@
             try {
                 const response = await fetch('@Url.Action("GuardarVehiculo", "Vehiculo")', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json; charset=utf-8' },
-                    body: JSON.stringify({ objeto: vehiculo })
+                    body: formData
                 });
 
                 if (!response.ok) throw new Error("Error en la petición.");
 
                 const data = await response.json();
 
-                if (data.resultado) {
+                if (data.resultado && data.resultado > 0) {
                     Swal.fire({
                         title: esNuevo ? "¡Registrado!" : "¡Actualizado!",
                         text: data.mensaje,
                         icon: 'success'
                     });
 
-                    // Recargar tabla para reflejar cambios y obtener datos completos (incluidos nombres de FKs)
                     tabladata.ajax.reload(null, false);
 
                     $('#FormModal').modal("hide");
                 } else {
-                    Swal.fire({ title: "¡Error!", text: data.mensaje, icon: 'error' });
+                    Swal.fire({
+                        title: "¡Error de Validación!",
+                        text: data.mensaje,
+                        icon: 'error'
+                    });
                 }
             } catch (error) {
                 Swal.fire({ title: "¡Error!", text: "Ocurrió un error inesperado al guardar.", icon: 'error' });
@@ -348,7 +378,6 @@
             }
         }
 
-        // Función para eliminar un Vehículo
         async function Eliminar(vehiculo) {
             Swal.fire({
                 title: '¿Estás seguro?',
@@ -383,7 +412,6 @@
                             tabladata.row(filaSeleccionada).remove().draw();
                             Swal.fire('¡Eliminado!', data.mensaje, 'success');
                         } else {
-                            // Maneja el error de dependencia (vehículo ya vendido)
                             Swal.fire('Error', data.mensaje, 'error');
                         }
                     } catch (error) {

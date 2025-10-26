@@ -3,10 +3,8 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<!-- Se incluye SweetAlert2 para notificaciones modernas -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<!-- Se incluye Datatables CSS si no está en bundles -->
 <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/2.0.8/css/jquery.dataTables.css" />
 <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/2.0.8/js/jquery.dataTables.js"></script>
 
@@ -43,7 +41,6 @@
 </div>
 
 
-<!-- Modal para Crear/Editar Asesor -->
 <div class="modal fade" id="FormModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" data-bs-backdrop="static">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -172,15 +169,11 @@
 
             const esNuevo = asesor.id_asesor === 0;
 
-            // Validación de campos requeridos (CI, Nombre, Apellido, Telefono)
-            if (asesor.nombre === "" || asesor.apellidos === "" || asesor.ci === "" || asesor.telefono === "") {
-                Swal.fire('Advertencia', 'Los campos Nombre, Apellidos, CI y Teléfono son obligatorios.', 'warning');
-                return;
-            }
+            // ***** CORRECCIÓN CLAVE: Se elimina la validación genérica de JS *****
 
             Swal.fire({
                 title: esNuevo ? "Registrando asesor..." : "Actualizando asesor...",
-                html: "Por favor, espera...",
+                html: "Validando datos...",
                 allowOutsideClick: false,
                 didOpen: () => { Swal.showLoading(); }
             });
@@ -196,7 +189,7 @@
 
                 const data = await response.json();
 
-                if (data.resultado) {
+                if (data.resultado && data.resultado > 0) { // Éxito si resultado > 0 (ID generado) o true (booleano)
                     Swal.fire({
                         title: esNuevo ? "¡Registrado!" : "¡Actualizado!",
                         text: data.mensaje,
@@ -207,12 +200,18 @@
                         asesor.id_asesor = data.resultado;
                         tabladata.row.add(asesor).draw(false);
                     } else {
-                        tabladata.row(filaSeleccionada).data(asesor).draw(false);
+                        // Recargar la fila para asegurar que se vean los cambios
+                        tabladata.ajax.reload(null, false);
                     }
 
                     $('#FormModal').modal("hide");
                 } else {
-                    Swal.fire({ title: "¡Error!", text: data.mensaje, icon: 'error' });
+                    // ERROR: Muestra el mensaje ESPECÍFICO devuelto por la Capa de Negocio
+                    Swal.fire({
+                        title: "¡Error de Validación!",
+                        text: data.mensaje, // Este es el mensaje específico de la CN, ej: "El nombre es obligatorio."
+                        icon: 'error'
+                    });
                 }
             } catch (error) {
                 Swal.fire({ title: "¡Error!", text: "Ocurrió un error inesperado al guardar.", icon: 'error' });
@@ -220,7 +219,7 @@
             }
         }
 
-        // Función para eliminar un Asesor
+        // Función para eliminar un Asesor (se mantiene sin cambios)
         async function Eliminar(asesor) {
             Swal.fire({
                 title: '¿Estás seguro?',
@@ -255,7 +254,6 @@
                             tabladata.row(filaSeleccionada).remove().draw();
                             Swal.fire('¡Eliminado!', data.mensaje, 'success');
                         } else {
-                            // Maneja el error de dependencia (asesor con comisiones)
                             Swal.fire('Error', data.mensaje, 'error');
                         }
                     } catch (error) {

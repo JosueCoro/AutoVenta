@@ -189,5 +189,37 @@ namespace CapaDato
             }
             return resultado;
         }
+        public bool ActualizarRutaImagen(Vehiculo obj, out string Mensaje)
+        {
+            bool resultado = false;
+            Mensaje = string.Empty;
+
+            try
+            {
+                using (SqlConnection oConexion = new SqlConnection(Conexion.cn))
+                {
+                    SqlCommand cmd = new SqlCommand("comercial.sp_ActualizarRutaImagen", oConexion);
+
+                    cmd.Parameters.AddWithValue("@IdVehiculo", obj.id_vehiculo);
+                    cmd.Parameters.AddWithValue("@RutaImagen", obj.imagen);
+
+                    cmd.Parameters.Add("@Mensaje", SqlDbType.VarChar, 500).Direction = ParameterDirection.Output;
+                    cmd.Parameters.Add("@Resultado", SqlDbType.Bit).Direction = ParameterDirection.Output;
+
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    oConexion.Open();
+                    cmd.ExecuteNonQuery();
+
+                    resultado = Convert.ToBoolean(cmd.Parameters["@Resultado"].Value);
+                    Mensaje = cmd.Parameters["@Mensaje"].Value.ToString();
+                }
+            }
+            catch (Exception ex)
+            {
+                resultado = false;
+                Mensaje = "Error DB al actualizar ruta: " + ex.Message;
+            }
+            return resultado;
+        }
     }
 }

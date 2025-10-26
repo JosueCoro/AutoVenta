@@ -36,7 +36,27 @@ namespace CapaNegocio
                 Mensaje = "La Cédula de Identidad (CI) es obligatoria.";
                 return 0;
             }
-            // Agrega más validaciones si son necesarias (ej. formato de CI)
+            if (!obj.ci.All(char.IsDigit))
+            {
+                Mensaje = "La Cédula de Identidad (CI) debe contener solo números.";
+                return 0;
+            }
+            if (string.IsNullOrEmpty(obj.telefono))
+            {
+                Mensaje = "El número de telefono es obligatoria.";
+                return 0;
+            }
+            if (!obj.telefono.All(char.IsDigit))
+            {
+                Mensaje = "El número de teléfono debe contener solo números.";
+                return 0;
+            }
+            if (string.IsNullOrEmpty(obj.direccion))
+            {
+                Mensaje = "La Direccion es obligatoria.";
+                return 0;
+            }
+
 
             return cdasesor.Registrar(obj, idUsuario, out Mensaje);
         }
@@ -63,6 +83,26 @@ namespace CapaNegocio
             if (string.IsNullOrEmpty(obj.ci))
             {
                 Mensaje = "La Cédula de Identidad (CI) es obligatoria.";
+                return false;
+            }
+            if (!obj.ci.All(char.IsDigit))
+            {
+                Mensaje = "La Cédula de Identidad (CI) debe contener solo números.";
+                return false;
+            }
+            if (string.IsNullOrEmpty(obj.telefono))
+            {
+                Mensaje = "El numero de telefono es obligatoria.";
+                return false;
+            }
+            if (!obj.telefono.All(char.IsDigit))
+            {
+                Mensaje = "El número de teléfono debe contener solo números.";
+                return false;
+            }
+            if (string.IsNullOrEmpty(obj.direccion))
+            {
+                Mensaje = "La Direccion es obligatoria.";
                 return false;
             }
 
