@@ -57,6 +57,8 @@ namespace CapaNegocio
                 Mensaje = "Debe seleccionar una marca.";
                 return 0;
             }
+
+            // Su validación final de TipoVehiculo es la correcta.
             if (obj.oTipoVehiculo == null || obj.oTipoVehiculo.id_tp_vehiculo == 0)
             {
                 Mensaje = "Debe seleccionar un tipo de vehículo.";
@@ -100,11 +102,13 @@ namespace CapaNegocio
                 Mensaje = "El precio de venta debe ser mayor a cero.";
                 return false;
             }
-            if (obj.id_marca == 0 || obj.oTipoVehiculo.id_tp_vehiculo ==0)
+            if (obj.oMarca == null || obj.oMarca.id_marca == 0)
             {
                 Mensaje = "Debe seleccionar una marca.";
                 return false;
             }
+
+            // Su validación final de TipoVehiculo es la correcta.
             if (obj.oTipoVehiculo == null || obj.oTipoVehiculo.id_tp_vehiculo == 0)
             {
                 Mensaje = "Debe seleccionar un tipo de vehículo.";

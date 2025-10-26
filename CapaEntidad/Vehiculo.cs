@@ -35,6 +35,7 @@ namespace CapaEntidad
         public string fecha_ingreso { get; set; }
         public decimal precio_compra { get; set; }
         public decimal precio_venta { get; set; }
+        public string imagenBase64 { get; set; } 
         public int id_usuario { get; set; }
         public int id_marca { get; set; }
         public int id_tp_vehiculo { get; set; }
