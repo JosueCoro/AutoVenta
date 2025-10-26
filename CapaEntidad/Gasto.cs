@@ -22,12 +22,13 @@ namespace CapaEntidad
         public int id_gasto { get; set; }
         public string descripcion { get; set; }
         public decimal monto { get; set; }
-        public DateTime fecha { get; set; }
+        public string fecha { get; set; }
         public int id_tipo_gasto { get; set; }
-        public TipoGasto _tipogasto { get; set; }
-        public int id_vehiculo { get; set; }
-        public Vehiculo _vehiculo { get; set; }
-        public int id_venta { get; set; }
-        public Venta _venta { get; set; }
+        public TipoGasto oTipoGasto { get; set; }
+        public int? id_vehiculo { get; set; }
+        public Vehiculo oVehiculo { get; set; }
+        public int? id_venta { get; set; }
+        public Venta oVenta { get; set; }
+        public string InfoAsociacion { get; set; }
     }
 }

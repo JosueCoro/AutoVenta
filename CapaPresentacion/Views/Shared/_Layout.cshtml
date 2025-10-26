@@ -59,7 +59,8 @@
                     TienePermiso("Gestionar Vehiculo") ||
                     TienePermiso("Gestionar Comisiones") ||
                     TienePermiso("Gestionar Pago") ||
-                    TienePermiso("Gestionar Venta");
+                    TienePermiso("Gestionar Venta") ||
+                    TienePermiso("Gestionar Gasto");
             }
 
             @if (tienePermisosComercial)
@@ -125,6 +126,15 @@
                     <a class="nav-link" href="@Url.Action("Venta", "Venta")">
                         <i class="fas fa-fw fa-tags"></i>
                         <span>Venta</span>
+                    </a>
+                </li>
+            }
+            @if (TienePermiso("Gestionar Gasto"))
+            {
+                <li class="nav-item">
+                    <a class="nav-link" href="@Url.Action("Gasto", "Gasto")">
+                        <i class="fas fa-fw fa-tags"></i>
+                        <span>Gastos</span>
                     </a>
                 </li>
             }

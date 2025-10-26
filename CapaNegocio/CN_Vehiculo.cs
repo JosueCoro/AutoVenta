@@ -108,7 +108,6 @@ namespace CapaNegocio
                 return false;
             }
 
-            // Su validación final de TipoVehiculo es la correcta.
             if (obj.oTipoVehiculo == null || obj.oTipoVehiculo.id_tp_vehiculo == 0)
             {
                 Mensaje = "Debe seleccionar un tipo de vehículo.";

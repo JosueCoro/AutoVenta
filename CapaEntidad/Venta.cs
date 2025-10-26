@@ -20,14 +20,14 @@ namespace CapaEntidad
             )
         GO*/
         public int id_venta {  get; set; }
-        public DateTime fecha { get; set; }
+        public string fecha { get; set; }
         public float total { get; set; }
         public float comision { get; set; }
         public string observaciones { get; set; }
         public int id_cliente { get; set; }
         public int id_usuario { get; set; }
-        public Usuario _usuario { get; set; }
-        public Cliente _cliente { get; set; }
+        public Usuario ousuario { get; set; }
+        public Cliente oCliente { get; set; }
 
     }
 }

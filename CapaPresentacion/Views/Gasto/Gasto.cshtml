@@ -1,192 +1,416 @@
-﻿
-@{
-    ViewBag.Title = "Gasto";
+﻿@{
+    ViewBag.Title = "Registro de Gastos";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
+
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/2.0.8/css/jquery.dataTables.css" />
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/2.0.8/js/jquery.dataTables.js"></script>
 
-<div class="card">
-    <div class="card-header">
-        <i class="fas fa-list-alt"></i> Lista de Tipos de Gasto
+
+<div class="card shadow mb-4">
+    <div class="card-header bg-primary text-white">
+        <i class="fas fa-money-bill-wave"></i> Registro y Control de Gastos
     </div>
 
     <div class="card-body">
-        <div class="row">
-            <div class="col-12">
-                <button type="button" class="btn btn-success mb-3" onclick="abrirModal(null)">Crear Nuevo</button>
+
+        <div class="row mb-4 border p-3 rounded bg-light">
+            <h5 class="text-primary">Asociar Gasto a:</h5>
+
+            <div class="col-sm-6">
+                <label for="cboVehiculo" class="form-label">Vehículo (Inventario)</label>
+                <select id="cboVehiculo" class="form-control">
+                    <option value="0">Seleccionar Vehículo</option>
+                </select>
+            </div>
+
+            <div class="col-sm-6">
+                <label for="cboVenta" class="form-label">Venta (Trámites)</label>
+                <select id="cboVenta" class="form-control">
+                    <option value="0">Seleccionar Venta</option>
+                </select>
             </div>
         </div>
 
-        <table id="tablatipogasto" class="display cell-border" style="width:100%">
+        <h5 class="text-primary mt-4">Detalle de Ítems de Gasto</h5>
+        <div class="row g-2 mb-3 border p-3 rounded">
+            <div class="col-sm-4">
+                <label for="txtDescripcionItem" class="form-label">Descripción</label>
+                <input type="text" id="txtDescripcionItem" class="form-control" maxlength="250">
+            </div>
+            <div class="col-sm-3">
+                <label for="txtMontoItem" class="form-label">Monto (Bs.)</label>
+                <input type="number" id="txtMontoItem" class="form-control" step="0.01" value="0.00">
+            </div>
+            <div class="col-sm-3">
+                <label for="cboTipoGastoItem" class="form-label">Tipo de Gasto</label>
+                <select id="cboTipoGastoItem" class="form-control">
+                    <option value="0">Cargando...</option>
+                </select>
+            </div>
+            <div class="col-sm-2 d-flex align-items-end">
+                <button type="button" class="btn btn-info w-100" onclick="AgregarItemGasto()">
+                    <i class="fas fa-cart-plus"></i> Agregar
+                </button>
+            </div>
+        </div>
+
+        <table id="tablaDetalleGastos" class="table table-striped table-bordered w-100">
             <thead>
                 <tr>
-                    <th>Nombre</th>
+                    <th>Descripción</th>
+                    <th>Monto (Bs.)</th>
+                    <th>Tipo Gasto</th>
+                    <th>Acción</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+
+        <div class="row mt-4">
+            <div class="col-12 text-end">
+                <h4 id="lblTotalGastos">Total de Gastos: Bs. 0.00</h4>
+                <button type="button" class="btn btn-success btn-lg" onclick="FinalizarRegistroGastos()">
+                    <i class="fas fa-check-circle"></i> Registrar Gastos
+                </button>
+            </div>
+        </div>
+
+        <hr />
+
+        <h5 class="text-secondary mt-4">Historial de Gastos Registrados</h5>
+        <table id="tablagastos" class="display cell-border w-100" style="width:100%">
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Tipo Gasto</th>
+                    <th>Descripción</th>
+                    <th>Monto</th>
+                    <th>Vehículo Asoc.</th>
+                    <th>Venta Asoc.</th>
                     <th>Acciones</th>
                 </tr>
             </thead>
             <tbody>
             </tbody>
         </table>
+
     </div>
 </div>
 
-<!-- Modal para Crear/Editar Tipo de Gasto -->
-<div class="modal fade" id="FormModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" data-bs-backdrop="static">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header bg-dark text-white">
-                <h5 class="modal-title" id="modalTitle">Tipo de Gasto</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body ">
-                <input id="txtid" type="hidden" value="0" />
-                <div class="row g-2">
-                    <div class="col-12">
-                        <label for="txtNombre" class="form-label">Nombre</label>
-                        <input type="text" class="form-control" id="txtNombre" placeholder="Ej: Servicios" autocomplete="off">
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                <button type="button" class="btn btn-primary" onclick="Guardar()">Guardar</button>
-            </div>
-        </div>
-    </div>
-</div>
 
 @section Scripts{
     <script>
-        // Se usa jQuery para DataTables, ya que es una dependencia de esa librería
-        var tabladata;
-        var filaSeleccionada;
+        var tabladataGastosRegistrados;
+        var carritoGastos = [];
 
-        document.addEventListener('DOMContentLoaded', function () {
-            tabladata = $('#tablatipogasto').DataTable({
-                responsive: true,
-                ordering: false,
-                "ajax": {
-                    "url": '@Url.Action("Listar", "Gasto")',
-                    "type": "GET",
-                    "datatype": "json"
-                },
-                "columns": [
-                    { "data": "nombre" },
-                    {
-                        "defaultContent": '<button type="button" class="btn btn-primary btn-sm btn-editar me-2"><i class="fas fa-pen"></i></button>' +
-                                          '<button type="button" class="btn btn-danger btn-sm btn-eliminar"><i class="fas fa-trash"></i></button>',
-                        "orderable": false,
-                        "searchable": false,
-                        "width": "125px"
-                    }
-                ],
-                "language": {
-                    "url": '//cdn.datatables.net/plug-ins/2.2.1/i18n/es-ES.json',
-                },
-            });
+        // ===========================================
+        // FUNCIONES DE CARGA DE DATOS MAESTROS
+        // ===========================================
 
-            // Evento de clic para el botón Editar de la tabla
-            $("#tablatipogasto tbody").on("click", '.btn-editar', function () {
-                filaSeleccionada = $(this).closest("tr");
-                var data = tabladata.row(filaSeleccionada).data();
-                abrirModal(data);
-            });
+        async function llenarTiposGasto() {
+            try {
+                const response = await fetch('@Url.Action("ListarTiposGasto", "Gasto")', { method: 'GET' });
+                const data = await response.json();
 
-            // Evento de clic para el botón Eliminar de la tabla
-            $("#tablatipogasto tbody").on("click", '.btn-eliminar', function () {
-                filaSeleccionada = $(this).closest("tr");
-                var data = tabladata.row(filaSeleccionada).data();
-                Eliminar(data);
-            });
-        });
+                if (!data || !Array.isArray(data.data)) {
+                    throw new Error("Respuesta inválida del servidor para TipoGasto.");
+                }
 
-        // Limpia el formulario del modal
-        function Limpiar() {
-            document.getElementById("txtid").value = 0;
-            document.getElementById("txtNombre").value = "";
-        }
+                const tipos = data.data;
+                const ddl = document.getElementById("cboTipoGastoItem");
+                ddl.innerHTML = '<option value="0">-- Seleccione --</option>';
 
-        // Abre el modal para crear o editar
-        function abrirModal(json) {
-            Limpiar();
-            if (json != null) {
-                document.getElementById("txtid").value = json.id_tipo_gasto;
-                document.getElementById("txtNombre").value = json.nombre;
-                document.getElementById("modalTitle").textContent = "Editar Tipo de Gasto";
-            } else {
-                document.getElementById("modalTitle").textContent = "Crear Nuevo Tipo de Gasto";
+                tipos.forEach(tipo => {
+                    const option = document.createElement('option');
+                    option.value = tipo.id_tipo_gasto;
+                    option.textContent = tipo.nombre;
+                    option.setAttribute('data-nombre', tipo.nombre);
+                    ddl.appendChild(option);
+                });
+            } catch (error) {
+                document.getElementById("cboTipoGastoItem").innerHTML = '<option value="0">Error de Carga</option>';
+            }
+        }
+
+
+        async function llenarVehiculos() {
+            try {
+                const response = await fetch('@Url.Action("ListarVehiculosSimples", "Gasto")', { method: 'GET' });
+                const data = await response.json();
+                const ddl = document.getElementById("cboVehiculo");
+                ddl.innerHTML = '<option value="0">-- No Asociar --</option>';
+
+                if (!data || !Array.isArray(data.data)) {
+                    throw new Error("Respuesta inválida para Vehículos.");
+                }
+
+                data.data.forEach(v => {
+                    const option = document.createElement('option');
+                    option.value = v.id_vehiculo;
+                    option.textContent = v.info;
+                    ddl.appendChild(option);
+                });
+            } catch (error) {
+                document.getElementById("cboVehiculo").innerHTML = '<option value="0">Error</option>';
+            }
+        }
+
+        async function llenarVentas() {
+            try {
+                const response = await fetch('@Url.Action("ListarVentasSimples", "Gasto")', { method: 'GET' });
+                const data = await response.json();
+                const ddl = document.getElementById("cboVenta");
+                ddl.innerHTML = '<option value="0">-- No Asociar --</option>';
+
+                if (data && Array.isArray(data.data)) {
+                    data.data.forEach(v => {
+                        const option = document.createElement('option');
+                        option.value = v.id_venta;
+                        option.textContent = v.info;
+                        ddl.appendChild(option);
+                    });
+                } else {
+                    throw new Error("El servicio de ventas no está listo.");
+                }
+            } catch (error) {
+                document.getElementById("cboVenta").innerHTML = '<option value="0">Error de Carga</option>';
+            }
+        }
+
+
+        // ===========================================
+        // LÓGICA DEL CARRITO
+        // ===========================================
+
+        function AgregarItemGasto() {
+            const descripcion = document.getElementById("txtDescripcionItem").value.trim();
+            const montoStr = document.getElementById("txtMontoItem").value;
+            const idTipoGasto = parseInt(document.getElementById("cboTipoGastoItem").value);
+            // Obtiene el nombre del tipo de gasto seleccionado (usando .text, que es más seguro)
+            const nombreTipoGasto = document.getElementById("cboTipoGastoItem").options[document.getElementById("cboTipoGastoItem").selectedIndex].text;
+
+            const monto = parseFloat(montoStr);
+
+            if (descripcion === "") {
+                Swal.fire('Advertencia', 'Debe ingresar una descripción para el gasto.', 'warning');
+                return;
             }
-            $('#FormModal').modal('show');
-        }
+            if (isNaN(monto) || monto <= 0) {
+                Swal.fire('Advertencia', 'El monto debe ser un valor numérico positivo.', 'warning');
+                return;
+            }
+            // Validar que no se haya seleccionado "Cargando..." o "Error de Carga"
+            if (idTipoGasto === 0 || nombreTipoGasto.includes("Cargando") || nombreTipoGasto.includes("Error")) {
+                Swal.fire('Advertencia', 'Debe seleccionar un Tipo de Gasto válido.', 'warning');
+                return;
+            }
 
-        // Función para guardar un tipo de gasto usando FETCH y SweetAlert2
-        async function Guardar() {
-            const tipoGasto = {
-                id_tipo_gasto: parseInt(document.getElementById("txtid").value),
-                nombre: document.getElementById("txtNombre").value
+            const nuevoItem = {
+                descripcion: descripcion,
+                monto: monto,
+                id_tipo_gasto: idTipoGasto,
+                nombre_tipo_gasto: nombreTipoGasto // Propiedad auxiliar para renderizar el carrito
             };
 
-            const esNuevo = tipoGasto.id_tipo_gasto === 0;
+            carritoGastos.push(nuevoItem);
+            RenderizarCarrito();
+            LimpiarCamposItem();
+        }
+
+        function QuitarItemGasto(index) {
+            carritoGastos.splice(index, 1);
+            RenderizarCarrito();
+        }
+
+        function RenderizarCarrito() {
+            const tbody = document.querySelector("#tablaDetalleGastos tbody");
+            tbody.innerHTML = '';
+            let total = 0;
+
+            carritoGastos.forEach((item, index) => {
+                total += item.monto;
+                const row = tbody.insertRow();
+
+                row.insertCell().textContent = item.descripcion;
+                row.insertCell().textContent = item.monto.toFixed(2);
+                row.insertCell().textContent = item.nombre_tipo_gasto;
+
+                const cellAccion = row.insertCell();
+                const btnQuitar = document.createElement('button');
+                btnQuitar.className = 'btn btn-danger btn-sm';
+                btnQuitar.innerHTML = '<i class="fas fa-trash"></i>';
+                btnQuitar.onclick = () => QuitarItemGasto(index);
+                cellAccion.appendChild(btnQuitar);
+            });
+
+            document.getElementById("lblTotalGastos").textContent = `Total de Gastos: Bs. ${total.toFixed(2)}`;
+        }
+
+        function LimpiarCamposItem() {
+            document.getElementById("txtDescripcionItem").value = "";
+            document.getElementById("txtMontoItem").value = "0.00";
+            document.getElementById("cboTipoGastoItem").value = "0";
+        }
+
+        function ResetearFormularioPrincipal() {
+            carritoGastos = [];
+            RenderizarCarrito();
+            document.getElementById("cboVehiculo").value = "0";
+            document.getElementById("cboVenta").value = "0";
+            LimpiarCamposItem();
+            HabilitarExclusividad();
+            tabladataGastosRegistrados.ajax.reload(null, false);
+        }
+
+        // Lógica de exclusividad (sin cambios)
+        function HabilitarExclusividad() {
+            const idVehiculo = parseInt(document.getElementById("cboVehiculo").value);
+            const idVenta = parseInt(document.getElementById("cboVenta").value);
+
+            const cboVenta = document.getElementById("cboVenta");
+            const cboVehiculo = document.getElementById("cboVehiculo");
+
+            cboVenta.disabled = idVehiculo !== 0;
+
+            cboVehiculo.disabled = idVenta !== 0;
+
+            if (idVehiculo === 0 && idVenta === 0) {
+                cboVenta.disabled = false;
+                cboVehiculo.disabled = false;
+            }
+        }
+
+        document.getElementById("cboVehiculo").addEventListener('change', HabilitarExclusividad);
+        document.getElementById("cboVenta").addEventListener('change', HabilitarExclusividad);
+
+        // Finalizar Registro (sin cambios)
+        async function FinalizarRegistroGastos() {
+            const idVehiculo = parseInt(document.getElementById("cboVehiculo").value);
+            const idVenta = parseInt(document.getElementById("cboVenta").value);
+
+            if (idVehiculo === 0 && idVenta === 0) {
+                Swal.fire('Error', 'Debe asociar los gastos a un Vehículo o a una Venta.', 'error');
+                return;
+            }
+            if (carritoGastos.length === 0) {
+                Swal.fire('Error', 'Debe agregar al menos un ítem al detalle de gastos.', 'error');
+                return;
+            }
 
             Swal.fire({
-                title: esNuevo ? "Registrando tipo de gasto..." : "Actualizando tipo de gasto...",
-                html: esNuevo ? "Por favor, espera..." : "Por favor, espera...",
+                title: "Registrando Gastos...",
+                html: "Procesando la transacción.",
                 allowOutsideClick: false,
                 didOpen: () => { Swal.showLoading(); }
             });
 
             try {
-                const response = await fetch('@Url.Action("GuardarGasto", "Gasto")', {
+                const response = await fetch('@Url.Action("RegistrarGastos", "Gasto")', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json; charset=utf-8' },
-                    body: JSON.stringify({ objeto: tipoGasto })
+                    body: JSON.stringify({
+                        idVehiculo: idVehiculo,
+                        idVenta: idVenta,
+                        detalleGastosJson: JSON.stringify(carritoGastos)
+                    })
                 });
 
                 if (!response.ok) throw new Error("Error en la petición.");
 
                 const data = await response.json();
 
-                if (data.resultado) {
-                    Swal.fire({
-                        title: esNuevo ? "¡Registrado!" : "¡Actualizado!",
-                        text: esNuevo ? "El tipo de gasto se ha registrado correctamente." : "El tipo de gasto se ha actualizado correctamente.",
-                        icon: 'success'
-                    });
-
-                    if (esNuevo) {
-                        tipoGasto.id_tipo_gasto = data.resultado;
-                        tabladata.row.add(tipoGasto).draw(false);
-                    } else {
-                        tabladata.row(filaSeleccionada).data(tipoGasto).draw(false);
-                    }
-
-                    $('#FormModal').modal("hide");
+                if (data.resultado > 0) {
+                    Swal.fire('¡Registrado!', data.mensaje, 'success');
+                    ResetearFormularioPrincipal();
                 } else {
-                    Swal.fire({ title: "¡Error!", text: data.mensaje, icon: 'error' });
+                    Swal.fire('Error de Registro', data.mensaje, 'error');
                 }
             } catch (error) {
-                Swal.fire({ title: "¡Error!", text: "Ocurrió un error inesperado al guardar.", icon: 'error' });
+                Swal.fire('Error', 'Ocurrió un error inesperado al registrar.', 'error');
                 console.error(error);
             }
         }
 
-        // Función para eliminar un tipo de gasto usando FETCH y SweetAlert2
-        async function Eliminar(tipoGasto) {
+
+        document.addEventListener('DOMContentLoaded', function () {
+            llenarTiposGasto();
+            llenarVehiculos();
+            llenarVentas();
+
+            tabladataGastosRegistrados = $('#tablagastos').DataTable({
+                responsive: true,
+                ordering: false,
+                "ajax": {
+                    "url": '@Url.Action("ListarGastos", "Gasto")',
+                    "type": "GET",
+                    "datatype": "json"
+                },
+                "columns": [
+                    { "data": "fecha" },
+                    { "data": "oTipoGasto.nombre" },
+                    { "data": "descripcion" },
+                    {
+                        "data": "monto",
+                        "render": function (data) { return `Bs. ${parseFloat(data).toFixed(2)}`; }
+                    },
+                    {
+                        // COLUMNA: Vehículo Asoc.
+                        "data": null,
+                        "render": function (data) {
+                            // Muestra el modelo y año si existe oVehiculo
+                            if (data.oVehiculo) {
+                                return `${data.oVehiculo.modelo} (${data.oVehiculo.año})`;
+                            }
+                            return ''; // Deja en blanco si no está asociado a un vehículo
+                        }
+                    },
+                    {
+                        // COLUMNA: Venta Asoc.
+                        "data": null,
+                        "render": function (data) {
+                            // Muestra el ID de la venta si existe id_venta
+                            if (data.id_venta !== null && data.id_venta > 0) {
+                                return `Venta ID: ${data.id_venta}`;
+                            }
+                            return ''; // Deja en blanco si no está asociado a una venta
+                        }
+                    },
+                    {
+                        "data": "id_gasto",
+                        "render": function (data) {
+                            return `<button type="button" class="btn btn-danger btn-sm" onclick="EliminarGastoRegistro(${data})"><i class="fas fa-trash"></i></button>`;
+                        },
+                        "orderable": false,
+                        "searchable": false,
+                        "width": "60px"
+                    }
+                ],
+                "language": {
+                    "url": '//cdn.datatables.net/plug-ins/2.2.1/i18n/es-ES.json',
+                },
+            });
+        });
+
+        // Función para eliminar (sin cambios)
+        async function EliminarGastoRegistro(id) {
             Swal.fire({
                 title: '¿Estás seguro?',
-                text: "No podrás revertir esta acción.",
+                text: `Se eliminará el gasto ID: ${id}.`,
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
                 confirmButtonText: 'Sí, eliminar',
                 cancelButtonText: 'Cancelar'
             }).then(async (result) => {
                 if (result.isConfirmed) {
                     Swal.fire({
                         title: "Eliminando...",
-                        text: "Por favor, espera.",
+                        html: "Revisando y eliminando gasto.",
                         allowOutsideClick: false,
                         didOpen: () => { Swal.showLoading(); }
                     });
@@ -195,7 +419,7 @@
                         const response = await fetch('@Url.Action("EliminarGasto", "Gasto")', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json; charset=utf-8' },
-                            body: JSON.stringify({ id: tipoGasto.id_tipo_gasto })
+                            body: JSON.stringify({ id: id })
                         });
 
                         if (!response.ok) throw new Error("Error en la petición.");
@@ -203,8 +427,8 @@
                         const data = await response.json();
 
                         if (data.resultado) {
-                            tabladata.row(filaSeleccionada).remove().draw();
-                            Swal.fire('¡Eliminado!', 'El tipo de gasto ha sido eliminado.', 'success');
+                            Swal.fire('¡Eliminado!', data.mensaje, 'success');
+                            tabladataGastosRegistrados.ajax.reload(null, false);
                         } else {
                             Swal.fire('Error', data.mensaje, 'error');
                         }
@@ -217,4 +441,3 @@
         }
     </script>
 }
-

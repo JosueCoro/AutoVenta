@@ -89,7 +89,6 @@ namespace CapaNegocio
                 return false;
             }
 
-            // La verificación de dependencia con Venta está en el SP
             return cdcliente.Eliminar(id, idUsuario, out Mensaje);
         }
     }

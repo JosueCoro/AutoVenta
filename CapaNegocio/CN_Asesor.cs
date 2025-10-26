@@ -119,7 +119,6 @@ namespace CapaNegocio
                 return false;
             }
 
-            // La verificación de dependencia con Comision ya está en el SP
             return cdasesor.Eliminar(id, idUsuario, out Mensaje);
         }
     }

@@ -59,7 +59,6 @@ namespace CapaNegocio
                 return false;
             }
 
-            // La verificación de dependencia con Gasto ya está en el SP
             return cdTipoGasto.Eliminar(id, idUsuario, out Mensaje);
         }
     }
