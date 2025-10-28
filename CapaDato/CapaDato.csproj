@@ -198,6 +198,7 @@
     <Compile Include="CD_Login.cs" />
     <Compile Include="CD_Marca.cs" />
     <Compile Include="CD_Rol.cs" />
+    <Compile Include="CD_RolPermiso.cs" />
     <Compile Include="CD_TipoGasto.cs" />
     <Compile Include="CD_TipoPago.cs" />
     <Compile Include="CD_TipoVehiculo.cs" />

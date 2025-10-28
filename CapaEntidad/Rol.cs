@@ -18,5 +18,7 @@ namespace CapaEntidad
         public int id_rol { get; set; }
         public string nombre { get; set; }
         public bool estado  { get; set; }
+
+        public List<Permiso> oListaPermiso { get; set; }
     }
 }

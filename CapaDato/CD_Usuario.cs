@@ -20,7 +20,6 @@ namespace CapaDato
                 {
                     SqlCommand cmd = new SqlCommand("administracion.CRUD_USUARIO", oConexion);
                     cmd.Parameters.AddWithValue("@Operacion", "SELECT");
-                    // Los parámetros OUTPUT deben estar presentes
                     cmd.Parameters.Add("@Mensaje", SqlDbType.VarChar, 500).Direction = ParameterDirection.Output;
                     cmd.Parameters.Add("@Resultado", SqlDbType.Int).Direction = ParameterDirection.Output;
                     cmd.CommandType = CommandType.StoredProcedure;
@@ -38,7 +37,7 @@ namespace CapaDato
                                 ci = dr["ci"].ToString(),
                                 telefono = dr["telefono"].ToString(),
                                 correo = dr["correo"].ToString(),
-                                contraseña = dr["contraseña"].ToString(), // Contraseña hasheada (útil para edición)
+                                contraseña = dr["contraseña"].ToString(), 
                                 estado = Convert.ToBoolean(dr["estado"]),
                                 id_rol = Convert.ToInt32(dr["id_rol"]),
                                 oRol = new Rol()
@@ -55,7 +54,6 @@ namespace CapaDato
             return lista;
         }
 
-        // Método para registrar un nuevo Usuario
         public int Registrar(Usuario obj, int idUsuarioAuditoria, out string Mensaje)
         {
             int idGenerado = 0; Mensaje = string.Empty;
@@ -95,7 +93,6 @@ namespace CapaDato
             return idGenerado;
         }
 
-        // Método para editar un Usuario
         public bool Editar(Usuario obj, int idUsuarioAuditoria, out string Mensaje)
         {
             bool resultado = false; Mensaje = string.Empty;
@@ -112,7 +109,6 @@ namespace CapaDato
                     cmd.Parameters.AddWithValue("@Ci", obj.ci);
                     cmd.Parameters.AddWithValue("@Telefono", obj.telefono);
                     cmd.Parameters.AddWithValue("@Correo", obj.correo);
-                    // IMPORTANTE: Envía la nueva contraseña hasheada (o "" si no se cambia)
                     cmd.Parameters.AddWithValue("@Contrasena", obj.contraseña);
                     cmd.Parameters.AddWithValue("@Estado", obj.estado);
                     cmd.Parameters.AddWithValue("@IdRol", obj.oRol.id_rol);
@@ -134,7 +130,6 @@ namespace CapaDato
             return resultado;
         }
 
-        // Método para eliminar (inactivar) un Usuario
         public bool Eliminar(int id, int idUsuarioAuditoria, out string Mensaje)
         {
             bool resultado = false; Mensaje = string.Empty;

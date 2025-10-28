@@ -4,5 +4,184 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h2>Permiso</h2>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/2.0.8/css/jquery.dataTables.css" />
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/2.0.8/js/jquery.dataTables.js"></script>
 
+
+<div class="card shadow mb-4">
+    <div class="card-header bg-dark text-white">
+        <i class="fas fa-user-lock"></i> Gestión de Permisos por Rol
+    </div>
+
+    <div class="card-body">
+        <h5 class="mb-3">Roles del Sistema:</h5>
+
+        <table id="tablaroles" class="display cell-border w-100" style="width:100%">
+            <thead>
+                <tr>
+                    <th>ID Rol</th>
+                    <th>Nombre del Rol</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+</div>
+<div class="modal fade" id="ModalPermisos" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title" id="modalTitle">Asignar Permisos a <span id="lblNombreRol"></span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input id="txtIdRolPermiso" type="hidden" value="0" />
+                <div class="row">
+                    <div class="col-12">
+                        <h6>Lista de Permisos Disponibles:</h6>
+                        <div id="contenedorPermisos" class="p-3 border rounded" style="max-height: 400px; overflow-y: auto;">
+                            {{ Contenido cargado por JavaScript }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="GuardarPermisos()">Guardar Permisos</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <script>
+        var tabladata;
+
+        document.addEventListener('DOMContentLoaded', function () {
+            tabladata = $('#tablaroles').DataTable({
+                responsive: true,
+                ordering: false,
+                "ajax": {
+                    "url": '@Url.Action("ListarRoles", "Rol")', 
+                    "type": "GET",
+                    "datatype": "json"
+                },
+                "columns": [
+                    { "data": "id_rol" },
+                    { "data": "nombre" },
+                    {
+                        "data": "estado",
+                        "render": function (data) {
+                            return data ? '<span class="badge bg-success text-white">Activo</span>' : '<span class="badge bg-danger text-white">Inactivo</span>';
+                        }
+                    },
+                    {
+                        "defaultContent": '<button type="button" class="btn btn-info btn-sm btn-asignar"><i class="fas fa-lock-open"></i> Asignar Permisos</button>',
+                        "orderable": false,
+                        "searchable": false,
+                        "width": "150px"
+                    }
+                ],
+                "language": {
+                    "url": '//cdn.datatables.net/plug-ins/2.2.1/i18n/es-ES.json',
+                },
+            });
+
+            $("#tablaroles tbody").on("click", '.btn-asignar', function () {
+                var data = tabladata.row($(this).closest("tr")).data();
+                abrirModalPermisos(data);
+            });
+        });
+
+        async function abrirModalPermisos(dataRol) {
+            document.getElementById("txtIdRolPermiso").value = dataRol.id_rol;
+            document.getElementById("lblNombreRol").textContent = dataRol.nombre;
+            const contenedor = document.getElementById("contenedorPermisos");
+            contenedor.innerHTML = 'Cargando permisos...';
+
+            try {
+                const response = await fetch('@Url.Action("ObtenerPermisos", "Permiso")?idRol=' + dataRol.id_rol, { method: 'GET' });
+
+                if (!response.ok) throw new Error("Error al obtener la lista de permisos.");
+
+                const data = await response.json();
+                const listaPermisos = data.lista;
+                let htmlPermisos = '<div class="row">';
+
+                if (listaPermisos.length > 0) {
+                    listaPermisos.forEach(p => {
+                        // Crear un checkbox por cada permiso
+                        const checked = p.Asignado ? 'checked' : '';
+                        htmlPermisos += `
+                            <div class="col-sm-6 col-md-4 mb-2">
+                                <div class="form-check">
+                                    <input class="form-check-input permiso-checkbox" type="checkbox" data-id="${p.id_permiso}" ${checked} id="permiso_${p.id_permiso}">
+                                    <label class="form-check-label" for="permiso_${p.id_permiso}">
+                                        ${p.accion}
+                                    </label>
+                                </div>
+                            </div>`;
+                    });
+                } else {
+                    htmlPermisos += '<div class="col-12 text-center text-danger">No hay permisos definidos en el sistema.</div>';
+                }
+
+                htmlPermisos += '</div>';
+                contenedor.innerHTML = htmlPermisos;
+
+                $('#ModalPermisos').modal('show');
+            } catch (error) {
+                contenedor.innerHTML = `<div class="alert alert-danger">Error: ${error.message}</div>`;
+                console.error("Error al cargar permisos:", error);
+            }
+        }
+
+        async function GuardarPermisos() {
+            const idRol = parseInt(document.getElementById("txtIdRolPermiso").value);
+            const checkboxes = document.querySelectorAll('#contenedorPermisos input[type="checkbox"]:checked');
+
+            const idsPermisosAsignados = Array.from(checkboxes).map(cb => parseInt(cb.dataset.id));
+
+            Swal.fire({
+                title: "Guardando asignación...",
+                html: "Actualizando la lista de permisos del rol.",
+                allowOutsideClick: false,
+                didOpen: () => { Swal.showLoading(); }
+            });
+
+            try {
+                const response = await fetch('@Url.Action("GuardarPermisos", "Permiso")', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json; charset=utf-8' },
+                    body: JSON.stringify({
+                        idRol: idRol,
+                        permisos: idsPermisosAsignados 
+                    })
+                });
+
+                if (!response.ok) throw new Error("Error en la petición de guardado.");
+
+                const data = await response.json();
+
+                if (data.resultado) {
+                    Swal.fire('¡Éxito!', data.mensaje, 'success');
+                    $('#ModalPermisos').modal("hide");
+                } else {
+                    Swal.fire('¡Error!', data.mensaje, 'error');
+                }
+            } catch (error) {
+                Swal.fire({
+                    title: "¡Error!",
+                    text: error.message || "Ocurrió un error inesperado al guardar.",
+                    icon: 'error'
+                });
+                console.error("Error en GuardarPermisos:", error);
+            }
+        }
+    </script>
+}

@@ -18,5 +18,6 @@ namespace CapaEntidad
         public int id_permiso {  get; set; }
         public string accion { get; set; }
         public bool estado { get; set; }
+        public bool Asignado { get; set; }
     }
 }
