@@ -18,18 +18,16 @@ namespace CapaPresentacion.Controllers
         [ValidarPermisos(NombrePermiso = "Gestionar Usuarios")]
         public ActionResult Usuario()
         {
+            ViewBag.ListaRoles = new CN_Rol().Listar();
+
+            ViewBag.ListaEstados = new List<SelectListItem>() {
+                new SelectListItem() { Value = "1", Text = "Activo" },
+                new SelectListItem() { Value = "0", Text = "Inactivo" }
+            };
+
             return View();
         }
 
-        // Acción para listar los roles, que se usa en la vista de creación de usuarios
-        [HttpGet]
-        public JsonResult ListarRoles()
-        {
-            List<Rol> lista = new CN_Rol().Listar();
-            return Json(new { data = lista }, JsonRequestBehavior.AllowGet);
-        }
-
-        // Acción para listar todos los usuarios
         [HttpGet]
         public JsonResult ListarUsuarios()
         {
@@ -37,36 +35,40 @@ namespace CapaPresentacion.Controllers
             return Json(new { data = lista }, JsonRequestBehavior.AllowGet);
         }
 
-        // Acción para registrar o editar un usuario
         [HttpPost]
         public JsonResult GuardarUsuario(Usuario objeto)
         {
             object resultado;
             string Mensaje = string.Empty;
 
+            int idUsuarioAuditoria = ((Usuario_Activo)Session["Usuario"]).id_usuario;
+
+
             if (objeto.id_usuario == 0)
             {
-                resultado = new CN_Usuario().Registrar(objeto, out Mensaje);
+                resultado = new CN_Usuario().Registrar(objeto, idUsuarioAuditoria, out Mensaje);
             }
             else
             {
-                resultado = new CN_Usuario().Editar(objeto, out Mensaje);
+                resultado = new CN_Usuario().Editar(objeto, idUsuarioAuditoria, out Mensaje);
             }
 
             return Json(new { resultado = resultado, mensaje = Mensaje }, JsonRequestBehavior.AllowGet);
         }
 
-        // Acción para eliminar lógicamente un usuario
         [HttpPost]
         public JsonResult EliminarUsuario(int id)
         {
-            bool resultado = new CN_Usuario().Eliminar(id, out string mensaje);
+            int idUsuarioAuditoria = ((Usuario_Activo)Session["Usuario"]).id_usuario;
+
+            bool resultado = new CN_Usuario().Eliminar(id, idUsuarioAuditoria, out string mensaje);
+
             return Json(new { resultado = resultado, mensaje = mensaje }, JsonRequestBehavior.AllowGet);
         }
 
-        
 
-        
+
+
 
     }
 }

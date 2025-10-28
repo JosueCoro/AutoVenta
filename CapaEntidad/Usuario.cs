@@ -30,7 +30,7 @@ namespace CapaEntidad
         public string telefono { get; set; }
         public bool estado { get; set; }
         public int id_rol { get; set; }
-        public Rol _rol { get; set; }
+        public Rol oRol { get; set; }
         public string nombre_rol { get; set; }
 
         

@@ -43,7 +43,7 @@
 
             <hr class="sidebar-divider my-0">
 
-            <li class="nav-item">
+            <li class="nav-item active">
                 <a class="nav-link" href="@Url.Action("Index", "Home")" ">
                     <i class="fas fa-fw fa-tachometer-alt"></i>
                     <span>Inicio</span>
@@ -75,7 +75,7 @@
 
             @if (TienePermiso("Gestionar Cliente"))
             {
-                <li class="nav-item">
+                <li class="nav-item active">
                     <a class="nav-link" href="@Url.Action("Cliente", "Cliente")">
                         <i class="fas fa-fw fa-users"></i>
                         <span>Clientes</span>
@@ -85,7 +85,7 @@
 
             @if (TienePermiso("Gestionar Asesores"))
             {
-                <li class="nav-item">
+                <li class="nav-item active">
                     <a class="nav-link" href="@Url.Action("Asesor", "Asesor")">
                         <i class="fas fa-fw fa-id-badge"></i>
                         <span>Asesores</span>
@@ -94,7 +94,7 @@
             }
             @if (TienePermiso("Gestionar Vehiculo"))
             {
-                <li class="nav-item">
+                <li class="nav-item active">
                     <a class="nav-link" href="@Url.Action("Vehiculo", "Vehiculo")">
                         <i class="fas fa-fw fa-car"></i>
                         <span>Vehículos</span>
@@ -122,7 +122,7 @@
             }
             @if (TienePermiso("Realizar Venta"))
             {
-                <li class="nav-item">
+                <li class="nav-item active">
                     <a class="nav-link" href="@Url.Action("Venta", "Venta")">
                         <i class="fas fa-fw fa-tags"></i>
                         <span>Venta</span>
@@ -131,7 +131,7 @@
             }
             @if (TienePermiso("Gestionar Gasto"))
             {
-                <li class="nav-item">
+                <li class="nav-item active">
                     <a class="nav-link" href="@Url.Action("Gasto", "Gasto")">
                         <i class="fas fa-fw fa-tags"></i>
                         <span>Gastos</span>
@@ -159,7 +159,7 @@
             }
             @if (TienePermiso("Gestionar Marcas"))
             {
-                <li class="nav-item">
+                <li class="nav-item active">
                     <a class="nav-link" href="@Url.Action("Marca", "Marca")">
                         <i class="fas fa-fw fa-copyright"></i>
                         <span>Marcas</span>
@@ -168,7 +168,7 @@
             }
             @if (TienePermiso("Gestionar Tipos de Vehiculo"))
             {
-                <li class="nav-item">
+                <li class="nav-item active">
                     <a class="nav-link" href="@Url.Action("TipoVehiculo", "Vehiculo")">
                         <i class="fas fa-fw fa-truck"></i>
                         <span>Tipo de Vehiculo</span>
@@ -177,7 +177,7 @@
             }
             @if (TienePermiso("Gestionar Tipos de Pago"))
             {
-                <li class="nav-item">
+                <li class="nav-item active">
                     <a class="nav-link" href="@Url.Action("TipoPago", "Pago")">
                         <i class="fas fa-fw fa-cash-register"></i>
                         <span>Tipo de Pago</span>
@@ -186,7 +186,7 @@
             }
             @if (TienePermiso("Gestionar Tipos de Gasto"))
             {
-                <li class="nav-item">
+                <li class="nav-item active">
                     <a class="nav-link" href="@Url.Action("TipoGasto", "Gasto")">
                         <i class="fas fa-fw fa-funnel-dollar"></i>
                         <span>Tipo de Gastos</span>
@@ -211,7 +211,7 @@
 
             @if (TienePermiso("Gestionar Usuarios"))
             {
-                <li class="nav-item">
+                <li class="nav-item active">
                     <a class="nav-link" href="@Url.Action("Usuario", "Usuario")">
                         <i class="fas fa-fw fa-user"></i>
                         <span>Usuarios</span>
@@ -220,7 +220,7 @@
             }
             @if (TienePermiso("Gestionar Roles y Permisos"))
             {
-                <li class="nav-item">
+                <li class="nav-item active">
                     <a class="nav-link" href="@Url.Action("Rol", "Rol")">
                         <i class="fas fa-fw fa-users-cog"></i>
                         <span>Roles</span>
@@ -230,7 +230,7 @@
 
             @if (TienePermiso("Gestionar Roles y Permisos"))
             {
-                <li class="nav-item">
+                <li class="nav-item active">
                     <a class="nav-link" href="@Url.Action("Permiso", "Permiso")">
                         <i class="fas fa-fw fa-key"></i>
                         <span>Permisos</span>
@@ -239,7 +239,7 @@
             }
             @if (TienePermiso("Visualizar Bitacora"))
             {
-                <li class="nav-item">
+                <li class="nav-item active">
                     <a class="nav-link" href="@Url.Action("Bitacora", "Bitacora")">
                         <i class="fas fa-fw fa-clipboard-list"></i>
                         <span>Bitacora</span>

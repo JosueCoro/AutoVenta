@@ -43,10 +43,12 @@ namespace CapaPresentacion.Controllers
                     oTipoGasto = new { nombre = g.oTipoGasto != null ? g.oTipoGasto.nombre : "N/A" },
                     g.id_vehiculo,
                     g.id_venta,
+                    
                     // InfoAsociacion es solo para referencia
                     // Si el CD mapeó oVehiculo, se asume que los datos están ahí,
                     // aunque la vista use el renderizado con los campos sueltos.
                     oVehiculo = g.oVehiculo // Dejamos oVehiculo para que el renderizado de la vista funcione
+
                 }).ToList();
 
                 return Json(new { data = datosParaVista }, JsonRequestBehavior.AllowGet);

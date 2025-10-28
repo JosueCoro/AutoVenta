@@ -363,9 +363,9 @@
                         "render": function (data) {
                             // Muestra el modelo y año si existe oVehiculo
                             if (data.oVehiculo) {
-                                return `${data.oVehiculo.modelo} (${data.oVehiculo.año})`;
+                                return `${data.oVehiculo.modelo} (${data.oVehiculo.año}) (${data.oVehiculo.placa})`;
                             }
-                            return ''; // Deja en blanco si no está asociado a un vehículo
+                            return ''; 
                         }
                     },
                     {

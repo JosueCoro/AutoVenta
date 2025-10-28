@@ -47,7 +47,8 @@ namespace CapaDato
                                 oVehiculo = esGastoVehiculo ? new Vehiculo()
                                 {
                                     modelo = dr["ModeloVehiculo"].ToString(),
-                                    año = dr["AnioVehiculo"].ToString()
+                                    año = dr["AnioVehiculo"].ToString(),
+                                    placa = dr["Placa"].ToString(),
                                 } : null,
 
                                 // Mapeo simple de Venta (solo ID)

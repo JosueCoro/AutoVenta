@@ -1,5 +1,5 @@
 ﻿using CapaEntidad;
-using MySql.Data.MySqlClient;
+using System.Data.SqlClient;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -16,13 +16,17 @@ namespace CapaDato
             List<Usuario> lista = new List<Usuario>();
             try
             {
-                using (MySqlConnection oConexion = new MySqlConnection(Conexion.cn))
+                using (SqlConnection oConexion = new SqlConnection(Conexion.cn))
                 {
-                    oConexion.Open();
-                    MySqlCommand cmd = new MySqlCommand("sp_ListarUsuarios", oConexion);
+                    SqlCommand cmd = new SqlCommand("administracion.CRUD_USUARIO", oConexion);
+                    cmd.Parameters.AddWithValue("@Operacion", "SELECT");
+                    // Los parámetros OUTPUT deben estar presentes
+                    cmd.Parameters.Add("@Mensaje", SqlDbType.VarChar, 500).Direction = ParameterDirection.Output;
+                    cmd.Parameters.Add("@Resultado", SqlDbType.Int).Direction = ParameterDirection.Output;
                     cmd.CommandType = CommandType.StoredProcedure;
 
-                    using (MySqlDataReader dr = cmd.ExecuteReader())
+                    oConexion.Open();
+                    using (SqlDataReader dr = cmd.ExecuteReader())
                     {
                         while (dr.Read())
                         {
@@ -32,165 +36,132 @@ namespace CapaDato
                                 nombre = dr["nombre"].ToString(),
                                 apellido = dr["apellido"].ToString(),
                                 ci = dr["ci"].ToString(),
+                                telefono = dr["telefono"].ToString(),
                                 correo = dr["correo"].ToString(),
+                                contraseña = dr["contraseña"].ToString(), // Contraseña hasheada (útil para edición)
                                 estado = Convert.ToBoolean(dr["estado"]),
-                                id_rol = Convert.ToInt32(dr["rol_id_rol"]),
-                                nombre_rol = dr["nombre_rol"].ToString()
+                                id_rol = Convert.ToInt32(dr["id_rol"]),
+                                oRol = new Rol()
+                                {
+                                    id_rol = Convert.ToInt32(dr["id_rol"]),
+                                    nombre = dr["NombreRol"].ToString()
+                                }
                             });
                         }
                     }
                 }
             }
-            catch (Exception ex)
-            {
-                lista = new List<Usuario>();
-            }
+            catch { lista = new List<Usuario>(); }
             return lista;
         }
 
-        // Método para registrar un nuevo usuario
-        public int Registrar(Usuario obj, out string Mensaje)
+        // Método para registrar un nuevo Usuario
+        public int Registrar(Usuario obj, int idUsuarioAuditoria, out string Mensaje)
         {
-            int idGenerado = 0;
-            Mensaje = string.Empty;
-
+            int idGenerado = 0; Mensaje = string.Empty;
             try
             {
-                using (MySqlConnection oConexion = new MySqlConnection(Conexion.cn))
+                using (SqlConnection oConexion = new SqlConnection(Conexion.cn))
                 {
-                    MySqlCommand cmd = new MySqlCommand("sp_RegistrarUsuario", oConexion);
-                    cmd.Parameters.AddWithValue("p_nombre", obj.nombre);
-                    cmd.Parameters.AddWithValue("p_apellido", obj.apellido);
-                    cmd.Parameters.AddWithValue("p_ci", obj.ci);
-                    cmd.Parameters.AddWithValue("p_correo", obj.correo);
-                    cmd.Parameters.AddWithValue("p_contraseña", obj.contraseña);
-                    cmd.Parameters.AddWithValue("p_rol_id_rol", obj.id_rol);
-                    cmd.Parameters.Add("p_id_usuario", MySqlDbType.Int32).Direction = ParameterDirection.Output;
-                    cmd.Parameters.Add("p_Mensaje", MySqlDbType.VarChar, 500).Direction = ParameterDirection.Output;
-                    cmd.CommandType = CommandType.StoredProcedure;
+                    SqlCommand cmd = new SqlCommand("administracion.CRUD_USUARIO", oConexion);
 
+                    cmd.Parameters.AddWithValue("@Operacion", "INSERT");
+                    cmd.Parameters.AddWithValue("@Nombre", obj.nombre);
+                    cmd.Parameters.AddWithValue("@Apellido", obj.apellido);
+                    cmd.Parameters.AddWithValue("@Ci", obj.ci);
+                    cmd.Parameters.AddWithValue("@Telefono", obj.telefono);
+                    cmd.Parameters.AddWithValue("@Correo", obj.correo);
+                    cmd.Parameters.AddWithValue("@Contrasena", obj.contraseña);
+                    cmd.Parameters.AddWithValue("@Estado", obj.estado);
+                    cmd.Parameters.AddWithValue("@IdRol", obj.oRol.id_rol);
+                    cmd.Parameters.AddWithValue("@IdUsuarioAuditoria", idUsuarioAuditoria);
+
+                    cmd.Parameters.Add("@Mensaje", SqlDbType.VarChar, 500).Direction = ParameterDirection.Output;
+                    cmd.Parameters.Add("@Resultado", SqlDbType.Int).Direction = ParameterDirection.Output;
+
+                    cmd.CommandType = CommandType.StoredProcedure;
                     oConexion.Open();
                     cmd.ExecuteNonQuery();
 
-                    idGenerado = Convert.ToInt32(cmd.Parameters["p_id_usuario"].Value);
-                    Mensaje = cmd.Parameters["p_Mensaje"].Value.ToString();
+                    idGenerado = Convert.ToInt32(cmd.Parameters["@Resultado"].Value);
+                    Mensaje = cmd.Parameters["@Mensaje"].Value.ToString();
                 }
             }
             catch (Exception ex)
-            {
-                idGenerado = 0;
-                Mensaje = ex.Message;
+            { 
+                idGenerado = 0; 
+                Mensaje = ex.Message; 
             }
             return idGenerado;
         }
 
-        // Método para editar un usuario
-        public bool Editar(Usuario obj, out string Mensaje)
+        // Método para editar un Usuario
+        public bool Editar(Usuario obj, int idUsuarioAuditoria, out string Mensaje)
         {
-            bool resultado = false;
-            Mensaje = string.Empty;
-
+            bool resultado = false; Mensaje = string.Empty;
             try
             {
-                using (MySqlConnection oConexion = new MySqlConnection(Conexion.cn))
+                using (SqlConnection oConexion = new SqlConnection(Conexion.cn))
                 {
-                    MySqlCommand cmd = new MySqlCommand("sp_EditarUsuario", oConexion);
-                    cmd.Parameters.AddWithValue("p_id_usuario", obj.id_usuario);
-                    cmd.Parameters.AddWithValue("p_nombre", obj.nombre);
-                    cmd.Parameters.AddWithValue("p_apellido", obj.apellido);
-                    cmd.Parameters.AddWithValue("p_ci", obj.ci);
-                    cmd.Parameters.AddWithValue("p_correo", obj.correo);
-                    cmd.Parameters.AddWithValue("p_contraseña", obj.contraseña ?? "");
-                    cmd.Parameters.AddWithValue("p_estado", obj.estado);
-                    cmd.Parameters.AddWithValue("p_rol_id_rol", obj.id_rol);
-                    cmd.Parameters.Add("p_Mensaje", MySqlDbType.VarChar, 500).Direction = ParameterDirection.Output;
-                    cmd.CommandType = CommandType.StoredProcedure;
+                    SqlCommand cmd = new SqlCommand("administracion.CRUD_USUARIO", oConexion);
 
+                    cmd.Parameters.AddWithValue("@Operacion", "UPDATE");
+                    cmd.Parameters.AddWithValue("@IdUsuario", obj.id_usuario);
+                    cmd.Parameters.AddWithValue("@Nombre", obj.nombre);
+                    cmd.Parameters.AddWithValue("@Apellido", obj.apellido);
+                    cmd.Parameters.AddWithValue("@Ci", obj.ci);
+                    cmd.Parameters.AddWithValue("@Telefono", obj.telefono);
+                    cmd.Parameters.AddWithValue("@Correo", obj.correo);
+                    // IMPORTANTE: Envía la nueva contraseña hasheada (o "" si no se cambia)
+                    cmd.Parameters.AddWithValue("@Contrasena", obj.contraseña);
+                    cmd.Parameters.AddWithValue("@Estado", obj.estado);
+                    cmd.Parameters.AddWithValue("@IdRol", obj.oRol.id_rol);
+                    cmd.Parameters.AddWithValue("@IdUsuarioAuditoria", idUsuarioAuditoria);
+
+                    cmd.Parameters.Add("@Mensaje", SqlDbType.VarChar, 500).Direction = ParameterDirection.Output;
+                    cmd.Parameters.Add("@Resultado", SqlDbType.Int).Direction = ParameterDirection.Output;
+
+                    cmd.CommandType = CommandType.StoredProcedure;
                     oConexion.Open();
                     cmd.ExecuteNonQuery();
 
-                    Mensaje = cmd.Parameters["p_Mensaje"].Value.ToString();
-                    resultado = Mensaje == "";
+                    resultado = Convert.ToInt32(cmd.Parameters["@Resultado"].Value) == 1;
+                    Mensaje = cmd.Parameters["@Mensaje"].Value.ToString();
                 }
             }
             catch (Exception ex)
-            {
-                resultado = false;
-                Mensaje = ex.Message;
-            }
+            { resultado = false; Mensaje = ex.Message; }
             return resultado;
         }
 
-        // Método para eliminar lógicamente un usuario
-        public bool Eliminar(int id, out string Mensaje)
+        // Método para eliminar (inactivar) un Usuario
+        public bool Eliminar(int id, int idUsuarioAuditoria, out string Mensaje)
         {
-            bool resultado = false;
-            Mensaje = string.Empty;
-
+            bool resultado = false; Mensaje = string.Empty;
             try
             {
-                using (MySqlConnection oConexion = new MySqlConnection(Conexion.cn))
+                using (SqlConnection oConexion = new SqlConnection(Conexion.cn))
                 {
-                    MySqlCommand cmd = new MySqlCommand("sp_EliminarUsuario", oConexion);
-                    cmd.Parameters.AddWithValue("p_id_usuario", id);
-                    cmd.Parameters.Add("p_Mensaje", MySqlDbType.VarChar, 500).Direction = ParameterDirection.Output;
-                    cmd.CommandType = CommandType.StoredProcedure;
+                    SqlCommand cmd = new SqlCommand("administracion.CRUD_USUARIO", oConexion);
 
+                    cmd.Parameters.AddWithValue("@Operacion", "DELETE");
+                    cmd.Parameters.AddWithValue("@IdUsuario", id);
+                    cmd.Parameters.AddWithValue("@IdUsuarioAuditoria", idUsuarioAuditoria);
+
+                    cmd.Parameters.Add("@Mensaje", SqlDbType.VarChar, 500).Direction = ParameterDirection.Output;
+                    cmd.Parameters.Add("@Resultado", SqlDbType.Int).Direction = ParameterDirection.Output;
+
+                    cmd.CommandType = CommandType.StoredProcedure;
                     oConexion.Open();
                     cmd.ExecuteNonQuery();
 
-                    Mensaje = cmd.Parameters["p_Mensaje"].Value.ToString();
-                    resultado = Mensaje == "";
+                    resultado = Convert.ToInt32(cmd.Parameters["@Resultado"].Value) == 1;
+                    Mensaje = cmd.Parameters["@Mensaje"].Value.ToString();
                 }
             }
             catch (Exception ex)
-            {
-                resultado = false;
-                Mensaje = ex.Message;
-            }
+            { resultado = false; Mensaje = ex.Message; }
             return resultado;
-        }
-
-        // Método para validar el login de un usuario
-        public Usuario_Activo ValidarLogin(string correo, string contrasena)
-        {
-            Usuario_Activo objUsuario = null;
-
-            try
-            {
-                using (MySqlConnection oConexion = new MySqlConnection(Conexion.cn))
-                {
-                    oConexion.Open();
-                    MySqlCommand cmd = new MySqlCommand("sp_ValidarLogin", oConexion);
-                    cmd.Parameters.AddWithValue("p_correo", correo);
-                    cmd.Parameters.AddWithValue("p_contraseña", contrasena); // La contraseña ya debe venir hasheada
-                    cmd.CommandType = CommandType.StoredProcedure;
-
-                    using (MySqlDataReader dr = cmd.ExecuteReader())
-                    {
-                        if (dr.Read()) 
-                        {
-                            objUsuario = new Usuario_Activo()
-                            {
-                                id_usuario = Convert.ToInt32(dr["id_usuario"]),
-                                nombre = dr["nombre"].ToString(),
-                                apellido = dr["apellido"].ToString(),
-                                ci = dr["ci"].ToString(),
-                                correo = dr["correo"].ToString(),
-                                estado = Convert.ToBoolean(dr["estado"]),
-                                id_rol = Convert.ToInt32(dr["rol_id_rol"]),
-                                nombre_rol = dr["nombre_rol"].ToString()
-                            };
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                objUsuario = null; // En caso de error, retorna null
-                // Aquí podrías loggear el error: Console.WriteLine(ex.Message);
-            }
-            return objUsuario;
         }
     }
 }

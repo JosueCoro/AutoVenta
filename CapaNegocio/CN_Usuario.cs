@@ -12,33 +12,70 @@ namespace CapaNegocio
     public class CN_Usuario
     {
         private CD_Usuario cdusuario = new CD_Usuario();
-        private CN_Recursos recursos = new CN_Recursos();
-
-
-       
+        private CN_Recursos recursos = new CN_Recursos(); 
 
         public List<Usuario> Listar()
         {
             return cdusuario.Listar();
         }
 
-        public int Registrar(Usuario obj, out string Mensaje)
+
+        public int Registrar(Usuario obj, int idUsuarioAuditoria, out string Mensaje)
         {
             Mensaje = string.Empty;
 
-            if (string.IsNullOrEmpty(obj.nombre) || string.IsNullOrEmpty(obj.apellido) || string.IsNullOrEmpty(obj.correo) || string.IsNullOrEmpty(obj.contraseña))
+            if (string.IsNullOrEmpty(obj.nombre))
             {
-                Mensaje = "Todos los campos obligatorios deben ser completados.";
+                Mensaje = "El nombre es obligatorio.";
+                return 0;
+            }
+            if (string.IsNullOrEmpty(obj.apellido))
+            {
+                Mensaje = "El apellido es obligatorio.";
+                return 0;
+            }
+            if (string.IsNullOrEmpty(obj.ci))
+            {
+                Mensaje = "La Cédula de Identidad (CI) es obligatoria.";
+                return 0;
+            }
+            if (!obj.ci.All(char.IsDigit))
+            {
+                Mensaje = "La Cédula de Identidad (CI) debe contener solo números.";
+                return 0;
+            }
+            if (string.IsNullOrEmpty(obj.correo))
+            {
+                Mensaje = "El correo es obligatorio.";
+                return 0;
+            }
+            if (string.IsNullOrEmpty(obj.contraseña))
+            {
+                Mensaje = "La contraseña es obligatoria para el nuevo usuario.";
+                return 0;
+            }
+            if (string.IsNullOrEmpty(obj.telefono))
+            {
+                Mensaje = "El teléfono es obligatorio.";
+                return 0;
+            }
+            if (!obj.telefono.All(char.IsDigit))
+            {
+                Mensaje = "El teléfono debe contener solo números.";
+                return 0;
+            }
+            if (obj.oRol == null || obj.oRol.id_rol == 0)
+            {
+                Mensaje = "Debe seleccionar un rol.";
                 return 0;
             }
 
-            // Se encripta la contraseña antes de guardarla
-            obj.contraseña = recursos.ConvertirSha256(obj.contraseña);
+            obj.contraseña = recursos.EncriptarSHA256(obj.contraseña);
 
-            return cdusuario.Registrar(obj, out Mensaje);
+            return cdusuario.Registrar(obj, idUsuarioAuditoria, out Mensaje);
         }
 
-        public bool Editar(Usuario obj, out string Mensaje)
+        public bool Editar(Usuario obj, int idUsuarioAuditoria, out string Mensaje)
         {
             Mensaje = string.Empty;
 
@@ -47,71 +84,65 @@ namespace CapaNegocio
                 Mensaje = "El ID del usuario no es válido.";
                 return false;
             }
-
-            if (string.IsNullOrEmpty(obj.nombre) || string.IsNullOrEmpty(obj.apellido) || string.IsNullOrEmpty(obj.correo))
+            if (string.IsNullOrEmpty(obj.nombre))
             {
-                Mensaje = "Los campos de nombre, apellido y correo no pueden ser vacíos.";
+                Mensaje = "El nombre es obligatorio.";
                 return false;
             }
-
-            // Solo se encripta la nueva contraseña si se proporciona un valor
-            if (!string.IsNullOrEmpty(obj.contraseña))
+            if (string.IsNullOrEmpty(obj.apellido))
             {
-                obj.contraseña = recursos.ConvertirSha256(obj.contraseña);
-            }
-
-            return cdusuario.Editar(obj, out Mensaje);
-        }
-
-        public bool Eliminar(int id, out string Mensaje)
-        {
-            Mensaje = string.Empty;
-
-            if (id == 0)
-            {
-                Mensaje = "El ID del usuario no es válido.";
+                Mensaje = "El apellido es obligatorio.";
                 return false;
             }
-
-            return cdusuario.Eliminar(id, out Mensaje);
-        }
-
-
-        // ... (otros métodos Listar, Registrar, Editar, Eliminar existentes) ...
-
-        // Nuevo método para validar el login
-        public Usuario_Activo ValidarLogin(string correo, string contrasena, out string Mensaje)
-        {
-            Mensaje = string.Empty;
-
-            // Validaciones básicas
-            if (string.IsNullOrEmpty(correo))
+            if (string.IsNullOrEmpty(obj.ci))
+            {
+                Mensaje = "La Cédula de Identidad (CI) es obligatoria.";
+                return false;
+            }
+            if (!obj.ci.All(char.IsDigit))
+            {
+                Mensaje = "La Cédula de Identidad (CI) debe contener solo números.";
+                return false;
+            }
+            if (string.IsNullOrEmpty(obj.correo))
             {
                 Mensaje = "El correo es obligatorio.";
-                return null;
+                return false;
             }
-            if (string.IsNullOrEmpty(contrasena))
+            if (string.IsNullOrEmpty(obj.telefono))
             {
-                Mensaje = "La contraseña es obligatoria.";
-                return null;
+                Mensaje = "El teléfono es obligatorio.";
+                return false;
             }
-
-            // Hashear la contraseña antes de enviarla a la capa de datos
-            string contrasenaHasheada = recursos.ConvertirSha256(contrasena);
-
-            // Llamar al método de la capa de datos
-            Usuario_Activo usuarioEncontrado = cdusuario.ValidarLogin(correo, contrasenaHasheada);
-
-            if (usuarioEncontrado == null)
+            if (!obj.telefono.All(char.IsDigit))
             {
-                Mensaje = "Credenciales incorrectas o usuario inactivo.";
+                Mensaje = "El teléfono debe contener solo números.";
+                return false;
             }
-            else
+            if (obj.oRol == null || obj.oRol.id_rol == 0 )
             {
-                Mensaje = "Login exitoso.";
+                Mensaje = "Debe seleccionar un rol.";
+                return false;
             }
 
-            return usuarioEncontrado;
+            if (!string.IsNullOrEmpty(obj.contraseña))
+            {
+                obj.contraseña = recursos.EncriptarSHA256(obj.contraseña);
+            }
+
+            return cdusuario.Editar(obj, idUsuarioAuditoria, out Mensaje);
+        }
+
+        public bool Eliminar(int id, int idUsuarioAuditoria, out string Mensaje)
+        {
+            Mensaje = string.Empty;
+
+            if (id == 0) Mensaje = "El ID del usuario no es válido.";
+            if (id == idUsuarioAuditoria) Mensaje = "No puedes eliminar o inactivar tu propia cuenta.";
+
+            if (!string.IsNullOrEmpty(Mensaje)) return false;
+
+            return cdusuario.Eliminar(id, idUsuarioAuditoria, out Mensaje);
         }
     }
 }
