@@ -4,5 +4,204 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h2>Bitacora</h2>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/2.0.8/css/jquery.dataTables.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/2.0.8/js/jquery.dataTables.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+
+    <script>
+        var tabladata;
+
+        async function cargarUsuariosFiltro() {
+            // Se asume que 'cboUsuario' existe en el DOM cuando se llama a esta función.
+            const ddlUsuario = document.getElementById("cboUsuario");
+
+            // 🛑 AHORA ESTA LÍNEA ES SEGURA (ya que la llamaremos desde DOMContentLoaded)
+            ddlUsuario.innerHTML = '<option value="0">Cargando...</option>';
+
+            try {
+                // Se corrigió el nombre de la acción en el fetch.
+                const response = await fetch('@Url.Action("ListarUsuarios", "Bitacora")', { method: 'GET' });
+                const data = await response.json();
+
+                ddlUsuario.innerHTML = '';
+                data.data.forEach(usuario => {
+                    const option = document.createElement('option');
+                    option.value = usuario.id_usuario;
+                    option.textContent = usuario.id_usuario === 0
+                        ? "TODOS LOS USUARIOS"
+                        : `${usuario.nombre} ${usuario.apellido}`;
+                    ddlUsuario.appendChild(option);
+                });
+
+            } catch (error) {
+                ddlUsuario.innerHTML = '<option value="0">Error al cargar usuarios</option>';
+            }
+        }
+
+        // Función para recargar la tabla (usada por el botón Buscar)
+        function filtrarBitacora() {
+            if ($.fn.DataTable.isDataTable('#tablaBitacora')) {
+                tabladata.ajax.reload();
+            } else {
+                inicializarTabla();
+            }
+        }
+
+        function inicializarTabla() {
+            if ($.fn.DataTable.isDataTable('#tablaBitacora')) {
+                $('#tablaBitacora').DataTable().destroy();
+            }
+
+            tabladata = $('#tablaBitacora').DataTable({
+                responsive: true,
+                ordering: false,
+                "ajax": {
+                    "url": '@Url.Action("ConsultarBitacora", "Bitacora")',
+                    "type": "GET",
+                    "datatype": "json",
+                    "dataSrc": function (json) {
+                        console.log("Datos completos recibidos:", json.data);
+                        // DataTables espera que devolvamos la lista de registros
+                        return json.data;
+                    },
+                    "data": function (d) {
+                        d.fechaInicio = $("#txtFechaInicio").val();
+                        d.fechaFin = $("#txtFechaFin").val();
+                        d.idUsuario = $("#cboUsuario").val();
+                    }
+                },
+                
+                "columns": [
+                    {
+                        "data": "fecha",
+                        "render": function (data) {
+                            if (data) {
+                                // Extrae el número de milisegundos de la cadena /Date(1666992000000)/
+                                const milliseconds = parseInt(data.replace("/Date(", "").replace(")/", ""));
+
+                                // Si el número es válido, crea la fecha
+                                if (!isNaN(milliseconds)) {
+                                    return new Date(milliseconds).toLocaleDateString();
+                                }
+                            }
+                            return '';
+                        }
+                    },
+                    {
+                        "data": "hora",
+                        "render": function (data) {
+                            if (data && typeof data === 'object' && data.hasOwnProperty('Hours')) {
+                                const pad = (num) => num.toString().padStart(2, '0');
+                                const hours = pad(data.Hours);
+                                const minutes = pad(data.Minutes);
+                                const seconds = pad(data.Seconds);
+                                return `${hours}:${minutes}:${seconds}`;
+                            }
+                            return '';
+                        }
+                    },
+                    { "data": "accion" },
+                    {
+                        "data": "oUsuario.nombre",
+                        "render": function (data, type, row) {
+                            if (row.oUsuario) {
+                                return `${row.oUsuario.nombre} ${row.oUsuario.apellido}`;
+                            }
+                            return 'N/A';
+                        }
+                    }
+                ],
+                "language": {
+                    "sZeroRecords": "No se encontraron registros en el período seleccionado.",
+                    "sEmptyTable": "No hay datos disponibles en la tabla.",
+                    "url": '//cdn.datatables.net/plug-ins/2.2.1/i18n/es-ES.json',
+                },
+            });
+        }
+
+        // 🟢 BLOQUE DE EJECUCIÓN: Todo lo que interactúa con el DOM DEBE ir aquí.
+        document.addEventListener('DOMContentLoaded', function () {
+
+            // 1. Configuración de DatePicker
+            $(".datepicker").datepicker({
+                dateFormat: "yy-mm-dd",
+                changeMonth: true,
+                changeYear: true,
+                dayNamesMin: ["Do", "Lu", "Ma", "Mi", "Ju", "Vi", "Sa"],
+                monthNamesShort: ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"]
+            });
+
+            // 2. Establecer fechas por defecto
+            const today = new Date().toISOString().substring(0, 10);
+            $("#txtFechaInicio").val(today);
+            $("#txtFechaFin").val(today);
+
+            // 3. Cargar Filtros (Seguro porque el DOM ya está listo)
+            cargarUsuariosFiltro();
+
+            // 4. Inicializar DataTables (Seguro porque el DOM ya está listo)
+            inicializarTabla();
+        });
+    </script>
+}
+<div class="card shadow mb-4">
+    <div class="card-header bg-dark text-white">
+        <i class="fas fa-history"></i> Consulta de Bitácora del Sistema
+    </div>
+
+    <div class="card-body">
+        <h5 class="mb-3">Filtros de Búsqueda</h5>
+        <div class="row mb-4 g-3 align-items-end p-2 border rounded bg-light">
+
+            <div class="col-md-3">
+                <label for="txtFechaInicio" class="form-label">Fecha Inicio</label>
+                <div class="input-group">
+                    <input type="text" class="form-control datepicker" id="txtFechaInicio" readonly>
+                    <span class="input-group-text"><i class="fas fa-calendar"></i></span>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <label for="txtFechaFin" class="form-label">Fecha Fin</label>
+                <div class="input-group">
+                    <input type="text" class="form-control datepicker" id="txtFechaFin" readonly>
+                    <span class="input-group-text"><i class="fas fa-calendar"></i></span>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <label for="cboUsuario" class="form-label">Realizado por:</label>
+                <select id="cboUsuario" class="form-control">
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <button type="button" class="btn btn-primary w-100" onclick="inicializarTabla()">
+                    <i class="fas fa-search"></i> Buscar
+                </button>
+            </div>
+        </div>
+
+        <h5 class="mt-4 mb-3">Resultados de la Auditoría</h5>
+        <table id="tablaBitacora" class="display cell-border w-100" style="width:100%">
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Hora</th>
+                    <th>Acción Realizada</th>
+                    <th>Usuario Responsable</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+</div>
 

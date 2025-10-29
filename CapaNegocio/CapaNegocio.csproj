@@ -94,6 +94,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CN_Asesor.cs" />
+    <Compile Include="CN_Bitacora.cs" />
     <Compile Include="CN_Cliente.cs" />
     <Compile Include="CN_Gasto.cs" />
     <Compile Include="CN_Login.cs" />
