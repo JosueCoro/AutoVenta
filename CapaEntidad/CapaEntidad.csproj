@@ -98,6 +98,7 @@
     <Compile Include="Cliente.cs" />
     <Compile Include="Comision.cs" />
     <Compile Include="DetalleGasto.cs" />
+    <Compile Include="DetalleVenta.cs" />
     <Compile Include="Detalle_venta.cs" />
     <Compile Include="Gasto.cs" />
     <Compile Include="Marca.cs" />

@@ -205,7 +205,7 @@
     <Compile Include="CD_TipoVehiculo.cs" />
     <Compile Include="CD_Usuario.cs" />
     <Compile Include="CD_Vehiculo.cs" />
-    <Compile Include="CN_TipoPago.cs" />
+    <Compile Include="CD_Venta.cs" />
     <Compile Include="Conexion.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

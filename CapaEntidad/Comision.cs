@@ -29,7 +29,7 @@ namespace CapaEntidad
         public string observaciones { get; set; }
         public int id_venta { get; set; }
         public int id_asesor { get; set; }
-        public Venta _venta { get; set; }
-        public Asesor _asesor { get; set; }
+        public Venta oVenta { get; set; }
+        public Asesor oAsesor { get; set; }
     }
 }

@@ -1,11 +1,12 @@
-﻿using CapaEntidad;
+﻿using CapaDato;
+using CapaEntidad;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CapaDato
+namespace CapaNegocio
 {
     public class CN_TipoPago
     {

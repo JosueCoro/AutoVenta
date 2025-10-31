@@ -1,35 +1,183 @@
 ﻿@{
-    ViewBag.Title = "Home Page";
+    ViewBag.Title = "Inicio";
 }
 
 
+<style>
+    /* Estilos opcionales para los colores personalizados de Carsys */
+    .card-icon-primary {
+        color: rgba(0, 123, 255, 0.7); /* Azul de marca */
+    }
 
-<main>
-    <section class="row" aria-labelledby="aspnetTitle">
-        <h1 id="title">ASP.NET</h1>
-        <p class="lead">ASP.NET is a free web framework for building great Web sites and Web applications using HTML, CSS and JavaScript.</p>
-        <p><a href="https://asp.net" class="btn btn-primary btn-md">Learn more &raquo;</a></p>
-    </section>
+    .card-icon-success {
+        color: rgba(40, 167, 69, 0.7); /* Verde de ventas */
+    }
+</style>
+<!-- Page Heading -->
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">Dashboard</h1>
+    <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+        <i class="fas fa-download fa-sm text-white-50"></i> Generar Reporte
+    </a>
+</div>
 
-    <div class="row">
-        <section class="col-md-4" aria-labelledby="gettingStartedTitle">
-            <h2 id="gettingStartedTitle">Getting started</h2>
-            <p>
-                ASP.NET MVC gives you a powerful, patterns-based way to build dynamic websites that
-                enables a clean separation of concerns and gives you full control over markup
-                for enjoyable, agile development.
-            </p>
-            <p><a class="btn btn-outline-dark" href="https://go.microsoft.com/fwlink/?LinkId=301865">Learn more &raquo;</a></p>
-        </section>
-        <section class="col-md-4" aria-labelledby="librariesTitle">
-            <h2 id="librariesTitle">Get more libraries</h2>
-            <p>NuGet is a free Visual Studio extension that makes it easy to add, remove, and update libraries and tools in Visual Studio projects.</p>
-            <p><a class="btn btn-outline-dark" href="https://go.microsoft.com/fwlink/?LinkId=301866">Learn more &raquo;</a></p>
-        </section>
-        <section class="col-md-4" aria-labelledby="hostingTitle">
-            <h2 id="hostingTitle">Web Hosting</h2>
-            <p>You can easily find a web hosting company that offers the right mix of features and price for your applications.</p>
-            <p><a class="btn btn-outline-dark" href="https://go.microsoft.com/fwlink/?LinkId=301867">Learn more &raquo;</a></p>
-        </section>
+
+<!-- Content Row: Cards de Métricas Clave -->
+<div class="row">
+
+    <!-- Vehículos Disponibles -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-primary shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                            Stock Disponible
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">25</div> <!-- Valor simulado -->
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-car fa-2x card-icon-primary"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-</main>
+
+    <!-- Total de Ventas (Mensual) -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-success shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                            Ventas Netas (Mes)
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">Bs. 350,000</div> <!-- Valor simulado -->
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-dollar-sign fa-2x card-icon-success"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Clientes Registrados -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-info shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Clientes Activos</div>
+                        <div class="row no-gutters align-items-center">
+                            <div class="col-auto">
+                                <div class="h5 mb-0 mr-3 font-weight-bold text-gray-800">450</div> <!-- Valor simulado -->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-users fa-2x text-info"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Comisiones Pendientes -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-warning shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                            Comisiones Pendientes
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">Bs. 8,500</div> <!-- Valor simulado -->
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-clipboard-list fa-2x text-warning"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Content Row: Gráficos e Información Adicional -->
+<div class="row">
+
+    <!-- Área de Gráfico de Ventas (Simulado) -->
+    <div class="col-xl-8 col-lg-7">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                <h6 class="m-0 font-weight-bold text-primary">Resumen de Ingresos (Últimos 6 Meses)</h6>
+            </div>
+            <div class="card-body">
+                <div class="chart-area text-center">
+                    <!-- Placeholder de Gráfico de Área -->
+                    <p class="text-muted mt-5">Gráfico de DataTables/Chart.js iría aquí.</p>
+                    <div style="height: 300px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Donut Chart de Estado de Inventario (Simulado) -->
+    <div class="col-xl-4 col-lg-5">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                <h6 class="m-0 font-weight-bold text-primary">Estado del Inventario (%)</h6>
+            </div>
+            <div class="card-body">
+                <div class="chart-pie pt-4 pb-2 text-center">
+                    <!-- Placeholder de Gráfico de Pastel -->
+                    <div style="height: 250px;" class="mt-4">
+                        <i class="fas fa-chart-pie fa-5x text-gray-300"></i>
+                        <p class="text-muted mt-2">Disponible, Vendido, Mantenimiento</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Content Row: Tareas y Accesos Rápidos -->
+<div class="row">
+
+    <div class="col-lg-6 mb-4">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Accesos Rápidos</h6>
+            </div>
+            <div class="card-body">
+                <a href="@Url.Action("Vehiculo", "Vehiculo")" class="btn btn-block btn-outline-info mb-2">
+                    <i class="fas fa-plus"></i> Registrar Nuevo Vehículo
+                </a>
+                <a href="@Url.Action("Venta", "Venta")" class="btn btn-block btn-outline-success mb-2">
+                    <i class="fas fa-tags"></i> Realizar Nueva Venta
+                </a>
+                <a href="@Url.Action("Cliente", "Cliente")" class="btn btn-block btn-outline-primary">
+                    <i class="fas fa-users"></i> Buscar Clientes
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6 mb-4">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Registro de Auditoría Reciente</h6>
+            </div>
+            <div class="card-body">
+                <p class="text-muted">Muestra las últimas 5 acciones registradas en la **Bitácora** (solo para administradores).</p>
+                <a href="@Url.Action("Bitacora", "Bitacora")" class="btn btn-sm btn-secondary">
+                    Ver Bitácora Completa
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <!-- Aquí se integrarían Chart.js y las llamadas AJAX para obtener los datos reales de las métricas -->
+}

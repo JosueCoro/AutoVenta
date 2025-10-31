@@ -103,9 +103,11 @@
     <Compile Include="CN_Recursos.cs" />
     <Compile Include="CN_Rol.cs" />
     <Compile Include="CN_TipoGasto.cs" />
+    <Compile Include="CN_TipoPago.cs" />
     <Compile Include="CN_TipoVehiculo.cs" />
     <Compile Include="CN_Usuario.cs" />
     <Compile Include="CN_Vehiculo.cs" />
+    <Compile Include="CN_Venta.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -1,4 +1,5 @@
 ﻿using CapaDato;
+using CapaNegocio;
 using CapaEntidad;
 using CapaPresentacion.Filtros;
 using System;
