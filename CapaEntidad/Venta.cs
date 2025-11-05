@@ -30,6 +30,7 @@ namespace CapaEntidad
         public Usuario ousuario { get; set; }
         public Cliente oCliente { get; set; }
         public List<DetalleVenta> oDetalleVenta { get; set; }
+        
 
     }
 }

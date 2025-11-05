@@ -22,9 +22,10 @@ namespace CapaEntidad
         public string nombre { get; set; }
         public DateTime fecha { get; set; }
         public DateTime hora { get; set; }
+        public decimal monto { get; set; }
         public int id_tipo_pago { get; set; }
-        public TipoPago _tipopago{ get; set; }
+        public TipoPago oTipopago{ get; set; }
         public int id_venta { get; set; }
-        public Venta _venta { get; set; }
+        public Venta oVenta { get; set; }
     }
 }

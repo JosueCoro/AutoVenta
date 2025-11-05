@@ -11,8 +11,9 @@ namespace CapaNegocio
     public class CN_Venta
     {
         private CD_Venta cdVenta = new CD_Venta();
+        private CD_Pago cdPago = new CD_Pago();
 
-        public int Registrar(Venta objVenta, out string Mensaje)
+        public int RegistrarSoloVenta(Venta objVenta, out string Mensaje)
         {
             Mensaje = string.Empty;
 
@@ -62,6 +63,52 @@ namespace CapaNegocio
             }
 
             return cdVenta.Registrar(objVenta, out Mensaje);
+        }
+
+        public int RegistrarVentaYPago(Venta objVenta, decimal montoPago, int idTipoPago, int idUsuarioAuditoria, out string Mensaje)
+        {
+            Mensaje = string.Empty;
+            int idVentaGenerada = 0;
+
+            if (idTipoPago == 0)
+            {
+                Mensaje = "Debe seleccionar un tipo de pago.";
+                return 0;
+            }
+            if (montoPago <= 0)
+            {
+                Mensaje = "El monto del pago debe smayor a 0.";
+                return 0;
+            }
+
+            idVentaGenerada = RegistrarSoloVenta(objVenta, out Mensaje);
+
+            if (idVentaGenerada > 0)
+            {
+
+                Pago objPago = new Pago()
+                {
+                    id_venta = idVentaGenerada,
+                    monto = montoPago,
+                    id_tipo_pago = idTipoPago
+                };
+
+                int idPagoGenerado = cdPago.Registrar(objPago, idUsuarioAuditoria, out Mensaje);
+
+                if (idPagoGenerado > 0)
+                {
+                    Mensaje = $"Venta N° {idVentaGenerada} y Pago N° {idPagoGenerado} registrados con éxito.";
+                    return idVentaGenerada;
+                }
+                else
+                {
+                    return 0; 
+                }
+            }
+            else
+            {
+                return 0;
+            }
         }
 
     }

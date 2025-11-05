@@ -4,15 +4,11 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
+
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/2.0.8/css/jquery.dataTables.css" />
-<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/2.0.8/js/jquery.dataTables.js"></script>
-
-
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-
 
 
 <div class="card shadow mb-4">
@@ -22,34 +18,45 @@
     <div class="card-body">
 
         <div class="row mb-4">
-            <div class="col-lg-3 col-md-6 mb-3">
-                <label for="ddlCliente" class="form-label fw-bold">Cliente:</label>
-                <select id="ddlCliente" class="form-control">
-                    <option value="0">-- Seleccione Cliente --</option>
-                </select>
+
+            <div class="col-md-4 mb-3">
+                <label class="form-label fw-bold">Cliente</label>
+                <div class="input-group">
+                    <input type="hidden" id="txtIdClienteSeleccionado" value="0" />
+                    <input type="text" class="form-control" id="txtNombreClienteSeleccionado" placeholder="Seleccione un cliente" readonly />
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalBuscarCliente">
+                        <i class="fas fa-search"></i> Buscar Cliente
+                    </button>
+                </div>
             </div>
 
-            <div class="col-lg-3 col-md-6 mb-3">
-                <label for="ddlAsesor" class="form-label fw-bold">Asesor:</label>
-                <select id="ddlAsesor" class="form-control">
-                    <option value="0">-- Seleccione Asesor --</option>
-                </select>
+            <div class="col-md-4 mb-3">
+                <label class="form-label fw-bold">Asesor de Venta</label>
+                <div class="input-group">
+                    <input type="hidden" id="txtIdAsesorSeleccionado" value="0" />
+                    <input type="text" class="form-control" id="txtNombreAsesorSeleccionado" placeholder="Seleccione un Asesor" readonly />
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalBuscarAsesor">
+                        <i class="fas fa-search"></i> Buscar Asesor
+                    </button>
+                </div>
             </div>
 
-            <div class="col-md-3">
+
+            <div class="col-md-3 mb-3">
                 <label for="txtFecha" class="form-label">Fecha:</label>
                 <div class="input-group">
                     <input type="text" class="form-control datepicker" id="txtFecha" readonly>
                     <span class="input-group-text"><i class="fas fa-calendar"></i></span>
                 </div>
-
             </div>
 
             <div class="col-lg-2 col-md-4 mb-3">
-                <label for="txtMontoComision" class="form-label fw-bold text-danger">Monto Comisión:</label>
+                <label for="txtMontoComision" class="form-label fw-bold text-danger">Comisión ($):</label>
                 <input type="number" class="form-control text-danger" id="txtMontoComision" value="0.00" min="0" step="0.01">
             </div>
+            
         </div>
+
 
         <div class="row mb-4">
             <div class="col-12">
@@ -92,19 +99,82 @@
         </table>
 
         <input type="hidden" id="txtTotalVenta" value="0.00" />
+        <hr />
+        <div class="row mb-4">
+
+            <div class="col-lg-2 col-md-4 mb-3">
+                <label for="txtMontoComision" class="form-label fw-bold">Forma de Pago</label>
+                <select id="cboTipoPago" class="form-control">
+                    <option value="0">Cargando...</option>
+                </select>
+            </div>
+        </div>
 
         <hr />
 
         <div class="row">
             <div class="col-12 text-end">
                 <button type="button" class="btn btn-success btn-lg" onclick="RegistrarVenta()">
-                    <i class="fas fa-save"></i> **FINALIZAR VENTA**
+                    <i class="fas fa-save"></i> FINALIZAR VENTA
                 </button>
             </div>
         </div>
 
     </div>
 </div>
+
+<div class="modal fade" id="modalBuscarCliente" tabindex="-1" aria-labelledby="modalBuscarClienteLabel" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title" id="modalBuscarClienteLabel">Buscar Cliente</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <table id="tablaClientesModal" class="display cell-border w-100" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>Nombre Completo</th>
+                            <th>CI o NIT</th>
+                            <th>Telefono</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="modalBuscarAsesor" tabindex="-1" aria-labelledby="modalBuscarAsesorLabel" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title" id="modalBuscarAsesorLabel">Buscar Asesor</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <table id="tablaAsesorModal" class="display cell-border w-100" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Apellido</th>
+                            <th>Telefono</th>
+                            <th>CI</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 <div class="modal fade" id="ModalVehiculos" tabindex="-1" aria-labelledby="modalLabelVehiculos" aria-hidden="true">
     <div class="modal-dialog modal-xl">
@@ -131,68 +201,60 @@
         </div>
     </div>
 </div>
-@* ... (Enlaces a CSS y JS de DataTables y SweetAlert2) ... *@
-
 @section Scripts{
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/2.0.8/js/jquery.dataTables.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
 
     <script>
-        var tablaDetalle; // DataTable para el detalle de vehículos seleccionados
-        var listaVehiculosDisponibles = []; // Lista global de vehículos para selección
-        var listaAsesores = []; // Lista global de asesores
-        var listaClientes = [];
+        var tablaDetalle;
+        var tablaVehiculosModal;
+        var tablaClientesModal;
+        var tablaAsesorModal;
 
-        // Objeto global que contendrá la estructura de la Venta
+        var listaVehiculosDisponibles = [];
+        var listaAsesores = [];
+        var listaClientes = [];
+        var listaTiposPago = [];
+
         var objVentaGlobal = {
             id_venta: 0,
-            fecha: new Date().toISOString().slice(0, 10), // Fecha de hoy en formato YYYY-MM-DD
+            fecha: new Date().toISOString().slice(0, 10),
             total: 0.00,
             comision: 0.00,
             observaciones: "",
             id_cliente: 0,
-            id_usuario: 0, // Se setea en el Controller
+            id_usuario: 0,
             id_asesor: 0,
-            oDetalleVenta: [] // Lista de DetalleVenta
+            oDetalleVenta: []
         };
 
-        // --- 1. FUNCIÓN PARA CARGAR DATOS INICIALES (Asesores, Clientes, Vehículos) ---
-        function cargarDatosIniciales() {
-            // Cargar Vehículos Disponibles
-            fetch('@Url.Action("ListarVehiculosDisponibles", "Venta")')
-                .then(res => res.json())
-                .then(data => {
-                    listaVehiculosDisponibles = data.data;
-                    console.log("Vehículos Disponibles cargados:", listaVehiculosDisponibles.length);
-                });
+        async function llenarTP() {
+            try {
 
-            fetch('@Url.Action("ListarAsesores", "Venta")')
-                .then(res => res.json())
-                .then(data => {
-                    listaAsesores = data.data;
-                    const selectAsesor = document.getElementById('ddlAsesor');
-                    listaAsesores.forEach(asesor => {
-                        selectAsesor.options.add(new Option(asesor.nombre + ' ' + asesor.apellidos, asesor.id_asesor));
-                    });
-                });
+                const response = await fetch('@Url.Action("ListarTiposPago", "Pago")', { method: 'GET' });
+                const data = await response.json();
+                const tp = data.data;
+                const ddlTP = document.getElementById("cboTipoPago");
+                ddlTP.innerHTML = '';
 
-            fetch('@Url.Action("ListarClientes", "Cliente")')
-                .then(res => res.json())
-                .then(data => {
-                    listaClientes = data.data;
-                    const selectCliente = document.getElementById('ddlCliente');
-                    listaClientes.forEach(cliente => {
-                        selectCliente.options.add(new Option(cliente.nombre_completo, cliente.id_cliente));
-                    });
+                tp.forEach(tp => {
+                    const option = document.createElement('option');
+                    option.value = tp.id_tipo_pago;
+                    option.textContent = tp.nombre;
+                    ddlTP.appendChild(option);
+
                 });
+            } catch (error) {
+                document.getElementById("cboTipoPago").innerHTML = '<option value="0">Error al cargar marcas</option>';
+            }
 
         }
 
 
-        // --- 2. FUNCIÓN PARA CALCULAR Y ACTUALIZAR EL TOTAL ---
         function actualizarTotal() {
             let total = 0;
             objVentaGlobal.oDetalleVenta.forEach(detalle => {
@@ -200,73 +262,118 @@
             });
 
             objVentaGlobal.total = total;
-            // Actualiza la UI (ej. el campo #txtTotalVenta)
             document.getElementById('txtTotalVenta').value = total.toFixed(2);
-
-            // También se podría recalcular la comisión aquí si es un porcentaje del total
-            // objVentaGlobal.comision = total * 0.01; // Ejemplo: 1% de comisión
-            // document.getElementById('txtMontoComision').value = objVentaGlobal.comision.toFixed(2);
+            document.getElementById('txtTotalVentaDisplay').innerText = `$ ${total.toFixed(2)}`;
         }
 
-        // --- 3. FUNCIÓN PARA AÑADIR VEHÍCULO AL DETALLE ---
-        function agregarVehiculoAlDetalle(idVehiculo, precioVenta) {
-            const vehiculoExistente = objVentaGlobal.oDetalleVenta.find(d => d.id_vehiculo == idVehiculo);
+        function recargarTablaDetalle() {
+            tablaDetalle.clear().draw();
 
-            if (vehiculoExistente) {
-                // Si ya existe, podrías mostrar una alerta o ignorarlo
-                Swal.fire('Advertencia', 'Este vehículo ya ha sido agregado al detalle.', 'warning');
-                return;
-            }
+            objVentaGlobal.oDetalleVenta.forEach(detalle => {
+                const vehiculoData = listaVehiculosDisponibles.find(v => v.id_vehiculo == detalle.id_vehiculo);
 
-            // Crear el objeto DetalleVenta
-            const detalle = {
-                id_vehiculo: parseInt(idVehiculo),
-                precio_venta: parseFloat(precioVenta)
-            };
-
-            objVentaGlobal.oDetalleVenta.push(detalle);
-
-            // Actualizar la tabla visual (tablaDetalle) y recalcular el total
-            // Nota: Aquí tendrías que obtener los datos completos del vehículo (modelo, placa)
-            // desde listaVehiculosDisponibles para mostrarlos en la tabla
-            // ... (Lógica para refrescar o añadir fila a tablaDetalle)
-
+                if (vehiculoData) {
+                    tablaDetalle.row.add([
+                        detalle.id_vehiculo,
+                        `${vehiculoData.modelo} (${vehiculoData.placa})`,
+                        detalle.precio_venta.toFixed(2),
+                        `<button type="button" class="btn btn-danger btn-sm btn-eliminar-detalle" data-id="${detalle.id_vehiculo}"><i class="fas fa-trash"></i></button>`
+                    ]).draw(false);
+                }
+            });
             actualizarTotal();
         }
 
+        function agregarVehiculoAlDetalle(idVehiculo, precioVenta) {
+            const id = parseInt(idVehiculo);
+            const precio = parseFloat(precioVenta);
 
-        // --- 4. FUNCIÓN PRINCIPAL DE REGISTRO ---
+            if (objVentaGlobal.oDetalleVenta.some(d => d.id_vehiculo === id)) {
+                Swal.fire('Advertencia', 'Este vehículo ya está en el detalle.', 'warning');
+                return;
+            }
+            if (precio <= 0 || isNaN(precio)) {
+                Swal.fire('Error', 'El precio de venta debe ser válido y mayor a cero.', 'error');
+                return;
+            }
+
+            objVentaGlobal.oDetalleVenta.push({ id_vehiculo: id, precio_venta: precio });
+            $('#ModalVehiculos').modal('hide');
+            recargarTablaDetalle();
+        }
+
+        function eliminarVehiculoDelDetalle(idVehiculo) {
+            objVentaGlobal.oDetalleVenta = objVentaGlobal.oDetalleVenta.filter(d => d.id_vehiculo !== idVehiculo);
+            recargarTablaDetalle();
+        }
+
+
         async function RegistrarVenta() {
-            // Sincronizar datos de la UI con el objeto global
-            objVentaGlobal.id_cliente = parseInt(document.getElementById('ddlCliente').value) || 0;
-            objVentaGlobal.id_asesor = parseInt(document.getElementById('ddlAsesor').value) || 0;
+
+            // 1. Recolección de datos de VENTA (Encabezado)
+            objVentaGlobal.id_cliente = parseInt(document.getElementById('txtIdClienteSeleccionado').value) || 0;
+            objVentaGlobal.id_asesor = parseInt(document.getElementById('txtIdAsesorSeleccionado').value) || 0;
             objVentaGlobal.comision = parseFloat(document.getElementById('txtMontoComision').value) || 0;
             objVentaGlobal.observaciones = document.getElementById('txtObservaciones').value.trim();
-            // La fecha y total ya están sincronizados por otras funciones
+
+            // 2. Recolección de datos de PAGO
+            // El monto de pago es el total de la venta (pago completo)
+            const idTipoPago = parseInt(document.getElementById('cboTipoPago').value) || 0;
+            const montoPago = objVentaGlobal.total;
+
+            // 3. Validaciones Combinadas
+            if (objVentaGlobal.id_cliente === 0) {
+                 Swal.fire('Error', 'Debe seleccionar un cliente.', 'error'); return;
+            }
+            if (objVentaGlobal.id_asesor === 0) {
+                 Swal.fire('Error', 'Debe seleccionar un asesor.', 'error'); return;
+            }
+            if (objVentaGlobal.oDetalleVenta.length === 0) {
+                 Swal.fire('Error', 'Debe agregar al menos un vehículo.', 'error'); return;
+            }
+            if (idTipoPago === 0) {
+                 Swal.fire('Error', 'Debe seleccionar un Tipo de Pago.', 'error'); return;
+            }
+            if (montoPago <= 0) {
+                 Swal.fire('Error', 'El total de la venta debe ser mayor a cero.', 'error'); return;
+            }
+
 
             Swal.fire({
-                title: "Confirmar Venta",
-                text: `¿Desea registrar la venta por un total de ${objVentaGlobal.total.toFixed(2)}?`,
+                title: "Confirmar Transacción",
+                text: `Se registrará la VENTA y el PAGO de $${montoPago.toFixed(2)}. ¿Desea continuar?`,
                 icon: 'question',
                 showCancelButton: true,
-                confirmButtonText: 'Sí, Registrar',
+                confirmButtonText: 'Sí, Finalizar',
                 showLoaderOnConfirm: true,
                 preConfirm: async () => {
-                    try {
-                        // Empaquetar el objeto global en JSON
-                        const ventaData = JSON.stringify(objVentaGlobal);
 
-                        const response = await fetch('@Url.Action("RegistrarVenta", "Venta")', {
+                    // 4. Construir el objeto de Transacción COMPLETO (Venta + Pago)
+                    const objTransaccion = {
+                        // oVenta coincide con la CapaEntidad/Venta.cs
+                        oVenta: objVentaGlobal,
+                        // MontoPago e IdTipoPago coinciden con CapaEntidad/VentaTransaccion.cs
+                        MontoPago: montoPago,
+                        IdTipoPago: idTipoPago
+                    };
+
+                    const TransaccionJson = JSON.stringify(objTransaccion);
+
+                    // La clave 'TransaccionJson' debe coincidir con el parámetro C#
+                    const payload = { TransaccionJson: TransaccionJson };
+
+                    try {
+                        // 5. Llamada AJAX al nuevo endpoint coordinador
+                        const response = await fetch('@Url.Action("FinalizarVentaCompleta", "Venta")', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json; charset=utf-8' },
-                            // Nota: Se envía como objeto anónimo para coincidir con el controlador
-                            body: JSON.stringify({ VentaJson: ventaData })
+                            body: JSON.stringify(payload)
                         });
 
                         if (!response.ok) throw new Error("Error en la petición al servidor.");
-
                         const data = await response.json();
                         return data;
+
                     } catch (error) {
                         Swal.showValidationMessage(`Fallo en la comunicación: ${error.message}`);
                         return false;
@@ -277,21 +384,189 @@
                 if (result.isConfirmed) {
                     const data = result.value;
                     if (data.resultado > 0) {
-                        Swal.fire('¡Venta Exitosa!', data.mensaje, 'success').then(() => {
-                            // Limpiar formulario y recargar la tabla de vehículos disponibles
+
+                        // Transacción Venta+Pago exitosa (data.resultado es el id_venta generado)
+
+                        Swal.fire('¡Transacción Exitosa!', data.mensaje, 'success').then(() => {
+                            // Generar PDF y luego recargar la página
+                            PDFVenta(data.resultado);
                             window.location.reload();
                         });
+
                     } else {
-                        // Error de validación de la Capa de Negocio o de la Base de Datos
-                        Swal.fire('Error en el Registro', data.mensaje, 'error');
+                        // Fallo en la CN o BD (rollback)
+                        Swal.fire('Error Fatal', data.mensaje, 'error');
                     }
                 }
             });
         }
 
+        function cargarDatosIniciales() {
+
+
+            llenarTP().then(() => {
+                fetch('@Url.Action("ListarAsesores", "Venta")')
+                    .then(res => res.json())
+                    .then(data => {
+                        listaAsesores = data.data;
+                        tablaAsesorModal = $('#tablaAsesorModal').DataTable({
+                            data: listaAsesores,
+                            responsive: true,
+                            ordering: true,
+                            "columns": [
+                                { "data": "nombre" },
+                                { "data": "apellidos" },
+                                { "data": "telefono" },
+                                { "data": "ci" },
+                                {
+                                    "defaultContent": '<button type="button" class="btn btn-success btn-sm btn-seleccionar-asesor"><i class="fas fa-check"></i> Seleccionar</button>',
+                                    "orderable": false,
+                                    "searchable": false,
+                                    "width": "100px"
+                                }
+                            ],
+                            "language": { "url": '//cdn.datatables.net/plug-ins/2.2.1/i18n/es-ES.json' },
+                            "lengthMenu": [[5, 10, 25, 50, -1], [5, 10, 25, 50, "Todos"]]
+                        });
+                    })
+                    .catch(error => {
+                        console.error("Error al cargar asesores: ", error);
+                    });
+
+                fetch('@Url.Action("ListarClientes", "Cliente")')
+                    .then(res => res.json())
+                    .then(data => {
+                        listaClientes = data.data;
+
+                        tablaClientesModal = $('#tablaClientesModal').DataTable({
+                            data: listaClientes,
+                            responsive: true,
+                            ordering: true,
+                            "columns": [
+                                { "data": "nombre_completo" },
+                                { "data": "ci_nit" },
+                                { "data": "telefono" },
+                                {
+                                    "defaultContent": '<button type="button" class="btn btn-success btn-sm btn-seleccionar-cliente"><i class="fas fa-check"></i> Seleccionar</button>',
+                                    "orderable": false,
+                                    "searchable": false,
+                                    "width": "100px"
+                                }
+                            ],
+                            "language": { "url": '//cdn.datatables.net/plug-ins/2.2.1/i18n/es-ES.json' },
+                            "lengthMenu": [[5, 10, 25, 50, -1], [5, 10, 25, 50, "Todos"]]
+                        });
+                    })
+                    .catch(error => {
+                        console.error("Error al cargar clientes: ", error);
+                    });
+
+            });
+            fetch('@Url.Action("ListarVehiculosDisponibles", "Venta")')
+                .then(res => res.json())
+                .then(data => {
+                    listaVehiculosDisponibles = data.data;
+                });
+        }
+        function PDFVenta(idVentaGenerada) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('p', 'mm', 'a4');
+            let y = 10
+
+            const fechaVenta = document.getElementById('txtFecha').value;
+            const nombreCliente = document.getElementById('txtNombreClienteSeleccionado').value;
+            const nombreAsesor = document.getElementById('txtNombreAsesorSeleccionado').value;
+            const totalVenta = parseFloat(document.getElementById('txtTotalVenta').value).toFixed(2);
+            const observaciones = document.getElementById('txtObservaciones').value.trim();
+            const tipoPagoSeleccionado = document.getElementById('cboTipoPago');
+            //podemos poner un input para que el usuario ponga el tipo de cambio
+            const tipoCambio = 7;
+
+            doc.setFontSize(18)
+            doc.text('DOCUMENTO DE VENTA - CARSYS',105, y, {align:'center'});
+            y += 10;
+
+            doc.setFontSize(12);
+            doc.text(`Nª Venta: ${idVentaGenerada}`, 10, y);
+            doc.text(`Fecha: ${fechaVenta}`, 180, y, { align: 'right' });
+            y += 10;
+
+            doc.setFontSize(14);
+            doc.text('DATOS DE LA TRANSACCION', 10, y);
+            y += 10;
+
+            doc.setFontSize(12);
+            doc.text(`Cliente: ${nombreCliente}`, 10, y);
+            doc.text(`Asesor: ${nombreAsesor}`, 180, y, { align: 'right' });
+            y += 15;
+
+            doc.setFontSize(14);
+            doc.text('DETALLE DE VEHÍCULOS', 10, y);
+            y += 5;
+
+            const tablaHeaders = [['ID', 'Modelo/Placa', 'Precio Venta ($)']];
+            const tablaBody = objVentaGlobal.oDetalleVenta.map(detalle => {
+                const vehiculoData = listaVehiculosDisponibles.find(v => v.id_vehiculo == detalle.id_vehiculo);
+
+                return [
+                    detalle.id_vehiculo,
+                    `${vehiculoData.modelo} (${vehiculoData.placa})`,
+                    detalle.precio_venta.toFixed(2)
+                ];
+            });
+
+            doc.autoTable({
+                head: tablaHeaders,
+                body: tablaBody,
+                startY: y,
+                theme: 'striped',
+                styles: { fontSize: 10 },
+                headStyles: { fillColor: [41, 128, 185], textColor: 255 },
+                didDrawPage: function (data) {
+                    y = data.cursor.y + 10;
+                }
+            });
+            y = doc.autoTable.previous.finalY + 10;
+
+
+            doc.setFontSize(14);
+            doc.setFont(undefined, 'bold');
+            doc.text(`TOTAL FINAL DE LA VENTA: $ ${totalVenta}`, 180, y, { align: 'right' });
+            y += 10;
+
+            doc.setFontSize(14);
+            doc.setFont(undefined, 'bold');
+            const totalVentaBs = (parseFloat(totalVenta) * tipoCambio).toFixed(2);
+            doc.text(`TOTAL EN BS.: ${totalVentaBs}`, 180, y, { align: 'right' });
+            y += 10;
+
+            //tipo de cambio
+            doc.setFontSize(12);
+            doc.setFont(undefined, 'normal');
+            doc.text(`Tipo de Cambio: ${tipoCambio}`, 10, y);
+            y += 10;
+
+            const tipoPagoText = tipoPagoSeleccionado.options[tipoPagoSeleccionado.selectedIndex].text;
+            //tipo de pago
+            doc.setFontSize(12);
+            doc.setFont(undefined, 'normal');
+            doc.text(`Forma de Pago: ${tipoPagoText}`, 10, y);
+            y += 10;
+
+            doc.setFontSize(12);
+            doc.setFont(undefined, 'normal');
+            doc.text('Observaciones:', 10, y);
+
+            const splitText = doc.splitTextToSize(observaciones, 180);
+            doc.text(splitText, 10, y + 5);
+
+            doc.save(`Venta_${idVentaGenerada}_${nombreCliente.substring(0, 15).replace(/[^a-zA-Z0-9]/g, '')}.pdf`);
+
+        }
+
 
         document.addEventListener('DOMContentLoaded', function () {
-            // 1. Configuración de DatePicker
+
             $(".datepicker").datepicker({
                 dateFormat: "yy-mm-dd",
                 changeMonth: true,
@@ -299,13 +574,96 @@
                 dayNamesMin: ["Do", "Lu", "Ma", "Mi", "Ju", "Vi", "Sa"],
                 monthNamesShort: ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"]
             });
-
-            // 2. Establecer fechas por defecto
             const today = new Date().toISOString().substring(0, 10);
             $("#txtFecha").val(today);
+
+
+            tablaDetalle = $('#tablaDetalle').DataTable({
+                ordering: false,
+                searching: false,
+                paging: false,
+                info: false,
+                language: { "url": '//cdn.datatables.net/plug-ins/2.2.1/i18n/es-ES.json' }
+            });
+
+            $("#tablaDetalle tbody").on("click", '.btn-eliminar-detalle', function () {
+                const fila = $(this).closest("tr");
+                const idVehiculo = parseInt($(this).data('id'));
+                eliminarVehiculoDelDetalle(idVehiculo);
+            });
+
+
+            tablaVehiculosModal = $('#tablaVehiculosDisponibles').DataTable({
+                 responsive: true,
+                 ajax: {
+                     url: '@Url.Action("ListarVehiculosDisponibles", "Venta")',
+                     type: "GET",
+                     datatype: "json",
+                     dataSrc: "data"
+                 },
+                 columns: [
+                     { data: "placa" },
+                     { data: "modelo" },
+                     { data: "año" },
+                     { data: "precio_venta", render: function (data) { return `$ ${parseFloat(data).toFixed(2)}`; } },
+                     {
+                         defaultContent: '<button type="button" class="btn btn-success btn-sm btn-seleccionar"><i class="fas fa-check"></i> Seleccionar</button>',
+                         orderable: false,
+                         searchable: false,
+                         width: "100px"
+                     }
+                 ],
+                 language: { "url": '//cdn.datatables.net/plug-ins/2.2.1/i18n/es-ES.json' }
+             });
+
+            // Evento para seleccionar Vehículo del Modal
+            $("#tablaVehiculosDisponibles tbody").on("click", '.btn-seleccionar', function () {
+                const data = tablaVehiculosModal.row($(this).closest("tr")).data();
+
+                Swal.fire({
+                    title: `Precio Venta para ${data.modelo} (${data.placa})`,
+                    input: 'number',
+                    inputLabel: `Precio Sugerido: $ ${parseFloat(data.precio_venta).toFixed(2)}`,
+                    inputValue: parseFloat(data.precio_venta).toFixed(2),
+                    showCancelButton: true,
+                    confirmButtonText: 'Añadir',
+                    inputValidator: (value) => {
+                        if (value <= 0 || isNaN(value)) {
+                            return 'Debe ingresar un precio de venta válido y mayor a cero.';
+                        }
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        agregarVehiculoAlDetalle(data.id_vehiculo, result.value);
+                    }
+                });
+            });
+
+
+            $('#tablaClientesModal tbody').on('click', '.btn-seleccionar-cliente', function () {
+                const dataCliente = tablaClientesModal.row($(this).parents('tr')).data();
+
+                document.getElementById('txtIdClienteSeleccionado').value = dataCliente.id_cliente;
+                document.getElementById('txtNombreClienteSeleccionado').value = dataCliente.nombre_completo + ' (' + dataCliente.ci_nit + ')';
+
+                objVentaGlobal.id_cliente = dataCliente.id_cliente;
+
+                $('#modalBuscarCliente').modal('hide');
+            });
+
+            $('#tablaAsesorModal tbody').on('click', '.btn-seleccionar-asesor', function () {
+                const dataAsesor = tablaAsesorModal.row($(this).parents('tr')).data();
+
+                document.getElementById('txtIdAsesorSeleccionado').value = dataAsesor.id_asesor;
+                document.getElementById('txtNombreAsesorSeleccionado').value = dataAsesor.nombre + ' (' + dataAsesor.apellidos + ')' + ' (' + dataAsesor.ci + ')';
+
+                objVentaGlobal.id_asesor = dataAsesor.id_asesor;
+
+                $('#modalBuscarAsesor').modal('hide');
+            });
+
+
             cargarDatosIniciales();
-            // Inicializar tablaDetalle (DataTable sin AJAX, solo datos locales)
-            // ...
         });
 
     </script>

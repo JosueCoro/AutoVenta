@@ -16,6 +16,7 @@ namespace CapaPresentacion.Controllers
         private CN_Venta cnVenta = new CN_Venta();
         private CN_Vehiculo cnVehiculo = new CN_Vehiculo();
         private CN_Asesor cnAsesor = new CN_Asesor();
+        private CN_Pago cnPago = new CN_Pago();
 
         // GET: Venta
         [ValidarPermisos(NombrePermiso = "Realizar Venta")]
@@ -42,37 +43,31 @@ namespace CapaPresentacion.Controllers
         }
 
 
-        // ----------------------------------------------------------------------
-        // MÉTODO AJAX DE REGISTRO TRANSACCIONAL
-        // ----------------------------------------------------------------------
-
         [HttpPost]
-        public JsonResult RegistrarVenta(string VentaJson)
+        public JsonResult FinalizarVentaCompleta(string TransaccionJson) 
         {
             string Mensaje = string.Empty;
-            int idGenerado = 0;
+            int idGenerado = 0; 
 
             try
             {
-                // Deserializa el objeto Venta que llega como una cadena JSON
-                Venta objVenta = new JavaScriptSerializer().Deserialize<Venta>(VentaJson);
+                VentaTransaccion objTransaccion = new JavaScriptSerializer().Deserialize<VentaTransaccion>(TransaccionJson);
 
-                // Obtener el ID del usuario que realiza la operación (Auditoría y FK en Venta)
-                // Asumo que la estructura Usuario_Activo existe en la sesión
                 int idUsuarioSesion = ((Usuario_Activo)Session["Usuario"]).id_usuario;
-                objVenta.id_usuario = idUsuarioSesion; // Establece el usuario que registra la venta
+                objTransaccion.oVenta.id_usuario = idUsuarioSesion;
 
-                // Llamar a la Capa de Negocio para realizar la transacción completa
-                idGenerado = cnVenta.Registrar(objVenta, out Mensaje);
+                idGenerado = cnVenta.RegistrarVentaYPago(objTransaccion.oVenta,
+                                                        objTransaccion.MontoPago,
+                                                        objTransaccion.IdTipoPago,
+                                                        idUsuarioSesion,
+                                                        out Mensaje);
             }
             catch (Exception ex)
             {
-                // Capturar cualquier error inesperado (serialización, null reference, etc.)
-                Mensaje = "Error interno del servidor al procesar la solicitud: " + ex.Message;
+                Mensaje = "Error en el servidor al procesar la transacción: " + ex.Message;
                 idGenerado = 0;
             }
 
-            // Devolver el resultado de la operación
             return Json(new { resultado = idGenerado, mensaje = Mensaje }, JsonRequestBehavior.AllowGet);
         }
 
