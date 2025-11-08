@@ -23,20 +23,17 @@ namespace CapaDato
                     SqlCommand cmd = new SqlCommand("comercial.RegistrarPago", oConexion);
                     cmd.CommandType = CommandType.StoredProcedure;
 
-                    // Parámetros de ENTRADA
                     cmd.Parameters.AddWithValue("@IdVenta", objPago.id_venta);
                     cmd.Parameters.AddWithValue("@MontoPago", objPago.monto);
                     cmd.Parameters.AddWithValue("@IdTipoPago", objPago.id_tipo_pago);
                     cmd.Parameters.AddWithValue("@IdUsuarioAuditoria", idUsuarioAuditoria);
 
-                    // Parámetros de SALIDA
                     cmd.Parameters.Add("@Mensaje", SqlDbType.VarChar, 500).Direction = ParameterDirection.Output;
                     cmd.Parameters.Add("@IdPagoGenerado", SqlDbType.Int).Direction = ParameterDirection.Output;
 
                     oConexion.Open();
                     cmd.ExecuteNonQuery();
 
-                    // Capturar valores de salida
                     idPagoGenerado = Convert.ToInt32(cmd.Parameters["@IdPagoGenerado"].Value);
                     Mensaje = cmd.Parameters["@Mensaje"].Value.ToString();
                 }

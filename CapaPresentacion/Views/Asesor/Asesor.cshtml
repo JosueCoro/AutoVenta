@@ -114,14 +114,12 @@
                 },
             });
 
-            // Evento de clic para el botón Editar de la tabla
             $("#tablaasesores tbody").on("click", '.btn-editar', function () {
                 filaSeleccionada = $(this).closest("tr");
                 var data = tabladata.row(filaSeleccionada).data();
                 abrirModal(data);
             });
 
-            // Evento de clic para el botón Eliminar de la tabla
             $("#tablaasesores tbody").on("click", '.btn-eliminar', function () {
                 filaSeleccionada = $(this).closest("tr");
                 var data = tabladata.row(filaSeleccionada).data();
@@ -129,7 +127,6 @@
             });
         });
 
-        // Limpia el formulario
         function Limpiar() {
             document.getElementById("txtid").value = 0;
             document.getElementById("txtNombre").value = "";
@@ -139,7 +136,6 @@
             document.getElementById("txtDireccion").value = "";
         }
 
-        // Abre el modal para crear o editar
         function abrirModal(json) {
             Limpiar();
             if (json != null) {
@@ -156,7 +152,6 @@
             $('#FormModal').modal('show');
         }
 
-        // Función para guardar un Asesor usando FETCH y SweetAlert2
         async function Guardar() {
             const asesor = {
                 id_asesor: parseInt(document.getElementById("txtid").value),
@@ -169,7 +164,6 @@
 
             const esNuevo = asesor.id_asesor === 0;
 
-            // ***** CORRECCIÓN CLAVE: Se elimina la validación genérica de JS *****
 
             Swal.fire({
                 title: esNuevo ? "Registrando asesor..." : "Actualizando asesor...",
@@ -189,7 +183,7 @@
 
                 const data = await response.json();
 
-                if (data.resultado && data.resultado > 0) { // Éxito si resultado > 0 (ID generado) o true (booleano)
+                if (data.resultado && data.resultado > 0) { 
                     Swal.fire({
                         title: esNuevo ? "¡Registrado!" : "¡Actualizado!",
                         text: data.mensaje,
@@ -200,16 +194,14 @@
                         asesor.id_asesor = data.resultado;
                         tabladata.row.add(asesor).draw(false);
                     } else {
-                        // Recargar la fila para asegurar que se vean los cambios
                         tabladata.ajax.reload(null, false);
                     }
 
                     $('#FormModal').modal("hide");
                 } else {
-                    // ERROR: Muestra el mensaje ESPECÍFICO devuelto por la Capa de Negocio
                     Swal.fire({
                         title: "¡Error de Validación!",
-                        text: data.mensaje, // Este es el mensaje específico de la CN, ej: "El nombre es obligatorio."
+                        text: data.mensaje,
                         icon: 'error'
                     });
                 }
@@ -219,7 +211,6 @@
             }
         }
 
-        // Función para eliminar un Asesor (se mantiene sin cambios)
         async function Eliminar(asesor) {
             Swal.fire({
                 title: '¿Estás seguro?',

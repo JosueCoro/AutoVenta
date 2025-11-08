@@ -8,7 +8,7 @@ namespace CapaDato
 {
     public class CD_Gasto
     {
-        public List<Gasto> Listar()
+        /*public List<Gasto> Listar()
         {
             List<Gasto> lista = new List<Gasto>();
             string mensajeError = string.Empty;
@@ -42,7 +42,6 @@ namespace CapaDato
                                     nombre = dr["NombreTipoGasto"].ToString()
                                 },
 
-                                // Mapeo simple de Vehículo (solo modelo y año para display)
                                 id_vehiculo = esGastoVehiculo ? (int?)Convert.ToInt32(dr["id_vehiculo"]) : null,
                                 oVehiculo = esGastoVehiculo ? new Vehiculo()
                                 {
@@ -51,9 +50,8 @@ namespace CapaDato
                                     placa = dr["Placa"].ToString(),
                                 } : null,
 
-                                // Mapeo simple de Venta (solo ID)
                                 id_venta = dr["id_venta"] != DBNull.Value ? (int?)Convert.ToInt32(dr["id_venta"]) : null,
-                                oVenta = null // Venta no necesita sub-objeto si solo usamos id_venta
+                                oVenta = null 
                             });
                         }
                     }
@@ -62,9 +60,99 @@ namespace CapaDato
             catch (Exception ex)
             {
                 mensajeError = ex.Message;
-                // Dejamos lista vacía, pero si el problema persiste, es la conexión o el SP.
                 lista = new List<Gasto>();
                 throw new Exception("Fallo en CD_Gasto.Listar: " + mensajeError);
+            }
+            return lista;
+        }*/
+        public List<Gasto> ListarGeneral()
+        {
+            return ListarGastosBase("SELECT");
+        }
+
+        public List<Gasto> ListarGastosVehiculos()
+        {
+            return ListarGastosBase("SELECT_GVH");
+        }
+
+        public List<Gasto> ListarGastosVentas()
+        {
+            return ListarGastosBase("SELECT_GVS");
+        }
+
+        private List<Gasto> ListarGastosBase(string operacion)
+        {
+            List<Gasto> lista = new List<Gasto>();
+            try
+            {
+                using (SqlConnection oConexion = new SqlConnection(Conexion.cn))
+                {
+                    SqlCommand cmd = new SqlCommand("comercial.CRUD_GASTO", oConexion);
+                    cmd.Parameters.AddWithValue("@Operacion", operacion);
+                    cmd.Parameters.Add("@Mensaje", SqlDbType.VarChar, 500).Direction = ParameterDirection.Output;
+                    cmd.Parameters.Add("@Resultado", SqlDbType.Int).Direction = ParameterDirection.Output;
+                    cmd.CommandType = CommandType.StoredProcedure;
+
+                    oConexion.Open();
+                    using (SqlDataReader dr = cmd.ExecuteReader())
+                    {
+                        while (dr.Read())
+                        {
+                            // Determinar si la columna de Vehículo tiene valor (no es nula)
+                            bool esGastoVehiculo = dr["id_vehiculo"] != DBNull.Value;
+                            // Determinar si la columna de Venta tiene valor (no es nula)
+                            bool esGastoVenta = dr["id_venta"] != DBNull.Value;
+
+                            Gasto nuevoGasto = new Gasto()
+                            {
+                                id_gasto = Convert.ToInt32(dr["id_gasto"]),
+                                descripcion = dr["descripcion"].ToString(),
+                                monto = Convert.ToDecimal(dr["monto"]),
+                                fecha = Convert.ToDateTime(dr["fecha"]).ToShortDateString(),
+
+                                id_tipo_gasto = Convert.ToInt32(dr["id_tipo_gasto"]),
+                                oTipoGasto = new TipoGasto()
+                                {
+                                    nombre = dr["NombreTipoGasto"].ToString()
+                                },
+
+                                // *** DATOS DE VEHÍCULO ***
+                                id_vehiculo = esGastoVehiculo ? (int?)Convert.ToInt32(dr["id_vehiculo"]) : null,
+                                oVehiculo = esGastoVehiculo ? new Vehiculo()
+                                {
+                                    modelo = dr["ModeloVehiculo"].ToString(),
+                                    año = dr["AnioVehiculo"].ToString(),
+                                    placa = dr["Placa"].ToString(),
+                                    // Asumiendo que esta es la entidad Vehiculo completa
+                                } : null,
+
+                                // *** DATOS DE VENTA Y CLIENTE ***
+                                id_venta = esGastoVenta ? (int?)Convert.ToInt32(dr["id_venta"]) : null,
+                                oVenta = esGastoVenta ? new Venta()
+                                {
+                                    id_venta = Convert.ToInt32(dr["id_venta"]),
+                                    oCliente = new Cliente() // Cliente es una sub-entidad de Venta
+                                    {
+                                        nombre_completo = dr["NombreCliente"].ToString(),
+                                        ci_nit = dr["CiNitCliente"].ToString()
+                                    }
+                                } : null,
+
+                                // Asignar InfoAsociacion para fácil visualización
+                                InfoAsociacion = esGastoVehiculo ? "Vehículo - " + dr["Placa"].ToString() :
+                                                 esGastoVenta ? "Venta - Cliente: " + dr["NombreCliente"].ToString() : "General"
+                            };
+
+                            lista.Add(nuevoGasto);
+                        }
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                // Manejo de errores simplificado
+                lista = new List<Gasto>();
+                // Idealmente, se registra el error o se lanza una excepción más controlada
             }
             return lista;
         }
@@ -76,7 +164,6 @@ namespace CapaDato
 
             try
             {
-                // Paso 1: Convertir la lista C# a un DataTable para el parámetro de tipo tabla SQL
                 DataTable dtDetalle = new DataTable();
                 dtDetalle.Columns.Add("descripcion", typeof(string));
                 dtDetalle.Columns.Add("monto", typeof(decimal));
@@ -91,7 +178,6 @@ namespace CapaDato
                 {
                     SqlCommand cmd = new SqlCommand("comercial.RegistrarGastos", oConexion);
 
-                    // Paso 2: Configurar parámetros de asociación mutua
                     if (tipoAsociacion == "VEHICULO")
                     {
                         cmd.Parameters.AddWithValue("@IdVehiculo", idAsociacion);
@@ -102,19 +188,16 @@ namespace CapaDato
                         cmd.Parameters.AddWithValue("@IdVehiculo", DBNull.Value);
                         cmd.Parameters.AddWithValue("@IdVenta", idAsociacion);
                     }
-                    // Si la CN validó correctamente, esto siempre será 'VEHICULO' o 'VENTA'.
 
-                    // Paso 3: Configurar el parámetro de tipo tabla READONLY
                     SqlParameter paramDetalle = new SqlParameter();
                     paramDetalle.ParameterName = "@DetalleGastos";
-                    paramDetalle.SqlDbType = SqlDbType.Structured; // Clave para tipos de tabla
+                    paramDetalle.SqlDbType = SqlDbType.Structured; 
                     paramDetalle.TypeName = "comercial.DetalleGastoTipo";
                     paramDetalle.Value = dtDetalle;
                     cmd.Parameters.Add(paramDetalle);
 
                     cmd.Parameters.AddWithValue("@IdUsuarioAuditoria", idUsuarioAuditoria);
 
-                    // Paso 4: Configurar Output y ejecución
                     cmd.Parameters.Add("@Mensaje", SqlDbType.VarChar, 500).Direction = ParameterDirection.Output;
                     cmd.Parameters.Add("@Resultado", SqlDbType.Int).Direction = ParameterDirection.Output;
                     cmd.CommandType = CommandType.StoredProcedure;
@@ -134,7 +217,6 @@ namespace CapaDato
             return gastosInsertados;
         }
 
-        // CÓDIGO DE Eliminar (Sin cambios)
         public bool Eliminar(int idGasto, int idUsuarioAuditoria, out string Mensaje)
         {
             bool resultado = false;

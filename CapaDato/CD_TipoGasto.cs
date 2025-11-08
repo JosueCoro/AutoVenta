@@ -42,12 +42,10 @@ namespace CapaDato
             catch (Exception ex)
             {
                 lista = new List<TipoGasto>();
-                // Manejo de excepción
             }
             return lista;
         }
 
-        // Método para registrar un nuevo Tipo de Gasto
         public int Registrar(TipoGasto obj, int idUsuario, out string Mensaje)
         {
             int idGenerado = 0;
@@ -82,7 +80,6 @@ namespace CapaDato
             return idGenerado;
         }
 
-        // Método para editar un Tipo de Gasto
         public bool Editar(TipoGasto obj, int idUsuario, out string Mensaje)
         {
             bool resultado = false;
@@ -118,7 +115,6 @@ namespace CapaDato
             return resultado;
         }
 
-        // Método para eliminar un Tipo de Gasto
         public bool Eliminar(int id, int idUsuario, out string Mensaje)
         {
             bool resultado = false;

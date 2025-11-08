@@ -34,7 +34,6 @@ namespace CapaPresentacion.Controllers
             object resultado;
             string Mensaje = string.Empty;
 
-            // OBTENER ID DEL USUARIO DE LA SESIÓN (AUDITORÍA)
             int idUsuario = ((Usuario_Activo)Session["Usuario"]).id_usuario;
 
             if (objeto.id_cliente == 0)
@@ -52,7 +51,6 @@ namespace CapaPresentacion.Controllers
         [HttpPost]
         public JsonResult EliminarCliente(int id)
         {
-            // OBTENER ID DEL USUARIO DE LA SESIÓN (AUDITORÍA)
             int idUsuario = ((Usuario_Activo)Session["Usuario"]).id_usuario;
 
             bool resultado = new CN_Cliente().Eliminar(id, idUsuario, out string mensaje);

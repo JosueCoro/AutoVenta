@@ -19,14 +19,11 @@
         var tabladata;
 
         async function cargarUsuariosFiltro() {
-            // Se asume que 'cboUsuario' existe en el DOM cuando se llama a esta función.
             const ddlUsuario = document.getElementById("cboUsuario");
 
-            // 🛑 AHORA ESTA LÍNEA ES SEGURA (ya que la llamaremos desde DOMContentLoaded)
             ddlUsuario.innerHTML = '<option value="0">Cargando...</option>';
 
             try {
-                // Se corrigió el nombre de la acción en el fetch.
                 const response = await fetch('@Url.Action("ListarUsuarios", "Bitacora")', { method: 'GET' });
                 const data = await response.json();
 
@@ -45,7 +42,6 @@
             }
         }
 
-        // Función para recargar la tabla (usada por el botón Buscar)
         function filtrarBitacora() {
             if ($.fn.DataTable.isDataTable('#tablaBitacora')) {
                 tabladata.ajax.reload();
@@ -68,7 +64,6 @@
                     "datatype": "json",
                     "dataSrc": function (json) {
                         console.log("Datos completos recibidos:", json.data);
-                        // DataTables espera que devolvamos la lista de registros
                         return json.data;
                     },
                     "data": function (d) {
@@ -83,10 +78,8 @@
                         "data": "fecha",
                         "render": function (data) {
                             if (data) {
-                                // Extrae el número de milisegundos de la cadena /Date(1666992000000)/
                                 const milliseconds = parseInt(data.replace("/Date(", "").replace(")/", ""));
 
-                                // Si el número es válido, crea la fecha
                                 if (!isNaN(milliseconds)) {
                                     return new Date(milliseconds).toLocaleDateString();
                                 }
@@ -126,10 +119,8 @@
             });
         }
 
-        // 🟢 BLOQUE DE EJECUCIÓN: Todo lo que interactúa con el DOM DEBE ir aquí.
         document.addEventListener('DOMContentLoaded', function () {
 
-            // 1. Configuración de DatePicker
             $(".datepicker").datepicker({
                 dateFormat: "yy-mm-dd",
                 changeMonth: true,
@@ -138,15 +129,12 @@
                 monthNamesShort: ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"]
             });
 
-            // 2. Establecer fechas por defecto
             const today = new Date().toISOString().substring(0, 10);
             $("#txtFechaInicio").val(today);
             $("#txtFechaFin").val(today);
 
-            // 3. Cargar Filtros (Seguro porque el DOM ya está listo)
             cargarUsuariosFiltro();
 
-            // 4. Inicializar DataTables (Seguro porque el DOM ya está listo)
             inicializarTabla();
         });
     </script>

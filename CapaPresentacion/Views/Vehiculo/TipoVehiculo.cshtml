@@ -40,7 +40,6 @@
 </div>
 
 
-<!-- Modal para Crear/Editar Tipo de Vehículo -->
 <div class="modal fade" id="FormModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" data-bs-backdrop="static">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -67,7 +66,6 @@
 
 @section Scripts{
     <script>
-        // Nota: Si usa Bootstrap 4, cambie las llamadas a modal por jQuery (ej: $('#FormModal').modal('show'))
 
         var tabladata;
         var filaSeleccionada;
@@ -96,14 +94,12 @@
                 },
             });
 
-            // Evento de clic para el botón Editar de la tabla
             $("#tablatipovehiculo tbody").on("click", '.btn-editar', function () {
                 filaSeleccionada = $(this).closest("tr");
                 var data = tabladata.row(filaSeleccionada).data();
                 abrirModal(data);
             });
 
-            // Evento de clic para el botón Eliminar de la tabla
             $("#tablatipovehiculo tbody").on("click", '.btn-eliminar', function () {
                 filaSeleccionada = $(this).closest("tr");
                 var data = tabladata.row(filaSeleccionada).data();
@@ -111,13 +107,11 @@
             });
         });
 
-        // Limpia el formulario
         function Limpiar() {
             document.getElementById("txtid").value = 0;
             document.getElementById("txtDescripcion").value = "";
         }
 
-        // Abre el modal para crear o editar
         function abrirModal(json) {
             Limpiar();
             if (json != null) {
@@ -127,11 +121,9 @@
             } else {
                 document.getElementById("modalTitle").textContent = "Crear Nuevo Tipo de Vehículo";
             }
-            // Usa jQuery para mostrar el modal si estás usando Bootstrap 4
             $('#FormModal').modal('show');
         }
 
-        // Función para guardar un Tipo de Vehículo usando FETCH y SweetAlert2
         async function Guardar() {
             const tipoVehiculo = {
                 id_tp_vehiculo: parseInt(document.getElementById("txtid").value),
@@ -153,7 +145,6 @@
             });
 
             try {
-                // Se llama a la acción GuardarTipoVehiculo del VehiculoController
                 const response = await fetch('@Url.Action("GuardarTipoVehiculo", "Vehiculo")', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json; charset=utf-8' },
@@ -167,11 +158,10 @@
                 if (data.resultado) {
                     Swal.fire({
                         title: esNuevo ? "¡Registrado!" : "¡Actualizado!",
-                        text: data.mensaje, // Usamos el mensaje devuelto por el SP/CN
+                        text: data.mensaje, 
                         icon: 'success'
                     });
 
-                    // Actualizamos la tabla
                     if (esNuevo) {
                         tipoVehiculo.id_tp_vehiculo = data.resultado;
                         tabladata.row.add(tipoVehiculo).draw(false);
@@ -189,7 +179,6 @@
             }
         }
 
-        // Función para eliminar un Tipo de Vehículo
         async function Eliminar(tipoVehiculo) {
             Swal.fire({
                 title: '¿Estás seguro?',
@@ -224,7 +213,6 @@
                             tabladata.row(filaSeleccionada).remove().draw();
                             Swal.fire('¡Eliminado!', data.mensaje, 'success');
                         } else {
-                            // Este error maneja la restricción de integridad referencial del SP
                             Swal.fire('Error', data.mensaje, 'error');
                         }
                     } catch (error) {

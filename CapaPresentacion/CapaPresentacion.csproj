@@ -2431,6 +2431,7 @@
     <Content Include="Views\Pago\TipoPago.cshtml" />
     <Content Include="Views\Gasto\TipoGasto.cshtml" />
     <Content Include="Views\Login\AccesoDenegado.cshtml" />
+    <Content Include="Views\Gasto\GastoVenta.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

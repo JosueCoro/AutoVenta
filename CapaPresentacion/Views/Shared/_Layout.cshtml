@@ -129,7 +129,17 @@
                 <li class="nav-item active">
                     <a class="nav-link" href="@Url.Action("Gasto", "Gasto")">
                         <i class="fas fa-fw fa-tags"></i>
-                        <span>Gastos</span>
+                        <span>Gastos Vehicular</span>
+                    </a>
+                </li>
+            }
+
+            @if (TienePermiso("Gestionar Gasto"))
+            {
+                <li class="nav-item active">
+                    <a class="nav-link" href="@Url.Action("GastoVenta", "Gasto")">
+                        <i class="fas fa-fw fa-tags"></i>
+                        <span>Gastos de Ventas</span>
                     </a>
                 </li>
             }

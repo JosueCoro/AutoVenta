@@ -29,7 +29,6 @@ namespace CapaPresentacion.Controllers
                 return Json(new { lista = new List<Permiso>(), error = "ID de rol inválido" }, JsonRequestBehavior.AllowGet);
             }
 
-            // Llama a la CN, que a su vez llama al SP 'SELECT_ASIGNADOS'
             List<Permiso> listaPermisos = cnPermiso.ListarPermisosPorRol(idRol);
 
             return Json(new { lista = listaPermisos }, JsonRequestBehavior.AllowGet);

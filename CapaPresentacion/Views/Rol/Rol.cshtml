@@ -79,7 +79,6 @@
         var tabladata;
         var filaSeleccionada;
 
-        // Función auxiliar para renderizar el estado como badge
         function renderizarEstado(data) {
             if (data) {
                 return '<span class="badge bg-success text-white">Activo</span>';
@@ -116,14 +115,12 @@
                 },
             });
 
-            // Evento de clic para el botón Editar de la tabla
             $("#tablaroles tbody").on("click", '.btn-editar', function () {
                 filaSeleccionada = $(this).closest("tr");
                 var data = tabladata.row(filaSeleccionada).data();
                 abrirModal(data);
             });
 
-            // Evento de clic para el botón Eliminar de la tabla
             $("#tablaroles tbody").on("click", '.btn-eliminar', function () {
                 filaSeleccionada = $(this).closest("tr");
                 var data = tabladata.row(filaSeleccionada).data();
@@ -131,21 +128,17 @@
             });
         });
 
-        // Limpia el formulario
         function Limpiar() {
             document.getElementById("txtid").value = 0;
             document.getElementById("txtNombre").value = "";
-            document.getElementById("cboEstado").value = "1"; // Activo por defecto
+            document.getElementById("cboEstado").value = "1"; 
         }
 
-        // Abre el modal para crear o editar
         function abrirModal(json) {
             Limpiar();
             if (json != null) {
                 document.getElementById("txtid").value = json.id_rol;
                 document.getElementById("txtNombre").value = json.nombre;
-                // El valor del estado es "1" (Activo) o "0" (Inactivo) en la DB (BIT),
-                // pero C# lo convierte a boolean (true/false). Lo convertimos a string para el select.
                 document.getElementById("cboEstado").value = json.estado ? "1" : "0";
                 document.getElementById("modalTitle").textContent = "Editar Rol";
             } else {
@@ -154,12 +147,10 @@
             $('#FormModal').modal('show');
         }
 
-        // Función para guardar un Rol usando FETCH y SweetAlert2
         async function Guardar() {
             const rol = {
                 id_rol: parseInt(document.getElementById("txtid").value),
                 nombre: document.getElementById("txtNombre").value.trim(),
-                // Convertir el string "1" o "0" a booleano esperado por C#
                 estado: document.getElementById("cboEstado").value === "1"
             };
 
@@ -183,19 +174,17 @@
 
                 const data = await response.json();
 
-                if (data.resultado && data.resultado > 0) { // Éxito
+                if (data.resultado && data.resultado > 0) { 
                     Swal.fire({
                         title: esNuevo ? "¡Registrado!" : "¡Actualizado!",
                         text: data.mensaje,
                         icon: 'success'
                     });
 
-                    // Recargar la tabla
                     tabladata.ajax.reload(null, false);
 
                     $('#FormModal').modal("hide");
                 } else {
-                    // ERROR: Muestra el mensaje ESPECÍFICO de la Capa de Negocio
                     Swal.fire({
                         title: "¡Error de Validación!",
                         text: data.mensaje,
@@ -208,7 +197,6 @@
             }
         }
 
-        // Función para eliminar un Rol
         async function Eliminar(rol) {
             Swal.fire({
                 title: '¿Estás seguro?',
@@ -243,7 +231,6 @@
                             tabladata.row(filaSeleccionada).remove().draw();
                             Swal.fire('¡Eliminado!', data.mensaje, 'success');
                         } else {
-                            // Maneja el error de dependencia (rol con usuarios)
                             Swal.fire('Error', data.mensaje, 'error');
                         }
                     } catch (error) {

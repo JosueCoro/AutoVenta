@@ -23,13 +23,10 @@ namespace CapaPresentacion.Controllers
             Usuario_Activo oUsuario = new Usuario_Activo();
             string mensaje = string.Empty;
 
-            // Instancia de la Capa de Negocio
             oUsuario = new CN_Login().ValidarUsuario(correo, contrasena);
 
             if (oUsuario != null)
             {
-                // Login Exitoso
-                // Almacenamos el objeto de usuario completo en la sesión.
                 Session["Usuario"] = oUsuario;
                 Session["NombreUsuario"] = oUsuario.nombre + " " + oUsuario.apellido;
                 Session["Email"] = oUsuario.correo;

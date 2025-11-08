@@ -93,14 +93,12 @@
                 },
             });
 
-            // Evento de clic para el botón Editar de la tabla
             $("#tablatipopago tbody").on("click", '.btn-editar', function () {
                 filaSeleccionada = $(this).closest("tr");
                 var data = tabladata.row(filaSeleccionada).data();
                 abrirModal(data);
             });
 
-            // Evento de clic para el botón Eliminar de la tabla
             $("#tablatipopago tbody").on("click", '.btn-eliminar', function () {
                 filaSeleccionada = $(this).closest("tr");
                 var data = tabladata.row(filaSeleccionada).data();
@@ -108,13 +106,11 @@
             });
         });
 
-        // Limpia el formulario
         function Limpiar() {
             document.getElementById("txtid").value = 0;
             document.getElementById("txtNombre").value = "";
         }
 
-        // Abre el modal para crear o editar
         function abrirModal(json) {
             Limpiar();
             if (json != null) {
@@ -127,7 +123,6 @@
             $('#FormModal').modal('show');
         }
 
-        // Función para guardar un Tipo de Pago usando FETCH y SweetAlert2
         async function Guardar() {
             const tipoPago = {
                 id_tipo_pago: parseInt(document.getElementById("txtid").value),
@@ -183,7 +178,6 @@
             }
         }
 
-        // Función para eliminar un Tipo de Pago
         async function Eliminar(tipoPago) {
             Swal.fire({
                 title: '¿Estás seguro?',
@@ -218,7 +212,6 @@
                             tabladata.row(filaSeleccionada).remove().draw();
                             Swal.fire('¡Eliminado!', data.mensaje, 'success');
                         } else {
-                            // Maneja el error de dependencia
                             Swal.fire('Error', data.mensaje, 'error');
                         }
                     } catch (error) {

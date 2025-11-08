@@ -43,7 +43,6 @@ namespace CapaDato
             return lista;
         }
 
-        // Método para registrar un nuevo Rol
         public int Registrar(Rol obj, int idUsuario, out string Mensaje)
         {
             int idGenerado = 0;
@@ -79,7 +78,6 @@ namespace CapaDato
             return idGenerado;
         }
 
-        // Método para editar un Rol
         public bool Editar(Rol obj, int idUsuario, out string Mensaje)
         {
             bool resultado = false;
@@ -116,7 +114,6 @@ namespace CapaDato
             return resultado;
         }
 
-        // Método para eliminar un Rol
         public bool Eliminar(int id, int idUsuario, out string Mensaje)
         {
             bool resultado = false;

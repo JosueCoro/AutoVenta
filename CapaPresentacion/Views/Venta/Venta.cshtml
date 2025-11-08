@@ -51,7 +51,7 @@
             </div>
 
             <div class="col-lg-2 col-md-4 mb-3">
-                <label for="txtMontoComision" class="form-label fw-bold text-danger">Comisión ($):</label>
+                <label for="txtMontoComision" class="form-label fw-bold text-danger">Comisión (Bs.):</label>
                 <input type="number" class="form-control text-danger" id="txtMontoComision" value="0.00" min="0" step="0.01">
             </div>
             
@@ -92,7 +92,7 @@
             <tfoot>
                 <tr class="bg-warning">
                     <th colspan="2" class="text-end">TOTAL DE LA VENTA:</th>
-                    <th id="txtTotalVentaDisplay" class="text-end fw-bold">$ 0.00</th>
+                    <th id="txtTotalVentaDisplay" class="text-end fw-bold">Bs.  0.00</th>
                     <th></th>
                 </tr>
             </tfoot>
@@ -310,18 +310,14 @@
 
         async function RegistrarVenta() {
 
-            // 1. Recolección de datos de VENTA (Encabezado)
             objVentaGlobal.id_cliente = parseInt(document.getElementById('txtIdClienteSeleccionado').value) || 0;
             objVentaGlobal.id_asesor = parseInt(document.getElementById('txtIdAsesorSeleccionado').value) || 0;
             objVentaGlobal.comision = parseFloat(document.getElementById('txtMontoComision').value) || 0;
             objVentaGlobal.observaciones = document.getElementById('txtObservaciones').value.trim();
 
-            // 2. Recolección de datos de PAGO
-            // El monto de pago es el total de la venta (pago completo)
             const idTipoPago = parseInt(document.getElementById('cboTipoPago').value) || 0;
             const montoPago = objVentaGlobal.total;
 
-            // 3. Validaciones Combinadas
             if (objVentaGlobal.id_cliente === 0) {
                  Swal.fire('Error', 'Debe seleccionar un cliente.', 'error'); return;
             }
@@ -348,22 +344,17 @@
                 showLoaderOnConfirm: true,
                 preConfirm: async () => {
 
-                    // 4. Construir el objeto de Transacción COMPLETO (Venta + Pago)
                     const objTransaccion = {
-                        // oVenta coincide con la CapaEntidad/Venta.cs
                         oVenta: objVentaGlobal,
-                        // MontoPago e IdTipoPago coinciden con CapaEntidad/VentaTransaccion.cs
                         MontoPago: montoPago,
                         IdTipoPago: idTipoPago
                     };
 
                     const TransaccionJson = JSON.stringify(objTransaccion);
 
-                    // La clave 'TransaccionJson' debe coincidir con el parámetro C#
                     const payload = { TransaccionJson: TransaccionJson };
 
                     try {
-                        // 5. Llamada AJAX al nuevo endpoint coordinador
                         const response = await fetch('@Url.Action("FinalizarVentaCompleta", "Venta")', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json; charset=utf-8' },
@@ -385,16 +376,13 @@
                     const data = result.value;
                     if (data.resultado > 0) {
 
-                        // Transacción Venta+Pago exitosa (data.resultado es el id_venta generado)
 
                         Swal.fire('¡Transacción Exitosa!', data.mensaje, 'success').then(() => {
-                            // Generar PDF y luego recargar la página
                             PDFVenta(data.resultado);
                             window.location.reload();
                         });
 
                     } else {
-                        // Fallo en la CN o BD (rollback)
                         Swal.fire('Error Fatal', data.mensaje, 'error');
                     }
                 }

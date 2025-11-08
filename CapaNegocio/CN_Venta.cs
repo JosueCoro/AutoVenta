@@ -13,6 +13,11 @@ namespace CapaNegocio
         private CD_Venta cdVenta = new CD_Venta();
         private CD_Pago cdPago = new CD_Pago();
 
+        public List<VentaSimple> Listar()
+        {
+            return cdVenta.ListarSimples();
+        }
+
         public int RegistrarSoloVenta(Venta objVenta, out string Mensaje)
         {
             Mensaje = string.Empty;

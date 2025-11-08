@@ -11,6 +11,37 @@ namespace CapaDato
 {
     public class CD_Venta
     {
+        public List<VentaSimple> ListarSimples()
+        {
+            List<VentaSimple> lista = new List<VentaSimple>();
+            try
+            {
+                using (SqlConnection oConexion = new SqlConnection(Conexion.cn))
+                {
+                    SqlCommand cmd = new SqlCommand("comercial.ListarVentasParaBusqueda", oConexion);
+                    cmd.CommandType = CommandType.StoredProcedure;
+
+                    oConexion.Open();
+                    using (SqlDataReader dr = cmd.ExecuteReader())
+                    {
+                        while (dr.Read())
+                        {
+                            lista.Add(new VentaSimple()
+                            {
+                                id_venta = Convert.ToInt32(dr["id_venta"]),
+                                fecha = Convert.ToDateTime(dr["fecha"]).ToShortDateString(),
+                                total = Convert.ToDecimal(dr["total"]),
+                                NombreCliente = dr["NombreCliente"].ToString(),
+                                CiNitCliente = dr["CiNitCliente"].ToString(),
+                                VehiculosVendidos = dr["VehiculosVendidos"].ToString()
+                            });
+                        }
+                    }
+                }
+            }
+            catch { lista = new List<VentaSimple>(); }
+            return lista;
+        }
 
         public int Registrar(Venta objVenta, out string Mensaje)
         {

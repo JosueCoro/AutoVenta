@@ -45,12 +45,10 @@ namespace CapaDato
             catch (Exception ex)
             {
                 lista = new List<Cliente>();
-                // Manejo de excepción
             }
             return lista;
         }
 
-        // Método para registrar un nuevo Cliente
         public int Registrar(Cliente obj, int idUsuario, out string Mensaje)
         {
             int idGenerado = 0;
@@ -88,7 +86,6 @@ namespace CapaDato
             return idGenerado;
         }
 
-        // Método para editar un Cliente
         public bool Editar(Cliente obj, int idUsuario, out string Mensaje)
         {
             bool resultado = false;
@@ -127,7 +124,6 @@ namespace CapaDato
             return resultado;
         }
 
-        // Método para eliminar un Cliente
         public bool Eliminar(int id, int idUsuario, out string Mensaje)
         {
             bool resultado = false;

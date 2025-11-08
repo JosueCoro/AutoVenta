@@ -39,7 +39,6 @@ namespace CapaPresentacion.Controllers
             object resultado;
             string Mensaje = string.Empty;
 
-            // OBTENER ID DEL USUARIO DE LA SESIÓN 
             int idUsuario = ((Usuario_Activo)Session["Usuario"]).id_usuario;
 
             if (objeto.id_tipo_pago == 0)
@@ -57,7 +56,6 @@ namespace CapaPresentacion.Controllers
         [HttpPost]
         public JsonResult EliminarTipoPago(int id)
         {
-            // OBTENER ID DEL USUARIO DE LA SESIÓN 
             int idUsuario = ((Usuario_Activo)Session["Usuario"]).id_usuario;
 
             bool resultado = new CN_TipoPago().Eliminar(id, idUsuario, out string mensaje);

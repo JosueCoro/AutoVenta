@@ -108,14 +108,12 @@
                 },
             });
 
-            // Evento de clic para el botón Editar de la tabla
             $("#tablaclientes tbody").on("click", '.btn-editar', function () {
                 filaSeleccionada = $(this).closest("tr");
                 var data = tabladata.row(filaSeleccionada).data();
                 abrirModal(data);
             });
 
-            // Evento de clic para el botón Eliminar de la tabla
             $("#tablaclientes tbody").on("click", '.btn-eliminar', function () {
                 filaSeleccionada = $(this).closest("tr");
                 var data = tabladata.row(filaSeleccionada).data();
@@ -123,7 +121,6 @@
             });
         });
 
-        // Limpia el formulario
         function Limpiar() {
             document.getElementById("txtid").value = 0;
             document.getElementById("txtNombreCompleto").value = "";
@@ -132,7 +129,6 @@
             document.getElementById("txtDireccion").value = "";
         }
 
-        // Abre el modal para crear o editar
         function abrirModal(json) {
             Limpiar();
             if (json != null) {
@@ -159,7 +155,6 @@
 
             const esNuevo = cliente.id_cliente === 0;
 
-            // ***** CORRECCIÓN CLAVE: Eliminamos la validación genérica de JS para que la CN decida el mensaje. *****
 
             Swal.fire({
                 title: esNuevo ? "Registrando cliente..." : "Actualizando cliente...",
@@ -179,7 +174,7 @@
 
                 const data = await response.json();
 
-                if (data.resultado && data.resultado > 0) { // Éxito
+                if (data.resultado && data.resultado > 0) { 
                     Swal.fire({
                         title: esNuevo ? "¡Registrado!" : "¡Actualizado!",
                         text: data.mensaje,
@@ -190,16 +185,14 @@
                         cliente.id_cliente = data.resultado;
                         tabladata.row.add(cliente).draw(false);
                     } else {
-                        // Recargar la fila para asegurar que se vean los cambios
                         tabladata.ajax.reload(null, false);
                     }
 
                     $('#FormModal').modal("hide");
                 } else {
-                    // ERROR: Muestra el mensaje ESPECÍFICO devuelto por la Capa de Negocio
                     Swal.fire({
                         title: "¡Error de Validación!",
-                        text: data.mensaje, // Este es el mensaje como "El nombre completo es obligatorio."
+                        text: data.mensaje, 
                         icon: 'error'
                     });
                 }
@@ -209,7 +202,6 @@
             }
         }
 
-        // Función para eliminar un cliente (se mantiene sin cambios)
         async function Eliminar(cliente) {
             Swal.fire({
                 title: '¿Estás seguro?',

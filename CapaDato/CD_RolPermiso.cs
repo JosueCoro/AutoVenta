@@ -38,7 +38,6 @@ namespace CapaDato
                                 id_permiso = Convert.ToInt32(dr["id_permiso"]),
                                 accion = dr["accion"].ToString(),
                                 estado = Convert.ToBoolean(dr["estado"]),
-                                // Mapeamos la columna 'Asignado' devuelta por el SP (1 o 0)
                                 Asignado = Convert.ToInt32(dr["Asignado"]) == 1
                             });
                         }
@@ -48,15 +47,10 @@ namespace CapaDato
             catch (Exception )
             {
                 lista = new List<Permiso>();
-                // Aquí podrías loggear el error (ex.Message)
             }
             return lista;
         }
 
-
-        // ----------------------------------------------------
-        // GUARDAR: Asignar permisos masivamente a un rol
-        // ----------------------------------------------------
         public bool GuardarPermisos(int idRol, List<Permiso> permisosAsignados, int idUsuarioAuditoria, out string Mensaje)
         {
             bool respuesta = false;
@@ -64,7 +58,6 @@ namespace CapaDato
 
             try
             {
-                // 1. Convertir la lista List<Permiso> a un DataTable para enviarlo como TVP al SP
                 DataTable dtPermisos = new DataTable();
                 dtPermisos.Columns.Add("id_permiso", typeof(int));
 
@@ -78,19 +71,16 @@ namespace CapaDato
                     SqlCommand cmd = new SqlCommand("administracion.CRUD_ROLES_PERMISOS", oConexion);
                     cmd.CommandType = CommandType.StoredProcedure;
 
-                    // 2. Asignar Parámetros de Entrada
                     cmd.Parameters.AddWithValue("@Operacion", "GUARDAR");
                     cmd.Parameters.AddWithValue("@IdRol", idRol);
                     cmd.Parameters.AddWithValue("@IdUsuarioAuditoria", idUsuarioAuditoria);
 
-                    // Asignar el Table-Valued Parameter (TVP)
                     SqlParameter paramTVP = new SqlParameter("@TVP_Permisos", SqlDbType.Structured);
-                    paramTVP.TypeName = "administracion.ListaPermisos"; // Nombre del tipo de tabla en la DB
+                    paramTVP.TypeName = "administracion.ListaPermisos"; 
                     paramTVP.Value = dtPermisos;
                     cmd.Parameters.Add(paramTVP);
 
 
-                    // 3. Asignar Parámetros de Salida
                     SqlParameter pMensaje = new SqlParameter("@Mensaje", SqlDbType.VarChar, 500);
                     pMensaje.Direction = ParameterDirection.Output;
                     cmd.Parameters.Add(pMensaje);
@@ -102,7 +92,6 @@ namespace CapaDato
                     oConexion.Open();
                     cmd.ExecuteNonQuery();
 
-                    // 4. Leer Resultados
                     respuesta = Convert.ToBoolean(pResultado.Value);
                     Mensaje = pMensaje.Value.ToString();
                 }

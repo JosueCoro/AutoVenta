@@ -21,7 +21,6 @@ namespace CapaPresentacion.Controllers
             return View();
         }
 
-        // Acción para listar todas las marcas
         [HttpGet]
         public JsonResult ListarMarcas()
         {
@@ -29,14 +28,12 @@ namespace CapaPresentacion.Controllers
             return Json(new { data = lista }, JsonRequestBehavior.AllowGet);
         }
 
-        // Acción para registrar o editar una marca
         [HttpPost]
         public JsonResult GuardarMarca(Marca objeto)
         {
             object resultado;
             string Mensaje = string.Empty;
 
-            // OBTENER ID DEL USUARIO DE LA SESIÓN (REQUISITO DE AUDITORÍA)
             int idUsuario = ((Usuario_Activo)Session["Usuario"]).id_usuario;
 
             if (objeto.id_marca == 0)
@@ -51,11 +48,9 @@ namespace CapaPresentacion.Controllers
             return Json(new { resultado = resultado, mensaje = Mensaje }, JsonRequestBehavior.AllowGet);
         }
 
-        // Acción para eliminar una marca
         [HttpPost]
         public JsonResult EliminarMarca(int id)
         {
-            // OBTENER ID DEL USUARIO DE LA SESIÓN (REQUISITO DE AUDITORÍA)
             int idUsuario = ((Usuario_Activo)Session["Usuario"]).id_usuario;
 
             bool resultado = new CN_Marca().Eliminar(id, idUsuario, out string mensaje);

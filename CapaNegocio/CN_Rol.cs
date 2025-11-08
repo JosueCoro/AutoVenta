@@ -68,7 +68,6 @@ namespace CapaNegocio
                 return false;
             }
 
-            // La verificación de dependencia con Usuario ya está en el SP CRUD_ROL
             return cdrol.Eliminar(id, idUsuario, out Mensaje);
         }
     }

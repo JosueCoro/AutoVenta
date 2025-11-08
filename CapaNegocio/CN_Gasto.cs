@@ -14,8 +14,14 @@ namespace CapaNegocio
 
         public List<Gasto> Listar()
         {
-            return cD_Gasto.Listar();
+            return cD_Gasto.ListarGastosVehiculos();
         }
+        public List<Gasto> ListarVentas()
+        {
+            return cD_Gasto.ListarGastosVentas();
+        }
+
+
         public int RegistrarMultiples(int idVehiculo, int idVenta, List<DetalleGasto> listaDetalle, int idUsuario, out string Mensaje)
         {
             Mensaje = string.Empty;
@@ -26,7 +32,7 @@ namespace CapaNegocio
 
             if (idVehiculo > 0 && idVenta > 0)
             {
-                Mensaje = "Un registro de gastos debe estar asociado a un Vehículo **O** a una Venta, no a ambos.";
+                Mensaje = "Un registro de gastos debe estar asociado a un Vehículo O a una Venta, no a ambos.";
                 return 0;
             }
 
@@ -87,7 +93,7 @@ namespace CapaNegocio
                 return false;
             }
 
-            // En este punto, podríamos agregar lógica para evitar la eliminación,
+            // En este punto podemos agregar lógica para evitar la eliminación,
             // por ejemplo: "No se pueden eliminar gastos con más de 90 días de antigüedad".
 
             return cD_Gasto.Eliminar(idGasto, idUsuario, out Mensaje);

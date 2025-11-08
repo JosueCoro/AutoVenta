@@ -59,12 +59,10 @@ namespace CapaDato
             catch (Exception ex)
             {
                 lista = new List<Vehiculo>();
-                // Manejo de excepción
             }
             return lista;
         }
 
-        // Método para registrar un nuevo Vehículo
         public int Registrar(Vehiculo obj, int idUsuario, out string Mensaje)
         {
             int idGenerado = 0;
@@ -109,7 +107,6 @@ namespace CapaDato
             return idGenerado;
         }
 
-        // Método para editar un Vehículo
         public bool Editar(Vehiculo obj, int idUsuario, out string Mensaje)
         {
             bool resultado = false;
@@ -155,7 +152,6 @@ namespace CapaDato
             return resultado;
         }
 
-        // Método para eliminar un Vehículo
         public bool Eliminar(int id, int idUsuario, out string Mensaje)
         {
             bool resultado = false;

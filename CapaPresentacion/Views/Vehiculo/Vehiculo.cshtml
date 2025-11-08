@@ -139,15 +139,10 @@
         var tabladata;
         var filaSeleccionada;
 
-        // La ruta del archivo por defecto en el proyecto web
         const DEFAULT_IMG_PATH = '@Url.Content("~/Content/imagenes/default.png")';
 
-        // La URL del método del controlador que sirve las imágenes desde la ruta externa
         const IMAGE_SERVICE_URL = '@Url.Action("ObtenerImagen", "Vehiculo")';
 
-        // ===========================================
-        // FUNCIONES ASÍNCRONAS PARA CARGAR DROPDOWNS
-        // ===========================================
         async function llenarMarcas() {
             try {
                 const response = await fetch('@Url.Action("ListarMarcas", "Marca")', { method: 'GET' });
@@ -198,7 +193,6 @@
 
 
         document.addEventListener('DOMContentLoaded', function () {
-            // Cargar datos maestros al iniciar
             llenarMarcas();
             llenarTiposVehiculo();
 
@@ -218,7 +212,7 @@
                     {
                         "data": "precio_venta",
                         "render": function (data) {
-                            return '$' + parseFloat(data).toFixed(2);
+                            return 'Bs. ' + parseFloat(data).toFixed(2);
                         }
                     },
                     { "data": "estado" },
@@ -235,7 +229,6 @@
                 },
             });
 
-            // Eventos de clic para la tabla
             $("#tablavehiculos tbody").on("click", '.btn-editar', function () {
                 filaSeleccionada = $(this).closest("tr");
                 var data = tabladata.row(filaSeleccionada).data();
@@ -248,13 +241,11 @@
                 Eliminar(data);
             });
 
-             // Evento para previsualizar la imagen al seleccionar un archivo
             document.getElementById("fileImagen").addEventListener('change', function(e) {
                  mostrarImagen(this);
             });
         });
 
-        // Limpia el formulario
         function Limpiar() {
             document.getElementById("txtid").value = 0;
             document.getElementById("txtPlaca").value = "";
@@ -265,16 +256,13 @@
             document.getElementById("txtPrecioVenta").value = "";
             document.getElementById("txtFechaIngreso").value = "";
 
-            // ✅ Resetear la imagen a default placeholder y APLICAR CACHE BUSTER
             document.getElementById("imgVehiculo").src = DEFAULT_IMG_PATH + "?v=" + new Date().getTime();
-            // La ruta oculta ahora guarda SOLO el nombre del archivo (default.png)
             document.getElementById("txtImagenRuta").value = "default.png";
-            document.getElementById("fileImagen").value = ""; // Limpiar input file
+            document.getElementById("fileImagen").value = ""; 
 
             $('#cboEstado').val('En Venta');
         }
 
-        // Abre el modal para crear o editar
         function abrirModal(json) {
             Limpiar();
 
@@ -292,17 +280,13 @@
                 $('#cboTipo').val(json.oTipoVehiculo.id_tp_vehiculo);
                 $('#cboEstado').val(json.estado);
 
-                // ✅ Cargar imagen usando el nuevo servicio ObtenerImagen y el Cache Buster
                 if (json.imagen) {
 
-                    // La ruta base es el método ObtenerImagen en el controlador
                     let imgPath = IMAGE_SERVICE_URL + '?nombreArchivo=' + json.imagen;
 
-                    // Se añade el Cache Buster para forzar la recarga
                     const urlConCacheBuster = `${imgPath}&v=${new Date().getTime()}`;
 
                     document.getElementById("imgVehiculo").src = urlConCacheBuster;
-                    // Se guarda el nombre del archivo (ej: 123.jpg) en el hidden field
                     document.getElementById("txtImagenRuta").value = json.imagen;
                 }
 
@@ -313,7 +297,6 @@
             $('#FormModal').modal('show');
         }
 
-        // Función para guardar un Vehículo
         async function Guardar() {
             const esNuevo = parseInt(document.getElementById("txtid").value) === 0;
             const archivoImagen = document.getElementById("fileImagen").files[0];
@@ -328,10 +311,9 @@
                 fecha_ingreso: document.getElementById("txtFechaIngreso").value,
                 precio_compra: parseFloat(document.getElementById("txtPrecioCompra").value) || 0,
                 precio_venta: parseFloat(document.getElementById("txtPrecioVenta").value) || 0,
-                // Si NO hay imagen nueva, mandamos el nombre que ya está en txtImagenRuta
                 imagen: document.getElementById("txtImagenRuta").value,
 
-                oMarca: { id_marca: parseInt($('#cboMarca').val()) || 0 }, // Aseguramos que sea 0 si es NaN
+                oMarca: { id_marca: parseInt($('#cboMarca').val()) || 0 }, 
                 oTipoVehiculo: { id_tp_vehiculo: parseInt($('#cboTipo').val()) || 0 }
             };
 
@@ -346,7 +328,6 @@
                  formData.append("archivoImagen", archivoImagen);
             }
 
-            // Convertir el objeto JS a JSON string y adjuntarlo
             formData.append("objeto", JSON.stringify(vehiculoData));
 
 

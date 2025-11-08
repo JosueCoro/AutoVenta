@@ -49,13 +49,10 @@ namespace CapaDato
                         };
                     }
 
-                    // Si el usuario fue encontrado, consumimos el SEGUNDO RESULT SET (Permisos)
                     if (usuario != null)
                     {
-                        // Mueve el lector al segundo Result Set (reader.NextResult())
                         if (dr.NextResult())
                         {
-                            // --- SEGUNDO RESULT SET: IDs DE PERMISO ---
                             while (dr.Read())
                             {
                                 usuario.ListaPermisos.Add(new Permiso()

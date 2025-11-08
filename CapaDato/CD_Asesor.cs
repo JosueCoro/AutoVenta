@@ -45,12 +45,10 @@ namespace CapaDato
             catch (Exception ex)
             {
                 lista = new List<Asesor>();
-                // Manejo de excepción
             }
             return lista;
         }
 
-        // Método para registrar un nuevo Asesor
         public int Registrar(Asesor obj, int idUsuario, out string Mensaje)
         {
             int idGenerado = 0;
@@ -89,7 +87,6 @@ namespace CapaDato
             return idGenerado;
         }
 
-        // Método para editar un Asesor
         public bool Editar(Asesor obj, int idUsuario, out string Mensaje)
         {
             bool resultado = false;
@@ -129,7 +126,6 @@ namespace CapaDato
             return resultado;
         }
 
-        // Método para eliminar un Asesor
         public bool Eliminar(int id, int idUsuario, out string Mensaje)
         {
             bool resultado = false;
