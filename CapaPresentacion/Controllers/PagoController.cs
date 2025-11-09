@@ -46,7 +46,7 @@ namespace CapaPresentacion.Controllers
         {
             try
             {
-                List<VentaSimple> listaVentas = cnVenta.Listar(); // Asumo que el CN_Venta.Listar() que existe se llama ListarSimples()
+                List<VentaSimple> listaVentas = cnVenta.Listar(); 
 
                 VentaSimple venta = listaVentas
                     .Where(v => v.id_venta == idVenta)

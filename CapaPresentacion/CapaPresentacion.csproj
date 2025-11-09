@@ -181,6 +181,7 @@
     <Compile Include="Controllers\MarcaController.cs" />
     <Compile Include="Controllers\PagoController.cs" />
     <Compile Include="Controllers\PermisoController.cs" />
+    <Compile Include="Controllers\ReporteController.cs" />
     <Compile Include="Controllers\RolController.cs" />
     <Compile Include="Controllers\UsuarioController.cs" />
     <Compile Include="Controllers\VehiculoController.cs" />
@@ -2433,6 +2434,7 @@
     <Content Include="Views\Gasto\TipoGasto.cshtml" />
     <Content Include="Views\Login\AccesoDenegado.cshtml" />
     <Content Include="Views\Gasto\GastoVenta.cshtml" />
+    <Content Include="Views\Reporte\ReporteVentas.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

@@ -251,15 +251,31 @@
                 </li>
             }
 
+            @{
+                bool tienePermisosReporte =
+                    TienePermiso("Visualizar Reportes");
+            }
+
+            @if (tienePermisosReporte)
+            {
+                <hr class="sidebar-divider">
+                <div class="sidebar-heading">
+                    Reportes
+                </div>
+            }
+
+            @if (TienePermiso("Visualizar Reportes"))
+            {
+                <li class="nav-item active">
+                    <a class="nav-link" href="@Url.Action("ReporteVentas", "Reporte")">
+                        <i class="fas fa-fw fa-chart-area"></i>
+                        <span>Reporte de Ventas</span>
+                    </a>
+                </li>
+            }
 
 
-            <!-- Nav Item - Charts -->
-            <li class="nav-item active">
-                <a class="nav-link" href="">
-                    <i class="fas fa-fw fa-chart-area"></i>
-                    <span>Reportes</span>
-                </a>
-            </li>
+
 
 
 

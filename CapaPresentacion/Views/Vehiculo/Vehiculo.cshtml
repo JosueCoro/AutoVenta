@@ -187,7 +187,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                <button type="button" class="btn btn-danger" onclick="GenerarPDF()">
+                <button type="button" class="btn btn-danger" onclick="PDFReporte()">
                     <i class="fas fa-file-pdf"></i> Generar Reporte PDF
                 </button>
             </div>
@@ -195,9 +195,15 @@
     </div>
 </div>
 @section Scripts{
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/2.0.8/js/jquery.dataTables.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
     <script>
         var tabladata;
         var filaSeleccionada;
+        let reporteGlobal = null;
 
         const DEFAULT_IMG_PATH = '@Url.Content("~/Content/imagenes/default.png")';
 
@@ -222,6 +228,16 @@
             cargarReporte(idVehiculo);
         }
 
+        function PDFReporte(idVehiculo) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('p', 'mm', 'a4');
+            let y = 10
+
+            doc.setFontSize(18)
+            doc.text('REPORTE DE GATOS DE UN VEHICULO', 105, y, { align: 'center' });
+            y += 10;
+        }
+
         async function cargarReporte(idVehiculo) {
             Swal.fire({
                 title: "Cargando Reporte...",
@@ -238,6 +254,7 @@
 
                 if (data.resultado) {
                     const reporte = data.data;
+                    reporteGlobal = reporte;
 
                     const resumen = reporte.Resumen;
                     document.getElementById("resumenPrecioCompra").textContent = `Bs. ${parseFloat(resumen.PrecioCompra).toFixed(2)}`;
@@ -251,7 +268,7 @@
 
                     tablaGastos = $('#tablaGastos').DataTable({
                         data: reporte.ListaGastos,
-                        destroy: true, 
+                        destroy: true,
                         ordering: false,
                         searching: false,
                         paging: false,
@@ -292,37 +309,90 @@
             }
         }
 
-        async function GenerarPDF() {
-            const idVehiculo = document.getElementById("txtIdVehiculoReporte").value;
+        function PDFReporte() {
+            if (!reporteGlobal) {
+                Swal.fire('Error', 'Primero debe cargar el reporte de gastos del vehículo.', 'warning');
+                return;
+            }
 
-            Swal.fire({
-                title: "Generando PDF...",
-                html: "Espere mientras se genera el documento.",
-                allowOutsideClick: false,
-                didOpen: () => { Swal.showLoading(); }
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('p', 'mm', 'a4');
+            let y = 30; // Posición inicial
+
+            const reporte = reporteGlobal;
+            const resumen = reporte.Resumen;
+            const fechaactual = new Date().toLocaleDateString();
+
+
+            doc.setFontSize(18);
+            doc.text('REPORTE DE COSTO Y GASTOS DE VEHÍCULO', 105, 15, { align: 'center' });
+
+            doc.setFontSize(12);
+            doc.text(`Vehículo: ${reporte.Placa} (${reporte.Marca} ${reporte.Modelo})`, 10, 30);
+            doc.text(`Emisión: ${fechaactual}`, 200, 30, { align: 'right' });
+            y = 40;
+
+
+            doc.setFontSize(12);
+            doc.text('Resumen Financiero', 10, y);
+            y += 5;
+
+            const gananciaTotal = resumen.PrecioVenta - resumen.CostoTotal;
+
+            const resumenBody = [
+                ['Precio de Compra:', `Bs. ${parseFloat(resumen.PrecioCompra).toFixed(2)}`, 'Costo Total Vehículo:', `Bs. ${parseFloat(resumen.CostoTotal).toFixed(2)}`],
+                ['Total de Gastos:', `Bs. ${parseFloat(resumen.TotalGastos).toFixed(2)}`, 'Precio de Venta:', `Bs. ${parseFloat(resumen.PrecioVenta).toFixed(2)}`],
+                [
+                    { content: 'GANANCIA TOTAL:', colSpan: 2, styles: { fontStyle: 'bold', fillColor: [240, 255, 160] } },
+
+                    { content: `Bs. ${gananciaTotal.toFixed(2)}`, colSpan: 2, styles: { fontStyle: 'bold', fillColor: [240, 255, 160], halign: 'center' } }
+                ]
+            ];
+
+            doc.autoTable({
+                startY: y,
+                body: resumenBody,
+                theme: 'plain',
+                margin: { left: 10, right: 10 },
+                styles: { fontSize: 10, cellPadding: 2 },
+                columnStyles: { 1: { fontStyle: 'bold' }, 3: { fontStyle: 'bold', fillColor: [240, 240, 240] } }
             });
 
-            try {
-                // Llama a la acción del controlador para generar el PDF
-                // Si usas una librería como Rotativa, esta llamada podría abrir una nueva ventana
-                // o devolver el archivo directamente.
+            y = doc.autoTable.previous.finalY + 10;
 
-                // Simulación de la llamada
-                const response = await fetch(`@Url.Action("GenerarReporteGastoPDF", "Vehiculo")?idVehiculo=${idVehiculo}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ idVehiculo: idVehiculo })
-                });
 
-                if (response.ok) {
-                    Swal.fire('PDF Generado', 'El reporte se ha generado correctamente. (Falta la implementación de la librería PDF)', 'success');
-                } else {
-                    Swal.fire('Error de PDF', 'No se pudo generar el reporte PDF.', 'error');
-                }
+            doc.setFontSize(14);
+            doc.text('Detalle de Gastos por Vehículo', 10, y);
+            y += 5;
 
-            } catch (error) {
-                Swal.fire('Error', 'Error al solicitar la generación del PDF.', 'error');
-            }
+            const tablaGastosHeaders = [['Fecha', 'Tipo Gasto', 'Descripción', 'Monto (Bs.)']];
+
+            const tablaGastosRows = reporte.ListaGastos.map(gasto => [
+                gasto.fecha,
+                gasto.TipoGasto,
+                gasto.descripcion,
+                'Bs. ' + parseFloat(gasto.monto).toFixed(2)
+            ]);
+
+            const totalGastosBs = `Bs. ${parseFloat(resumen.TotalGastos).toFixed(2)}`;
+            tablaGastosRows.push(['', '', { content: 'TOTAL DE GASTOS:', styles: { fontStyle: 'bold', halign: 'right' } }, { content: totalGastosBs, styles: { fontStyle: 'bold', halign: 'right' } }]);
+
+
+            doc.autoTable({
+                head: tablaGastosHeaders,
+                body: tablaGastosRows,
+                startY: y,
+                theme: 'striped',
+                styles: { fontSize: 9 },
+                headStyles: { fillColor: [41, 128, 185], textColor: 255 },
+                columnStyles: { 3: { halign: 'right' } }
+            });
+
+
+            const placaLimpia = reporte.Placa.replace(/[^a-zA-Z0-9]/g, '');
+            doc.save(`Reporte_Costo_${placaLimpia}_${fechaactual.replace(/\//g, '-')}.pdf`);
+
+            Swal.fire('¡Éxito!', 'Reporte PDF generado correctamente.', 'success');
         }
 
         async function llenarMarcas() {

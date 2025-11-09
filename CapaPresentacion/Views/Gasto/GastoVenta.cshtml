@@ -111,7 +111,7 @@
                             <th>Cliente (CI/NIT)</th>
                             <th>Vehículo(s)</th>
                             <th>Fecha</th>
-                            <th>Total ($)</th>
+                            <th>Total (Bs.)</th>
                             <th>Acción</th>
                         </tr>
                     </thead>
@@ -311,7 +311,6 @@
                     {
                         "data": null,
                         "render": function (data) {
-                            // Asumo que tu ListarGastosVentas devuelve NombreCliente y CiNitCliente
                             if (data.id_venta !== null && data.id_venta > 0) {
                                 let clienteInfo = "";
                                 if (data.oVenta && data.oVenta.oCliente) {

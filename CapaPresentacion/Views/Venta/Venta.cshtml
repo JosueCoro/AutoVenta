@@ -337,7 +337,7 @@
 
             Swal.fire({
                 title: "Confirmar Transacción",
-                text: `Se registrará la VENTA y el PAGO de $${montoPago.toFixed(2)}. ¿Desea continuar?`,
+                text: `Se registrará la VENTA y el PAGO de Bs.${montoPago.toFixed(2)}. ¿Desea continuar?`,
                 icon: 'question',
                 showCancelButton: true,
                 confirmButtonText: 'Sí, Finalizar',
@@ -492,7 +492,7 @@
             doc.text('DETALLE DE VEHÍCULOS', 10, y);
             y += 5;
 
-            const tablaHeaders = [['ID', 'Modelo/Placa', 'Precio Venta ($)']];
+            const tablaHeaders = [['ID', 'Modelo/Placa', 'Precio Venta (Bs.)']];
             const tablaBody = objVentaGlobal.oDetalleVenta.map(detalle => {
                 const vehiculoData = listaVehiculosDisponibles.find(v => v.id_vehiculo == detalle.id_vehiculo);
 
@@ -519,13 +519,13 @@
 
             doc.setFontSize(14);
             doc.setFont(undefined, 'bold');
-            doc.text(`TOTAL FINAL DE LA VENTA: $ ${totalVenta}`, 180, y, { align: 'right' });
+            doc.text(`TOTAL DE LA VENTA: Bs. ${totalVenta}`, 180, y, { align: 'right' });
             y += 10;
 
             doc.setFontSize(14);
             doc.setFont(undefined, 'bold');
-            const totalVentaBs = (parseFloat(totalVenta) * tipoCambio).toFixed(2);
-            doc.text(`TOTAL EN BS.: ${totalVentaBs}`, 180, y, { align: 'right' });
+            const totalVentaBs = (parseFloat(totalVenta) / tipoCambio).toFixed(2);
+            doc.text(`TOTAL EN $.: ${totalVentaBs}`, 180, y, { align: 'right' });
             y += 10;
 
             //tipo de cambio
@@ -593,7 +593,7 @@
                      { data: "placa" },
                      { data: "modelo" },
                      { data: "año" },
-                     { data: "precio_venta", render: function (data) { return `$ ${parseFloat(data).toFixed(2)}`; } },
+                     { data: "precio_venta", render: function (data) { return `Bs. ${parseFloat(data).toFixed(2)}`; } },
                      {
                          defaultContent: '<button type="button" class="btn btn-success btn-sm btn-seleccionar"><i class="fas fa-check"></i> Seleccionar</button>',
                          orderable: false,

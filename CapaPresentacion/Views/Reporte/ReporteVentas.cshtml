@@ -1,0 +1,277 @@
+﻿
+@{
+    ViewBag.Title = "ReporteVentas";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/2.0.8/css/jquery.dataTables.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+<div class="card shadow mb-4">
+    <div class="card-header bg-primary text-white">
+        <i class="fas fa-chart-line"></i> Reporte de Ventas por Período
+    </div>
+
+    <div class="card-body">
+        <h5 class="mb-3">Filtros de Búsqueda</h5>
+        <div class="row mb-4 g-3 align-items-end p-2 border rounded bg-light">
+
+            <div class="col-md-3">
+                <label for="txtFechaInicio" class="form-label">Fecha Inicio</label>
+                <div class="input-group">
+                    <input type="text" class="form-control datepicker" id="txtFechaInicio" readonly>
+                    <span class="input-group-text"><i class="fas fa-calendar"></i></span>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <label for="txtFechaFin" class="form-label">Fecha Fin</label>
+                <div class="input-group">
+                    <input type="text" class="form-control datepicker" id="txtFechaFin" readonly>
+                    <span class="input-group-text"><i class="fas fa-calendar"></i></span>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <button type="button" class="btn btn-primary w-100" onclick="inicializarTabla()">
+                    <i class="fas fa-search"></i> Buscar Reporte
+                </button>
+            </div>
+
+            <div class="col-md-3">
+                <button type="button" class="btn btn-danger w-100" id="btnExportarPDF" onclick="exportarPDF()">
+                    <i class="fas fa-file-pdf"></i> Exportar PDF
+                </button>
+            </div>
+        </div>
+
+        <h5 class="mt-4 mb-3">Resultados de Ventas</h5>
+        <table id="tablaReporteVentas" class="display cell-border w-100" style="width:100%">
+            <thead>
+                <tr>
+                    <th>ID Venta:</th>
+                    <th>Realizado por:</th>
+                    <th>Fecha Venta</th>
+                    <th>Cliente</th>
+                    <th>Ci/Nit</th>
+                    <th>Vehículos Vendidos</th>
+                    <th>Total Venta (Bs.)</th>
+                    <th>Comisión (Bs.)</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+            <tfoot>
+                <tr>
+                    <th colspan="6" class="text-end fw-bold">TOTAL NETO VENDIDO:</th>
+                    <th id="totalVentasFooter" class="fw-bold"></th>
+                    <th id="totalComisionesFooter" class="fw-bold"></th>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/2.0.8/js/jquery.dataTables.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+
+    <script>
+        var tabladata;
+
+        function inicializarTabla() {
+            if ($.fn.DataTable.isDataTable('#tablaReporteVentas')) {
+                $('#tablaReporteVentas').DataTable().destroy();
+                $('#totalVentasFooter').text('0.00');
+                $('#totalComisionesFooter').text('0.00');
+            }
+
+            const fechaInicio = $("#txtFechaInicio").val();
+            const fechaFin = $("#txtFechaFin").val();
+
+            if (!fechaInicio || !fechaFin) {
+                Swal.fire('Advertencia', 'Debe seleccionar una Fecha de Inicio y una Fecha Fin.', 'warning');
+                return;
+            }
+
+            tabladata = $('#tablaReporteVentas').DataTable({
+                responsive: true,
+                ordering: false,
+                "ajax": {
+                    "url": '@Url.Action("ReporteVenta", "Reporte")',
+                    "type": "GET",
+                    "datatype": "json",
+                    "dataSrc": "data",
+                    "data": function (d) {
+                        d.fechaInicio = fechaInicio;
+                        d.fechaFin = fechaFin;
+                    },
+                    "error": function (xhr, error, code) {
+                        console.error("Error al cargar datos:", xhr.responseText);
+                        Swal.fire('Error', 'No se pudo cargar el reporte. Verifique la conexión o el servidor.', 'error');
+                    }
+                },
+                "columns": [
+                    { "data": "id_venta" },
+                    { "data": "NombreUsuario" },
+                    { "data": "fecha" },
+                    { "data": "NombreCliente" },
+                    { "data": "CiNitCliente" },
+                    { "data": "VehiculosVendidos" },
+                    {
+                        "data": "total",
+                        "render": function (data) {
+                            return 'Bs. ' + parseFloat(data).toFixed(2);
+                        }
+                    },
+                    {
+                        "data": "comision",
+                        "render": function (data) {
+                            return 'Bs. ' + parseFloat(data).toFixed(2);
+                        }
+                    }
+
+                ],
+
+
+                "language": {
+                    "sZeroRecords": "No se encontraron ventas en el período seleccionado.",
+                    "sEmptyTable": "Utilice el botón 'Buscar Reporte' para cargar las ventas.",
+                    "url": '//cdn.datatables.net/plug-ins/2.2.1/i18n/es-ES.json',
+                },
+                "footerCallback": function (row, data, start, end, display) {
+                    var api = this.api();
+
+                    var intVal = function (i) {
+                        return typeof i === 'string' ?
+                            i.replace(/[\$,]/g, '') * 1 :
+                            typeof i === 'number' ?
+                                i : 0;
+                    };
+
+                    var totalVentas = api
+                        .column(6, { page: 'current' })
+                        .data()
+                        .reduce(function (a, b) {
+                            return intVal(a) + intVal(b);
+                        }, 0);
+
+                    var totalComisiones = api
+                        .column(7, { page: 'current' })
+                        .data()
+                        .reduce(function (a, b) {
+                            return intVal(a) + intVal(b);
+                        }, 0);
+
+                    $('#totalVentasFooter').html('Bs. ' + totalVentas.toFixed(2));
+                    $('#totalComisionesFooter').html('Bs. ' + totalComisiones.toFixed(2));
+                }
+            });
+        }
+
+        function exportarPDF() {
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('p', 'mm', 'a4');
+            let y = 30;
+            const fechaInicio = $("#txtFechaInicio").val();
+            const fechaFin = $("#txtFechaFin").val();
+            const fechareporte = fechaInicio + ' al ' + fechaFin;
+            const fechaactual = new Date();
+
+            // Usamos rows().data().toArray() para asegurarnos de que sea un array puro
+            const data = tabladata.rows({ search: 'applied' }).data().toArray();
+
+            if (data.length === 0) {
+                Swal.fire('Advertencia', 'No hay datos para exportar. Por favor, genere un reporte primero.', 'warning');
+                return;
+            }
+
+            // Usamos el código mejorado de los totales
+            const totalVentasNeto = $('#totalVentasFooter').text().replace('Bs. ', '');
+            const totalComisionesNeto = $('#totalComisionesFooter').text().replace('Bs. ', '');
+
+            // Transformar los datos de DataTables a un array compatible con AutoTable
+            const rows = data.map(v => [
+                v.id_venta,
+                v.NombreUsuario,
+                v.fecha,
+                v.NombreCliente,
+                v.CiNitCliente,
+                v.VehiculosVendidos,
+                'Bs. ' + parseFloat(v.total).toFixed(2),
+                'Bs. ' + parseFloat(v.comision).toFixed(2)
+            ]);
+
+            const headers = [
+                ['ID', 'Realizado por:', 'Fecha Venta', 'Cliente', 'Ci/Nit', 'Vehículos Vendidos', 'Total Venta', 'Comisión']
+            ];
+
+            // --- ENCABEZADO ---
+            doc.setFontSize(18);
+            doc.text('REPORTE DE VENTAS REGISTRADAS', 105, 15, { align: 'center' });
+            doc.setFontSize(10);
+            doc.text(`Período: ${fechareporte}`, 10, 25);
+            doc.text(`Emisión: ${fechaactual.toLocaleDateString()} ${fechaactual.toLocaleTimeString()}`, 10, 30);
+            y = 40;
+
+            // --- TABLA DE DETALLES ---
+            doc.autoTable({
+                head: headers,
+                body: rows,
+                startY: y,
+                theme: 'striped',
+                headStyles: { fillColor: [66, 139, 202] },
+                styles: { fontSize: 8 },
+                columnStyles: {
+                    0: { cellWidth: 10 },
+                    5: { cellWidth: 40 },
+                    6: { halign: 'right' },
+                    7: { halign: 'right' }
+                }
+            });
+
+            // --- TOTALES ---
+            y = doc.autoTable.previous.finalY + 10;
+
+            doc.setFontSize(12);
+            doc.text('RESUMEN DEL REPORTE:', 10, y);
+            y += 5;
+
+            doc.setFontSize(10);
+            doc.text(`TOTAL NETO VENDIDO: Bs. ${totalVentasNeto}`, 200, y, { align: 'right' });
+            y += 5;
+            doc.text(`TOTAL COMISIONES: Bs. ${totalComisionesNeto}`, 200, y, { align: 'right' });
+
+            doc.save(`Reporte_Ventas_${fechaInicio}_a_${fechaFin}.pdf`);
+
+            // Cerramos el SweetAlert2 si lo hubieras abierto para indicar el proceso
+            // Swal.fire('¡Éxito!', 'Reporte PDF generado correctamente.', 'success');
+        }
+
+        
+        document.addEventListener('DOMContentLoaded', function () {
+
+            $(".datepicker").datepicker({
+                dateFormat: "yy-mm-dd",
+                changeMonth: true,
+                changeYear: true,
+                dayNamesMin: ["Do", "Lu", "Ma", "Mi", "Ju", "Vi", "Sa"],
+                monthNamesShort: ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"]
+            });
+
+            const today = new Date().toISOString().substring(0, 10);
+            $("#txtFechaInicio").val(today);
+            $("#txtFechaFin").val(today);
+
+
+        });
+    </script>
+}
+

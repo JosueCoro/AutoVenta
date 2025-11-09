@@ -17,6 +17,13 @@ namespace CapaNegocio
         {
             return cdVenta.ListarSimples();
         }
+        private CD_Venta objetoCD = new CD_Venta();
+
+
+        public List<VentaSimple> ReporteVenta(string fechaInicio, string fechaFin)
+        {
+            return cdVenta.ReporteVenta(fechaInicio, fechaFin);
+        }
 
         public int RegistrarSoloVenta(Venta objVenta, out string Mensaje)
         {
