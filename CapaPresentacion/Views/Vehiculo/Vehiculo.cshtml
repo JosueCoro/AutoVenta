@@ -134,6 +134,66 @@
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="ReporteModal" tabindex="-1" aria-labelledby="reporteModalLabel" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title" id="reporteModalTitle"><i class="fas fa-chart-bar"></i> Reporte de Costo: <span id="reportePlaca"></span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row mb-3">
+                    <div class="col-sm-3 text-center">
+                        <img id="imgReporteVehiculo" src="" style="max-width: 150px; border: 1px solid #ccc; object-fit: contain;" class="border rounded img-fluid" />
+                        <p class="mt-2 text-primary fw-bold" id="reporteModeloMarca"></p>
+                    </div>
+                    <div class="col-sm-9">
+                        <h4 class="text-info">Resumen Financiero</h4>
+                        <table class="table table-bordered table-sm">
+                            <tbody>
+                                <tr><th>Precio de Compra:</th><td><span id="resumenPrecioCompra" class="fw-bold text-success"></span></td></tr>
+                                <tr><th>Total de Gastos:</th><td><span id="resumenTotalGastos" class="fw-bold text-danger"></span></td></tr>
+                                <tr class="bg-light"><th>Costo Total Vehículo:</th><td><span id="resumenCostoTotal" class="fw-bolder text-dark"></span></td></tr>
+                                <tr><th>Precio de Venta:</th><td><span id="resumenPrecioVenta" class="fw-bold text-primary"></span></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <hr />
+
+                <h4 class="text-info mt-4">Detalle de Gastos</h4>
+                <table id="tablaGastos" class="table table-striped table-bordered w-100">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Tipo Gasto</th>
+                            <th>Descripción</th>
+                            <th>Monto (Bs.)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th colspan="3" class="text-end">TOTAL DE GASTOS:</th>
+                            <th id="totalGastosFooter"></th>
+                        </tr>
+                    </tfoot>
+                </table>
+
+                <input type="hidden" id="txtIdVehiculoReporte" />
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-danger" onclick="GenerarPDF()">
+                    <i class="fas fa-file-pdf"></i> Generar Reporte PDF
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 @section Scripts{
     <script>
         var tabladata;
@@ -142,6 +202,128 @@
         const DEFAULT_IMG_PATH = '@Url.Content("~/Content/imagenes/default.png")';
 
         const IMAGE_SERVICE_URL = '@Url.Action("ObtenerImagen", "Vehiculo")';
+
+        let tablaGastos;
+
+        function abrirModalReporte(idVehiculo, placa) {
+            if ($.fn.DataTable.isDataTable('#tablaGastos')) {
+                tablaGastos.destroy();
+            }
+
+            $('#tablaGastos tbody').empty();
+            $('#totalGastosFooter').text('');
+
+            document.getElementById("txtIdVehiculoReporte").value = idVehiculo;
+            document.getElementById("reportePlaca").textContent = placa;
+            document.getElementById("imgReporteVehiculo").src = DEFAULT_IMG_PATH;
+            document.getElementById("reporteModeloMarca").textContent = "";
+
+            $('#ReporteModal').modal('show');
+            cargarReporte(idVehiculo);
+        }
+
+        async function cargarReporte(idVehiculo) {
+            Swal.fire({
+                title: "Cargando Reporte...",
+                html: "Obteniendo datos de costos y gastos.",
+                allowOutsideClick: false,
+                didOpen: () => { Swal.showLoading(); }
+            });
+
+            try {
+                const response = await fetch(`@Url.Action("ReporteGastoVehiculo", "Vehiculo")?idVehiculo=${idVehiculo}`, { method: 'GET' });
+                const data = await response.json();
+
+                Swal.close();
+
+                if (data.resultado) {
+                    const reporte = data.data;
+
+                    const resumen = reporte.Resumen;
+                    document.getElementById("resumenPrecioCompra").textContent = `Bs. ${parseFloat(resumen.PrecioCompra).toFixed(2)}`;
+                    document.getElementById("resumenTotalGastos").textContent = `Bs. ${parseFloat(resumen.TotalGastos).toFixed(2)}`;
+                    document.getElementById("resumenCostoTotal").textContent = `Bs. ${parseFloat(resumen.CostoTotal).toFixed(2)}`;
+                    document.getElementById("resumenPrecioVenta").textContent = `Bs. ${parseFloat(resumen.PrecioVenta).toFixed(2)}`;
+
+                    const imgPath = IMAGE_SERVICE_URL + '?nombreArchivo=' + reporte.ImagenRuta;
+                    document.getElementById("imgReporteVehiculo").src = `${imgPath}&v=${new Date().getTime()}`;
+                    document.getElementById("reporteModeloMarca").textContent = `${reporte.Marca} - ${reporte.Modelo}`;
+
+                    tablaGastos = $('#tablaGastos').DataTable({
+                        data: reporte.ListaGastos,
+                        destroy: true, 
+                        ordering: false,
+                        searching: false,
+                        paging: false,
+                        columns: [
+                            { "data": "fecha" },
+                            { "data": "TipoGasto" },
+                            { "data": "descripcion" },
+                            {
+                                "data": "monto",
+                                "render": function (data) {
+                                    return 'Bs. ' + parseFloat(data).toFixed(2);
+                                }
+                            }
+                        ],
+                        "language": {
+                            "url": '//cdn.datatables.net/plug-ins/2.2.1/i18n/es-ES.json',
+                            "emptyTable": "No hay gastos registrados para este vehículo."
+                        },
+                        "footerCallback": function (row, data, start, end, display) {
+                            let total = 0;
+                            if (data.length > 0) {
+                               total = data.reduce((sum, item) => sum + item.monto, 0);
+                            }
+                            $(this.api().column(3).footer()).html(`Bs. **${parseFloat(total).toFixed(2)}**`);
+                            document.getElementById("totalGastosFooter").textContent = `Bs. ${parseFloat(total).toFixed(2)}`;
+                        }
+                    });
+
+                } else {
+                    Swal.fire('Error', data.mensaje, 'error');
+                    $('#ReporteModal').modal('hide');
+                }
+
+            } catch (error) {
+                Swal.fire('Error', 'Ocurrió un error inesperado al cargar el reporte.', 'error');
+                console.error(error);
+                $('#ReporteModal').modal('hide');
+            }
+        }
+
+        async function GenerarPDF() {
+            const idVehiculo = document.getElementById("txtIdVehiculoReporte").value;
+
+            Swal.fire({
+                title: "Generando PDF...",
+                html: "Espere mientras se genera el documento.",
+                allowOutsideClick: false,
+                didOpen: () => { Swal.showLoading(); }
+            });
+
+            try {
+                // Llama a la acción del controlador para generar el PDF
+                // Si usas una librería como Rotativa, esta llamada podría abrir una nueva ventana
+                // o devolver el archivo directamente.
+
+                // Simulación de la llamada
+                const response = await fetch(`@Url.Action("GenerarReporteGastoPDF", "Vehiculo")?idVehiculo=${idVehiculo}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ idVehiculo: idVehiculo })
+                });
+
+                if (response.ok) {
+                    Swal.fire('PDF Generado', 'El reporte se ha generado correctamente. (Falta la implementación de la librería PDF)', 'success');
+                } else {
+                    Swal.fire('Error de PDF', 'No se pudo generar el reporte PDF.', 'error');
+                }
+
+            } catch (error) {
+                Swal.fire('Error', 'Error al solicitar la generación del PDF.', 'error');
+            }
+        }
 
         async function llenarMarcas() {
             try {
@@ -218,10 +400,11 @@
                     { "data": "estado" },
                     {
                         "defaultContent": '<button type="button" class="btn btn-primary btn-sm btn-editar me-2"><i class="fas fa-pen"></i></button>' +
-                            '<button type="button" class="btn btn-danger btn-sm btn-eliminar"><i class="fas fa-trash"></i></button>',
+                            '<button type="button" class="btn btn-danger btn-sm btn-eliminar"><i class="fas fa-trash"></i></button>' +
+                            '<button type="button" class="btn btn-info btn-sm btn-reporte"><i class="fas fa-chart-bar"></i></button>',
                         "orderable": false,
                         "searchable": false,
-                        "width": "125px"
+                        "width": "150px"
                     }
                 ],
                 "language": {
@@ -241,6 +424,13 @@
                 Eliminar(data);
             });
 
+
+            $("#tablavehiculos tbody").on("click", '.btn-reporte', function () {
+                filaSeleccionada = $(this).closest("tr");
+                var data = tabladata.row(filaSeleccionada).data();
+                abrirModalReporte(data.id_vehiculo, data.placa);
+            });
+
             document.getElementById("fileImagen").addEventListener('change', function(e) {
                  mostrarImagen(this);
             });
@@ -258,7 +448,7 @@
 
             document.getElementById("imgVehiculo").src = DEFAULT_IMG_PATH + "?v=" + new Date().getTime();
             document.getElementById("txtImagenRuta").value = "default.png";
-            document.getElementById("fileImagen").value = ""; 
+            document.getElementById("fileImagen").value = "";
 
             $('#cboEstado').val('En Venta');
         }
@@ -313,7 +503,7 @@
                 precio_venta: parseFloat(document.getElementById("txtPrecioVenta").value) || 0,
                 imagen: document.getElementById("txtImagenRuta").value,
 
-                oMarca: { id_marca: parseInt($('#cboMarca').val()) || 0 }, 
+                oMarca: { id_marca: parseInt($('#cboMarca').val()) || 0 },
                 oTipoVehiculo: { id_tp_vehiculo: parseInt($('#cboTipo').val()) || 0 }
             };
 

@@ -11,6 +11,44 @@ namespace CapaDato
 {
     public class CD_Pago
     {
+        public List<Pago> Listar()
+        {
+            List<Pago> lista = new List<Pago>();
+            // Usamos try-catch para manejar errores de conexión/SQL
+            try
+            {
+                using (SqlConnection oConexion = new SqlConnection(Conexion.cn))
+                {
+                    SqlCommand cmd = new SqlCommand("comercial.CRUD_PAGO", oConexion);
+                    cmd.Parameters.AddWithValue("@Operacion", "SELECT");
+                    // Los parámetros de salida son necesarios aunque no se usen en el SELECT
+                    cmd.Parameters.Add("@Mensaje", SqlDbType.VarChar, 500).Direction = ParameterDirection.Output;
+                    cmd.Parameters.Add("@Resultado", SqlDbType.Int).Direction = ParameterDirection.Output;
+                    cmd.CommandType = CommandType.StoredProcedure;
+
+                    oConexion.Open();
+                    using (SqlDataReader dr = cmd.ExecuteReader())
+                    {
+                        while (dr.Read())
+                        {
+                            lista.Add(new Pago()
+                            {
+                                id_pago = Convert.ToInt32(dr["id_pago"]),
+                                nombre = dr["nombre"].ToString(),
+                                fecha = Convert.ToDateTime(dr["fecha"]).ToShortDateString(),
+                                hora = dr["hora"].ToString(),
+                                monto = Convert.ToDecimal(dr["monto"]),
+                                id_venta = Convert.ToInt32(dr["id_venta"]),
+                                nombreTP = dr["NombreTipoPago"].ToString(),
+                                
+                            });
+                        }
+                    }
+                }
+            }
+            catch { lista = new List<Pago>(); }
+            return lista;
+        }
         public int Registrar(Pago objPago, int idUsuarioAuditoria, out string Mensaje)
         {
             int idPagoGenerado = 0;

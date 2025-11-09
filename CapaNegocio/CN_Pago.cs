@@ -1,12 +1,18 @@
 ﻿using CapaDato;
 using CapaEntidad;
 using System;
+using System.Collections.Generic;
 
 namespace CapaNegocio
 {
     public class CN_Pago
     {
         private CD_Pago cdPago = new CD_Pago();
+
+        public List<Pago> Listar()
+        {
+            return cdPago.Listar();
+        }
 
         public int Registrar(Pago objPago, int idUsuarioAuditoria, out string Mensaje)
         {

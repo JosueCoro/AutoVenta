@@ -56,7 +56,7 @@ namespace CapaDato
                     }
                 }
             }
-            catch (Exception ex)
+            catch (Exception )
             {
                 lista = new List<Vehiculo>();
             }
@@ -216,6 +216,123 @@ namespace CapaDato
                 Mensaje = "Error DB al actualizar ruta: " + ex.Message;
             }
             return resultado;
+        }
+        public Vehiculo ObtenerVehiculo(int idVehiculo)
+        {
+            Vehiculo objVehiculo = null;
+
+            try
+            {
+                using (SqlConnection oConexion = new SqlConnection(Conexion.cn))
+                {
+                    SqlCommand cmd = new SqlCommand("comercial.ObtenerVehiculo", oConexion);
+                    cmd.Parameters.AddWithValue("@IdVehiculo", idVehiculo);
+                    cmd.CommandType = CommandType.StoredProcedure;
+
+                    oConexion.Open();
+
+                    using (SqlDataReader dr = cmd.ExecuteReader())
+                    {
+                        if (dr.Read())
+                        {
+                            objVehiculo = new Vehiculo()
+                            {
+                                id_vehiculo = Convert.ToInt32(dr["id_vehiculo"]),
+                                placa = dr["placa"].ToString(),
+                                modelo = dr["modelo"].ToString(),
+                                imagen = dr["imagen"].ToString(),
+
+                                oMarca = new Marca()
+                                {
+                                    
+                                    nombre = dr["NombreMarca"].ToString()
+                                }
+                            };
+                        }
+                    }
+                }
+            }
+            catch (Exception )
+            {
+                objVehiculo = null;
+            }
+
+            return objVehiculo;
+        }
+
+        public ReporteCostoVehiculoDTO ReporteGastoVehiculo(int idVehiculo, out string mensaje)
+        {
+            ReporteCostoVehiculoDTO reporte = new ReporteCostoVehiculoDTO
+            {
+                ListaGastos = new List<GastoVehiculoReporte>(),
+                Resumen = new ResumenCostoVehiculo()
+            };
+            mensaje = string.Empty;
+
+            using (SqlConnection oConexion = new SqlConnection(Conexion.cn))
+            {
+                try
+                {
+                    SqlCommand cmd = new SqlCommand("comercial.ReporteGastoVehiculo", oConexion);
+                    cmd.Parameters.AddWithValue("IdVehiculo", idVehiculo);
+                    cmd.Parameters.Add("Mensaje", SqlDbType.VarChar, 500).Direction = ParameterDirection.Output;
+                    cmd.Parameters.Add("Resultado", SqlDbType.Int).Direction = ParameterDirection.Output;
+                    cmd.CommandType = CommandType.StoredProcedure;
+
+                    oConexion.Open();
+
+                    using (SqlDataReader dr = cmd.ExecuteReader())
+                    {
+                        // 1. Primer conjunto de resultados: Detalle de Gastos
+                        while (dr.Read())
+                        {
+                            reporte.ListaGastos.Add(new GastoVehiculoReporte()
+                            {
+                                descripcion = dr["descripcion"].ToString(),
+                                monto = Convert.ToDecimal(dr["monto"]),
+                                fecha = dr["fecha"].ToString(), // Ajustar formato si es necesario
+                                TipoGasto = dr["TipoGasto"].ToString()
+                            });
+                        }
+
+                        // Pasar al segundo conjunto de resultados: Resumen Financiero
+                        if (dr.NextResult() && dr.Read())
+                        {
+                            reporte.Resumen = new ResumenCostoVehiculo()
+                            {
+                                PrecioCompra = Convert.ToDecimal(dr["PrecioCompra"]),
+                                TotalGastos = Convert.ToDecimal(dr["TotalGastos"]),
+                                CostoTotal = Convert.ToDecimal(dr["CostoTotal"]),
+                                PrecioVenta = Convert.ToDecimal(dr["PrecioVenta"])
+                            };
+                        }
+                    }
+
+                    int resultado = Convert.ToInt32(cmd.Parameters["Resultado"].Value);
+                    mensaje = cmd.Parameters["Mensaje"].Value.ToString();
+
+                    if (resultado == 0)
+                    {
+                        return null; // El vehículo no se encontró o hubo un error
+                    }
+
+                    // OBTENER DATOS ADICIONALES DEL VEHÍCULO (Placa, Modelo, Marca, ImagenRuta)
+                    Vehiculo v = new CD_Vehiculo().ObtenerVehiculo(idVehiculo);
+                    if (v != null)
+                    {
+                        reporte.Placa = v.placa;
+                        reporte.Modelo = v.modelo;
+                        reporte.Marca = v.oMarca.nombre;
+                        reporte.ImagenRuta = v.imagen;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    reporte = null;
+                    mensaje = "Error al obtener el reporte: " + ex.Message;
+                }
+            }
+            return reporte;
         }
     }
 }

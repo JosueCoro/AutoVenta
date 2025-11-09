@@ -1,8 +1,241 @@
-﻿
-@{
-    ViewBag.Title = "Comision";
+﻿@{
+    ViewBag.Title = "Gestión de Comisiones";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h2>Comision</h2>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/2.0.8/css/jquery.dataTables.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
+<input id="txtid_comision_data" type="hidden" value="0" />
+<input id="txtmonto_comision_data" type="hidden" value="0.00" />
+
+
+<div class="card shadow mb-4">
+    <div class="card-header bg-success text-white">
+        <i class="fas fa-money-check-alt"></i> Control y Pago de Comisiones
+    </div>
+    <div class="card-body">
+        <a class="nav-link mb-3" href="@Url.Action("Asesor", "Asesor")">
+            <button type="button" class="btn btn-success">
+                <i class="fas fa-fw fa-id-badge"></i> Registrar nuevo Asesor
+            </button>
+        </a>
+
+        <table id="tablacomisiones" class="display cell-border w-100" style="width:100%">
+            <thead>
+                <tr>
+                    <th>Asesor</th>
+                    <th>Monto (Bs.)</th>
+                    <th>Generación</th>
+                    <th>Venta Asociada</th>
+                    <th>Estado</th>
+                    <th>Fecha Pago</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="modal fade" id="modalDetalleVenta" tabindex="-1" aria-labelledby="modalDetalleVentaLabel" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="modalDetalleVentaLabel">Detalle de Venta Asociada</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-sm-6">
+                        <p><strong>Nº Venta:</strong> <span id="lblIdVenta"></span></p>
+                        <p><strong>Cliente:</strong> <span id="lblCliente"></span></p>
+                        <p><strong>CI/NIT:</strong> <span id="lblCiNit"></span></p>
+                    </div>
+                    <div class="col-sm-6 text-end">
+                        <p><strong>Fecha Venta:</strong> <span id="lblFechaVenta"></span></p>
+                        <h4 class="text-success"><strong>Total Venta:</strong> <span id="lblTotalVenta"></span></h4>
+                    </div>
+                </div>
+                <hr />
+                <p><strong>Vehículo(s) Vendido(s):</strong> <span id="lblVehiculos"></span></p>
+                <div class="alert alert-info mt-3" role="alert">
+                    Este es el detalle de la venta que generó la comisión.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/2.0.8/js/jquery.dataTables.js"></script>
+
+    <script>
+        var tabladataComisiones;
+
+        function renderizarEstado(estado) {
+            if (estado === 'PAGADA') {
+                return '<span class="badge bg-success">PAGADA</span>';
+            } else if (estado === 'PENDIENTE') {
+                return '<span class="badge bg-warning">PENDIENTE</span>';
+            }
+            return `<span class="badge bg-secondary">${estado}</span>`;
+        }
+
+        function renderizarAccion(data) {
+            if (data.estado === 'PENDIENTE') {
+                return `<button type="button" class="btn btn-sm btn-success btn-pagar" data-id="${data.id_comision}"><i class="fas fa-money-bill-wave"></i> Pagar</button>`;
+            } else {
+                return `<span class="badge bg-info text-dark">Completado</span>`;
+            }
+        }
+
+        async function procesarPago(idComision, monto, asesor) {
+
+            Swal.fire({
+                title: 'Confirmar Pago',
+                html: `¿Estás seguro de PAGAR la comisión de <strong class="text-danger">Bs. ${monto.toFixed(2)}</strong> al asesor <strong class="text-primary">${asesor}</strong>?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#28a745',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Sí, Confirmar Pago',
+                cancelButtonText: 'Cancelar',
+                reverseButtons: true,
+                showLoaderOnConfirm: true,
+                preConfirm: async () => {
+
+                    try {
+                        const dataToSend = new URLSearchParams();
+                        dataToSend.append('idComision', idComision);
+
+                        const response = await fetch('@Url.Action("PagarComision", "Comision")', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8'
+                            },
+                            body: dataToSend.toString()
+                        });
+
+                        if (!response.ok) throw new Error("Error en la petición al servidor.");
+
+                        const data = await response.json();
+                        return data;
+
+                    } catch (error) {
+                         Swal.showValidationMessage(`Fallo en la comunicación: ${error.message}`);
+                         return false;
+                    }
+                },
+                allowOutsideClick: () => !Swal.isLoading()
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const data = result.value;
+
+                    if (data.resultado) {
+                        Swal.fire('¡Pagada!', data.mensaje, 'success');
+                        tabladataComisiones.ajax.reload(null, false);
+                    } else {
+                        Swal.fire('Error de Pago', data.mensaje, 'error');
+                    }
+                }
+            });
+        }
+
+
+        async function verDetalleVenta(idVenta) {
+            Swal.fire({
+                title: "Cargando Detalle...",
+                allowOutsideClick: false,
+                didOpen: () => { Swal.showLoading(); }
+            });
+
+            try {
+                const response = await fetch('@Url.Action("ObtenerVentaSimple", "Comision")?idVenta=' + idVenta, { method: 'GET' });
+                const result = await response.json();
+                Swal.close();
+
+                if (result.resultado) {
+                    const data = result.data;
+                    document.getElementById('lblIdVenta').textContent = data.id_venta;
+                    document.getElementById('lblCliente').textContent = data.NombreCliente;
+                    document.getElementById('lblCiNit').textContent = data.CiNitCliente;
+                    document.getElementById('lblFechaVenta').textContent = data.fecha;
+                    document.getElementById('lblTotalVenta').textContent = `Bs. ${parseFloat(data.total).toFixed(2)}`;
+                    document.getElementById('lblVehiculos').textContent = data.VehiculosVendidos;
+
+                    $('#modalDetalleVenta').modal('show');
+                } else {
+                    Swal.fire('Error', result.mensaje, 'error');
+                }
+
+            } catch (error) {
+                Swal.fire('Error', 'No se pudo contactar con el servidor para obtener el detalle.', 'error');
+            }
+        }
+
+
+        document.addEventListener('DOMContentLoaded', function () {
+
+            tabladataComisiones = $('#tablacomisiones').DataTable({
+                responsive: true,
+                ordering: false,
+                "ajax": {
+                    "url": '@Url.Action("ListarComisiones", "Comision")',
+                    "type": "GET",
+                    "datatype": "json"
+                },
+                "columns": [
+                    { "data": "NombreAsesor" },
+                    {
+                        "data": "monto",
+                        "render": function (data) { return `Bs. ${parseFloat(data).toFixed(2)}`; }
+                    },
+                    { "data": "fecha_generacion", "render": function(data) { return data ? data.substring(0, 10) : ''; } },
+                    {
+                        "data": "id_venta",
+                        "render": function (data) {
+                            return `${data} <button type="button" class="btn btn-info btn-sm btn-detalle-venta" data-id="${data}" title="Ver Detalle"><i class="fas fa-eye"></i></button>`;
+                        }
+                    },
+                    {
+                        "data": "estado",
+                        "render": function (data) { return renderizarEstado(data); }
+                    },
+                    {
+                        "data": "fecha_pago",
+                        "render": function (data) { return data ? data.substring(0, 10) : 'Pendiente'; }
+                    },
+                    {
+                        "data": null,
+                        "render": function (data) { return renderizarAccion(data); },
+                        "orderable": false,
+                        "searchable": false,
+                        "width": "100px"
+                    }
+                ],
+                "language": {
+                    "url": '//cdn.datatables.net/plug-ins/2.2.1/i18n/es-ES.json',
+                },
+                "order": [[4, 'desc']]
+            });
+
+            $("#tablacomisiones tbody").on("click", '.btn-pagar', function () {
+                const data = tabladataComisiones.row($(this).closest("tr")).data();
+                procesarPago(data.id_comision, data.monto, data.NombreAsesor);
+            });
+
+            $("#tablacomisiones tbody").on("click", '.btn-detalle-venta', function () {
+                const idVenta = parseInt($(this).data('id'));
+                verDetalleVenta(idVenta);
+            });
+        });
+
+    </script>
+}

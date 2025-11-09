@@ -139,6 +139,21 @@ namespace CapaPresentacion.Controllers
             return Json(new { resultado = resultado, mensaje = mensaje }, JsonRequestBehavior.AllowGet);
         }
 
+        private CN_Vehiculo objetoCN = new CN_Vehiculo();
+        [HttpGet]
+        public JsonResult ReporteGastoVehiculo(int idVehiculo)
+        {
+            string mensaje = string.Empty;
+            ReporteCostoVehiculoDTO reporte =  objetoCN.ReporteGastoVehiculo(idVehiculo, out mensaje);
+
+            return Json(new
+            {
+                data = reporte,
+                resultado = reporte != null,
+                mensaje = mensaje
+            }, JsonRequestBehavior.AllowGet);
+        }
+
 
         [ValidarPermisos(NombrePermiso = "Gestionar Tipos de Vehiculo")]
         public ActionResult TipoVehiculo()

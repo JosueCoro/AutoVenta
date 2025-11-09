@@ -1,31 +1,41 @@
-﻿@{
-    ViewBag.Title = "Inicio";
+﻿@using CapaEntidad
+@{
+    ViewBag.Title = "Dashboard";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    // 1. Castear y obtener datos del Controller (asumiendo que HomeController los pasó)
+    ReporteDashboard kpis = ViewBag.KPIs as ReporteDashboard;
+    // Las listas se manejarán directamente en JavaScript
 }
 
-
 <style>
-    /* Estilos opcionales para los colores personalizados de Carsys */
     .card-icon-primary {
-        color: rgba(0, 123, 255, 0.7); /* Azul de marca */
+        color: rgba(78, 115, 223, 0.7); 
     }
 
     .card-icon-success {
-        color: rgba(40, 167, 69, 0.7); /* Verde de ventas */
+        color: rgba(28, 200, 138, 0.7); 
+    }
+
+    .card-icon-info {
+        color: rgba(54, 185, 204, 0.7); 
+    }
+
+    .card-icon-warning {
+        color: rgba(255, 193, 7, 0.7); 
     }
 </style>
-<!-- Page Heading -->
+
 <div class="d-sm-flex align-items-center justify-content-between mb-4">
-    <h1 class="h3 mb-0 text-gray-800">Dashboard</h1>
+    <h1 class="h3 mb-0 text-gray-800">Panel de Control Gerencial</h1>
     <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
         <i class="fas fa-download fa-sm text-white-50"></i> Generar Reporte
     </a>
 </div>
 
 
-<!-- Content Row: Cards de Métricas Clave -->
 <div class="row">
 
-    <!-- Vehículos Disponibles -->
     <div class="col-xl-3 col-md-6 mb-4">
         <div class="card border-left-primary shadow h-100 py-2">
             <div class="card-body">
@@ -34,7 +44,9 @@
                         <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
                             Stock Disponible
                         </div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">25</div> <!-- Valor simulado -->
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">
+                            @(kpis != null ? kpis.TotalStockDisponible.ToString("N0") : "0")
+                        </div>
                     </div>
                     <div class="col-auto">
                         <i class="fas fa-car fa-2x card-icon-primary"></i>
@@ -44,16 +56,17 @@
         </div>
     </div>
 
-    <!-- Total de Ventas (Mensual) -->
     <div class="col-xl-3 col-md-6 mb-4">
         <div class="card border-left-success shadow h-100 py-2">
             <div class="card-body">
                 <div class="row no-gutters align-items-center">
                     <div class="col mr-2">
                         <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                            Ventas Netas (Mes)
+                            Ventas Netas (30 Días)
                         </div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">Bs. 350,000</div> <!-- Valor simulado -->
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">
+                            Bs. @(kpis != null ? kpis.TotalVentasMes.ToString("N2") : "0.00")
+                        </div>
                     </div>
                     <div class="col-auto">
                         <i class="fas fa-dollar-sign fa-2x card-icon-success"></i>
@@ -63,28 +76,24 @@
         </div>
     </div>
 
-    <!-- Clientes Registrados -->
     <div class="col-xl-3 col-md-6 mb-4">
         <div class="card border-left-info shadow h-100 py-2">
             <div class="card-body">
                 <div class="row no-gutters align-items-center">
                     <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Clientes Activos</div>
-                        <div class="row no-gutters align-items-center">
-                            <div class="col-auto">
-                                <div class="h5 mb-0 mr-3 font-weight-bold text-gray-800">450</div> <!-- Valor simulado -->
-                            </div>
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Clientes Registrados</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">
+                            @(kpis != null ? kpis.TotalClientes.ToString("N0") : "0")
                         </div>
                     </div>
                     <div class="col-auto">
-                        <i class="fas fa-users fa-2x text-info"></i>
+                        <i class="fas fa-users fa-2x card-icon-info"></i>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Comisiones Pendientes -->
     <div class="col-xl-3 col-md-6 mb-4">
         <div class="card border-left-warning shadow h-100 py-2">
             <div class="card-body">
@@ -93,57 +102,49 @@
                         <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
                             Comisiones Pendientes
                         </div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">Bs. 8,500</div> <!-- Valor simulado -->
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">
+                            Bs. @(kpis != null ? kpis.TotalComisionesPendientes.ToString("N2") : "0.00")
+                        </div>
                     </div>
                     <div class="col-auto">
-                        <i class="fas fa-clipboard-list fa-2x text-warning"></i>
+                        <i class="fas fa-hand-holding-usd fa-2x card-icon-warning"></i>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
-<!-- Content Row: Gráficos e Información Adicional -->
+
 <div class="row">
 
-    <!-- Área de Gráfico de Ventas (Simulado) -->
     <div class="col-xl-8 col-lg-7">
         <div class="card shadow mb-4">
             <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                <h6 class="m-0 font-weight-bold text-primary">Resumen de Ingresos (Últimos 6 Meses)</h6>
+                <h6 class="m-0 font-weight-bold text-primary">Resumen de Ingresos por Venta (Últimos 6 Meses)</h6>
             </div>
             <div class="card-body">
-                <div class="chart-area text-center">
-                    <!-- Placeholder de Gráfico de Área -->
-                    <p class="text-muted mt-5">Gráfico de DataTables/Chart.js iría aquí.</p>
-                    <div style="height: 300px;"></div>
+                <div class="chart-area">
+                    <canvas id="ingresosChart"></canvas>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Donut Chart de Estado de Inventario (Simulado) -->
     <div class="col-xl-4 col-lg-5">
         <div class="card shadow mb-4">
             <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                <h6 class="m-0 font-weight-bold text-primary">Estado del Inventario (%)</h6>
+                <h6 class="m-0 font-weight-bold text-primary">Distribución de Inventario</h6>
             </div>
             <div class="card-body">
-                <div class="chart-pie pt-4 pb-2 text-center">
-                    <!-- Placeholder de Gráfico de Pastel -->
-                    <div style="height: 250px;" class="mt-4">
-                        <i class="fas fa-chart-pie fa-5x text-gray-300"></i>
-                        <p class="text-muted mt-2">Disponible, Vendido, Mantenimiento</p>
-                    </div>
+                <div class="chart-pie pt-4 pb-2">
+                    <canvas id="inventarioChart"></canvas>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Content Row: Tareas y Accesos Rápidos -->
 <div class="row">
-
     <div class="col-lg-6 mb-4">
         <div class="card shadow mb-4">
             <div class="card-header py-3">
@@ -163,21 +164,119 @@
         </div>
     </div>
 
-    <div class="col-lg-6 mb-4">
-        <div class="card shadow mb-4">
-            <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-primary">Registro de Auditoría Reciente</h6>
-            </div>
-            <div class="card-body">
-                <p class="text-muted">Muestra las últimas 5 acciones registradas en la **Bitácora** (solo para administradores).</p>
-                <a href="@Url.Action("Bitacora", "Bitacora")" class="btn btn-sm btn-secondary">
-                    Ver Bitácora Completa
-                </a>
-            </div>
-        </div>
-    </div>
 </div>
 
 @section Scripts {
-    <!-- Aquí se integrarían Chart.js y las llamadas AJAX para obtener los datos reales de las métricas -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            const dataResumenMensual = @Html.Raw(Json.Encode(ViewBag.ResumenMensual));
+            const dataEstadoInventario = @Html.Raw(Json.Encode(ViewBag.EstadoInventario));
+
+            drawIngresosChart(dataResumenMensual);
+
+            drawInventarioChart(dataEstadoInventario);
+        });
+
+
+        function drawIngresosChart(dataMensual) {
+            if (!dataMensual || dataMensual.length === 0) {
+                 $("#ingresosChart").closest(".chart-area").html('<p class="text-muted text-center mt-5">No hay datos de ventas en los últimos 6 meses.</p>');
+                 return;
+            }
+
+            const labels = dataMensual.map(d => `${d.Periodo.substring(5, 7)}/${d.Periodo.substring(0, 4)}`);
+            const ingresos = dataMensual.map(d => d.IngresoTotal);
+
+            const ctx = document.getElementById("ingresosChart").getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: "Ingreso Total (Bs.)",
+                        lineTension: 0.3,
+                        backgroundColor: "rgba(78, 115, 223, 0.05)",
+                        borderColor: "rgba(78, 115, 223, 1)",
+                        pointRadius: 3,
+                        pointBackgroundColor: "rgba(78, 115, 223, 1)",
+                        pointBorderColor: "rgba(78, 115, 223, 1)",
+                        pointHoverRadius: 3,
+                        pointHoverBackgroundColor: "rgba(78, 115, 223, 1)",
+                        pointHoverBorderColor: "rgba(78, 115, 223, 1)",
+                        pointHitRadius: 10,
+                        pointBorderWidth: 2,
+                        data: ingresos,
+                    }],
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    tooltips: {
+                        mode: 'index',
+                        intersect: false,
+                        callbacks: {
+                            label: function(tooltipItem, chart) {
+                                return `Bs. ${tooltipItem.yLabel.toFixed(2)}`;
+                            }
+                        }
+                    },
+                    scales: {
+                        xAxes: [{ time: { unit: 'month' }, gridLines: { display: false, drawBorder: false }, ticks: { maxTicksLimit: 6 } }],
+                        yAxes: [{ ticks: { maxTicksLimit: 5, padding: 10, callback: function(value, index, values) { return 'Bs. ' + value.toFixed(2); } }, gridLines: { color: "rgb(234, 236, 244)", zeroLineColor: "rgb(234, 236, 244)", drawBorder: false, borderDash: [2], zeroLineBorderDash: [2] } }]
+                    },
+                    legend: { display: false }
+                }
+            });
+        }
+
+        function drawInventarioChart(dataInventario) {
+            if (!dataInventario || dataInventario.length === 0) {
+                 $("#inventarioChart").closest(".chart-pie").html('<p class="text-muted text-center mt-5">No hay vehículos registrados en inventario.</p>');
+                 return;
+            }
+
+            const labels = dataInventario.map(d => d.EstadoInventario);
+            const conteos = dataInventario.map(d => d.Conteo);
+
+            const ctx = document.getElementById("inventarioChart").getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: conteos,
+                        backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b', '#6c757d'],
+                        hoverBackgroundColor: ['#2e59d9', '#17a673', '#2c9faf', '#dda600', '#c23326', '#5a6268'],
+                        hoverBorderColor: "rgba(234, 236, 244, 1)",
+                    }],
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    tooltips: {
+                        backgroundColor: "rgb(255,255,255)",
+                        bodyFontColor: "#858796",
+                        borderColor: '#dddfeb',
+                        borderWidth: 1,
+                        xPadding: 15,
+                        yPadding: 15,
+                        displayColors: false,
+                        caretPadding: 10,
+                        callbacks: {
+                            label: function (tooltipItem, chart) {
+                                let dataLabel = chart.labels[tooltipItem.index];
+                                let value = chart.datasets[tooltipItem.datasetIndex].data[tooltipItem.index];
+                                return dataLabel + ': ' + value + ' unidades';
+                            }
+                        }
+                    },
+                    legend: {
+                        display: true,
+                        position: 'bottom'
+                    },
+                    cutoutPercentage: 80,
+                },
+            });
+        }
+    </script>
 }

@@ -132,5 +132,10 @@ namespace CapaNegocio
         {
             return cdvehiculo.ActualizarRutaImagen(obj, out Mensaje);
         }
+
+        public ReporteCostoVehiculoDTO ReporteGastoVehiculo(int idVehiculo, out string mensaje)
+        {
+            return cdvehiculo.ReporteGastoVehiculo(idVehiculo, out mensaje);
+        }
     }
 }

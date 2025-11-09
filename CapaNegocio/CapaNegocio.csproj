@@ -96,6 +96,8 @@
     <Compile Include="CN_Asesor.cs" />
     <Compile Include="CN_Bitacora.cs" />
     <Compile Include="CN_Cliente.cs" />
+    <Compile Include="CN_Comision.cs" />
+    <Compile Include="CN_Dashboard.cs" />
     <Compile Include="CN_Gasto.cs" />
     <Compile Include="CN_Login.cs" />
     <Compile Include="CN_Marca.cs" />

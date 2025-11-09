@@ -22,14 +22,16 @@ namespace CapaEntidad
         GO*/
 
         public int id_comision {  get; set; }
-        public float monto { get; set; }
-        public DateTime fecha_pago { get; set; }
-        public DateTime fecha_generacion { get; set; }
+        public decimal monto { get; set; }
+        public String fecha_pago { get; set; }
+        public String fecha_generacion { get; set; }
         public string estado { get; set; }
         public string observaciones { get; set; }
         public int id_venta { get; set; }
         public int id_asesor { get; set; }
         public Venta oVenta { get; set; }
         public Asesor oAsesor { get; set; }
+        public string NombreAsesor { get; set; }
+        public string CiAsesor { get; set; }
     }
 }

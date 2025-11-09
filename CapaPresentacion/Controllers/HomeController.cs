@@ -11,9 +11,18 @@ namespace CapaPresentacion.Controllers
 {
     [Authorize]
     public class HomeController : Controller
+        
     {
+        private CD_Dashboard objCdDashboard = new CD_Dashboard();
         public ActionResult Index()
         {
+            Dictionary<string, object> resumenData = objCdDashboard.ObtenerResumenDashboard();
+
+            ViewBag.KPIs = resumenData.ContainsKey("KPIs") ? resumenData["KPIs"] : null;
+            ViewBag.ResumenMensual = resumenData.ContainsKey("ResumenMensual") ? resumenData["ResumenMensual"] : null;
+            ViewBag.EstadoInventario = resumenData.ContainsKey("EstadoInventario") ? resumenData["EstadoInventario"] : null;
+
+
             return View();
         }
         
