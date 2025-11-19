@@ -131,14 +131,32 @@ namespace CapaPresentacion.Controllers
             return Json(new { resultado = resultado, mensaje = mensaje }, JsonRequestBehavior.AllowGet);
         }
 
+
         [HttpGet]
         public JsonResult ListarVehiculosSimples()
         {
-            var lista = cnVehiculo.Listar().Select(v => new {
-                id_vehiculo = v.id_vehiculo,
-                info = $"{v.placa} - {v.modelo} ({v.estado})"
-            }).ToList();
-            return Json(new { data = lista }, JsonRequestBehavior.AllowGet);
+            try
+            {
+                List<Vehiculo> lista = cnVehiculo.Listar();
+
+                var listaMapeada = lista.Select(v => new
+                { 
+                    v.id_vehiculo,
+                    v.placa,
+                    v.modelo,
+                    v.color,
+                    v.año,
+                   
+                    v.precio_venta
+
+
+                }).ToList();
+                return Json(new { data = listaMapeada }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new { data = new List<object>(), error = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
 
 
         }

@@ -1,0 +1,127 @@
+﻿
+@{
+    ViewBag.Title = "Reporte Venta";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/2.0.8/css/jquery.dataTables.css" />
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/2.0.8/js/jquery.dataTables.js"></script>
+
+
+<div class="card shadow mb-4">
+    <div class="card-header bg-primary text-white">
+        <i class="fas fa-money-bill-wave"></i> Reporte de Ganacia de una Venta
+    </div>
+
+    <div class="card-body">
+
+        <div class="row mb-4 border p-3 rounded bg-light">
+            <h5 class="text-primary">Asociar Reporte a:</h5>
+            <div class="col-sm-6">
+                <label for="txtVentaSeleccionada" class="form-label">Venta (Trámites)</label>
+                <div class="input-group">
+                    <input type="hidden" id="txtIdVentaSeleccionada" value="0" />
+                    <input type="text" class="form-control" id="txtVentaSeleccionada" placeholder="Seleccione una venta asociada" readonly />
+                    <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modalBuscarVenta">
+                        <i class="fas fa-search"></i> Buscar Venta
+                    </button>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+</div>
+<div class="modal fade" id="modalBuscarVenta" tabindex="-1" aria-labelledby="modalBuscarVentaLabel" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title" id="modalBuscarVentaLabel">Buscar Venta para Asociación de Gastos</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <table id="tablaVentasModal" class="display cell-border w-100" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>Nº Venta</th>
+                            <th>Cliente (CI/NIT)</th>
+                            <th>Vehículo(s)</th>
+                            <th>Fecha</th>
+                            <th>Total (Bs.)</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <script>
+        var tabladataVentasModal;
+
+
+
+        function ResetearFormularioPrincipal() {
+            document.getElementById("txtIdVentaSeleccionada").value = "0";
+            document.getElementById("txtVentaSeleccionada").value = "";
+            LimpiarCamposItem();
+            // Recargar el modal de ventas si está activo
+            if (tabladataVentasModal) {
+                 tabladataVentasModal.ajax.reload(null, false);
+            }
+        }
+
+        
+
+        document.addEventListener('DOMContentLoaded', function () {
+
+
+            tabladataVentasModal = $('#tablaVentasModal').DataTable({
+                responsive: true,
+                ordering: true,
+                "ajax": {
+                    "url": '@Url.Action("ListarVentasSimples", "Gasto")',
+                    "type": "GET",
+                    "datatype": "json",
+                    "dataSrc": "data"
+                },
+                "columns": [
+                    { "data": "id_venta" },
+                    { "data": "NombreCliente",
+                      "render": function (data, type, row) {
+                          return `${row.NombreCliente} (${row.CiNitCliente})`;
+                      }
+                    },
+                    { "data": "VehiculosVendidos" },
+                    { "data": "fecha" },
+                    { "data": "total", "render": function(data) { return `Bs. ${parseFloat(data).toFixed(2)}`; } },
+                    {
+                        "defaultContent": '<button type="button" class="btn btn-success btn-sm btn-seleccionar-venta"><i class="fas fa-check"></i> Seleccionar</button>',
+                        "orderable": false, "searchable": false, "width": "100px"
+                    }
+                ],
+                "language": { "url": '//cdn.datatables.net/plug-ins/2.2.1/i18n/es-ES.json' }
+            });
+
+            $('#tablaVentasModal tbody').on('click', '.btn-seleccionar-venta', function () {
+                const dataVenta = tabladataVentasModal.row($(this).parents('tr')).data();
+
+                document.getElementById('txtIdVentaSeleccionada').value = dataVenta.id_venta;
+                document.getElementById('txtVentaSeleccionada').value = `Venta N° ${dataVenta.id_venta} | Cliente: ${dataVenta.NombreCliente} (${dataVenta.CiNitCliente})`;
+
+                $('#modalBuscarVenta').modal('hide');
+            });
+
+        });
+
+    </script>
+}
+

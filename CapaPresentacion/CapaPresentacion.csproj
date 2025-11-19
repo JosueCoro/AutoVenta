@@ -2435,6 +2435,8 @@
     <Content Include="Views\Login\AccesoDenegado.cshtml" />
     <Content Include="Views\Gasto\GastoVenta.cshtml" />
     <Content Include="Views\Reporte\ReporteVentas.cshtml" />
+    <Content Include="Views\Reporte\RepoeGananciaVenta.cshtml" />
+    <Content Include="Views\Reporte\RepoeGananciaVehiculo.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

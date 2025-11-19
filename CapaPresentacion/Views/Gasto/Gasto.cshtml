@@ -16,15 +16,24 @@
 
     <div class="card-body">
 
-        <div class="row mb-4 border p-3 rounded bg-light">
-            <h5 class="text-primary">Asociar Gasto a:</h5>
+        
+        <div class="card-body">
 
-            <div class="col-sm-6">
-                <label for="cboVehiculo" class="form-label">Vehículo (Inventario)</label>
-                <select id="cboVehiculo" class="form-control">
-                    <option value="0">Seleccionar Vehículo</option>
-                </select>
+            <div class="row mb-4 border p-3 rounded bg-light">
+                <h5 class="text-primary">Asociar Gasto a:</h5>
+                <div class="col-sm-6">
+                    <label for="txtVehiculoSeleccionado" class="form-label">Vehiculo</label>
+                    <div class="input-group">
+                        <input type="hidden" id="txtIdVehiculoSeleccionada" value="0" />
+                        <input type="text" class="form-control" id="txtVehiculoSeleccionado" placeholder="Seleccione un Vrhiculo" readonly />
+                        <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modalBuscarVehiculo">
+                            <i class="fas fa-search"></i> Buscar Vehiculo
+                        </button>
+                    </div>
+                </div>
             </div>
+
+
         </div>
 
         <h5 class="text-primary mt-4">Detalle del Gasto</h5>
@@ -94,10 +103,42 @@
 </div>
 
 
+<div class="modal fade" id="modalBuscarVehiculo" tabindex="-1" aria-labelledby="modalBuscarVehiculoLabel" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title" id="modalBuscarVehiculoLabel">Buscar Vehiculo para Asociación de Gastos</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <table id="tablaVehiculosModal" class="display cell-border w-100" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>ID Vehículo</th>
+                            <th>Placa</th>
+                            <th>Modelo</th>
+                            <th>Color</th>
+                            <th>Año</th>
+                            <th>Precio Venta (Bs.)</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+
 @section Scripts{
     <script>
         var tabladataGastosRegistrados;
         var carritoGastos = [];
+        var tablaVehiculosModal;
 
 
         async function llenarTiposGasto() {
@@ -125,26 +166,7 @@
         }
 
 
-        async function llenarVehiculos() {
-            try {
-                const response = await fetch('@Url.Action("ListarVehiculosSimples", "Gasto")', { method: 'GET' });
-                const data = await response.json();
-                const ddl = document.getElementById("cboVehiculo");
-
-                if (!data || !Array.isArray(data.data)) {
-                    throw new Error("Respuesta inválida para Vehículos.");
-                }
-
-                data.data.forEach(v => {
-                    const option = document.createElement('option');
-                    option.value = v.id_vehiculo;
-                    option.textContent = v.info;
-                    ddl.appendChild(option);
-                });
-            } catch (error) {
-                document.getElementById("cboVehiculo").innerHTML = '<option value="0">Error</option>';
-            }
-        }
+       
 
        
 
@@ -221,33 +243,64 @@
         function ResetearFormularioPrincipal() {
             carritoGastos = [];
             RenderizarCarrito();
-            document.getElementById("cboVehiculo").value = "0";
+            document.getElementById("txtIdVehiculoSeleccionada").value = "0";
+            document.getElementById("txtVehiculoSeleccionado").value = "";
+            
+            if (tablaVehiculosModal) {
+                tablaVehiculosModal.ajax.reload(null, false);
+            }
             LimpiarCamposItem();
-            HabilitarExclusividad();
             llenarTiposGasto();
             tabladataGastosRegistrados.ajax.reload(null, false);
         }
 
-        function HabilitarExclusividad() {
-            const idVehiculo = parseInt(document.getElementById("cboVehiculo").value);
 
-            const cboVehiculo = document.getElementById("cboVehiculo");
+        document.addEventListener("DOMContentLoaded", function () {
 
+            tablaVehiculosModal = $('#tablaVehiculosModal').DataTable({
+                responsive: true,
+                ordering: true,
+                "ajax": {
+                    "url": '@Url.Action("ListarVehiculosSimples", "Gasto")',
+                    "type": "GET",
+                    "datatype": "json",
+                    "dataSrc": "data"
+                },
+                "columns": [
+                    { "data": "id_vehiculo" },
+                    { "data": "placa" },
+                    { "data": "modelo" },
+                    { "data": "color" },
+                    { "data": "año" },
+                    { "data": "precio_venta" },
+                    {
+                        "defaultContent": '<button type="button" class="btn btn-success btn-sm btn-seleccionar-vehiculo"><i class="fas fa-check"></i> Seleccionar</button>',
+                        "orderable": false, "searchable": false, "width": "100px"
+                    }
 
+                ],
+                "language": { "url": '//cdn.datatables.net/plug-ins/2.2.1/i18n/es-ES.json' }
 
-            cboVehiculo.disabled = false;
-            
-        }
+            });
+            $('#tablaVehiculosModal tbody').on('click', '.btn-seleccionar-vehiculo', function () {
+                const dataVehiculo = tablaVehiculosModal.row($(this).parents('tr')).data();
 
-        document.getElementById("cboVehiculo").addEventListener('change', HabilitarExclusividad);
+                document.getElementById('txtIdVehiculoSeleccionada').value = dataVehiculo.id_vehiculo;
+                document.getElementById('txtVehiculoSeleccionado').value = `Modelo: ${dataVehiculo.modelo} (${dataVehiculo.placa}) | Año: ${dataVehiculo.año} `;
+
+                $('#modalBuscarVehiculo').modal('hide');
+            });
+
+        });
+
 
         async function FinalizarRegistroGastos() {
-            const idVehiculo = parseInt(document.getElementById("cboVehiculo").value);
+            const idVehiculo = parseInt(document.getElementById("txtIdVehiculoSeleccionada").value);
 
             const idVenta = 0;
 
             if (idVehiculo === 0) {
-                Swal.fire('Error', 'Debe asociar los gastos a un Vehículo.', 'error');
+                Swal.fire('Error', 'Debe asociar los gastos a un Vehículo, usando el botón "Buscar Vehiculo".', 'error');
                 return;
             }
             if (carritoGastos.length === 0) {
@@ -292,7 +345,6 @@
 
         document.addEventListener('DOMContentLoaded', function () {
             llenarTiposGasto();
-            llenarVehiculos();
 
             tabladataGastosRegistrados = $('#tablagastos').DataTable({
                 responsive: true,

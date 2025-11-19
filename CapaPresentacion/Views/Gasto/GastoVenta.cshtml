@@ -33,19 +33,20 @@
 
         <h5 class="text-primary mt-4">Detalle de Ítems de Gasto</h5>
         <div class="row g-2 mb-3 border p-3 rounded">
-            <div class="col-sm-4">
-                <label for="txtDescripcionItem" class="form-label">Descripción</label>
-                <input type="text" id="txtDescripcionItem" class="form-control" maxlength="250">
-            </div>
-            <div class="col-sm-3">
-                <label for="txtMontoItem" class="form-label">Monto (Bs.)</label>
-                <input type="number" id="txtMontoItem" class="form-control" step="0.01" value="0.00">
-            </div>
             <div class="col-sm-3">
                 <label for="cboTipoGastoItem" class="form-label">Tipo de Gasto</label>
                 <select id="cboTipoGastoItem" class="form-control">
                     <option value="0">Cargando...</option>
                 </select>
+            </div>
+
+            <div class="col-sm-3">
+                <label for="txtMontoItem" class="form-label">Monto (Bs.)</label>
+                <input type="number" id="txtMontoItem" class="form-control" step="0.01" value="0.00">
+            </div>
+            <div class="col-sm-4">
+                <label for="txtDescripcionItem" class="form-label">Descripción</label>
+                <input type="text" id="txtDescripcionItem" class="form-control" maxlength="250">
             </div>
             <div class="col-sm-2 d-flex align-items-end">
                 <button type="button" class="btn btn-info w-100" onclick="AgregarItemGasto()">

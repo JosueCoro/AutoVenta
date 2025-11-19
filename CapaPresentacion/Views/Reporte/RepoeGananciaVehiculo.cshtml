@@ -1,0 +1,126 @@
+﻿
+@{
+    ViewBag.Title = "Reporte Vehiculo";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/2.0.8/css/jquery.dataTables.css" />
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/2.0.8/js/jquery.dataTables.js"></script>
+
+
+<div class="card shadow mb-4">
+    <div class="card-header bg-primary text-white">
+        <i class="fas fa-money-bill-wave"></i> Reporte de Ganancias de un vehiculo
+    </div>
+
+    <div class="card-body">
+
+        <div class="row mb-4 border p-3 rounded bg-light">
+            <h5 class="text-primary">Asociar Reporte a:</h5>
+            <div class="col-sm-6">
+                <label for="txtVehiculoSeleccionado" class="form-label">Vehiculo</label>
+                <div class="input-group">
+                    <input type="hidden" id="txtIdVehiculoSeleccionada" value="0" />
+                    <input type="text" class="form-control" id="txtVehiculoSeleccionado" placeholder="Seleccione un Vehiculo" readonly />
+                    <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modalBuscarVehiculo">
+                        <i class="fas fa-search"></i> Buscar Vehiculo
+                    </button>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+
+</div>
+
+<div class="modal fade" id="modalBuscarVehiculo" tabindex="-1" aria-labelledby="modalBuscarVehiculoLabel" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title" id="modalBuscarVehiculoLabel">Buscar Vehiculo para Asociación de Gastos</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <table id="tablaVehiculosModal" class="display cell-border w-100" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>ID Vehículo</th>
+                            <th>Placa</th>
+                            <th>Modelo</th>
+                            <th>Color</th>
+                            <th>Año</th>
+                            <th>Precio Venta (Bs.)</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+
+
+
+@section Scripts{
+    <script>
+        var tablaVehiculosModal;
+
+        function ResetearFormularioPrincipal() {
+            document.getElementById("txtIdVehiculoSeleccionada").value = "0";
+            document.getElementById("txtVehiculoSeleccionado").value = "";
+            LimpiarCamposItem();
+            if (tablaVehiculosModal) {
+                tablaVehiculosModal.ajax.reload(null, false);
+            }
+        }
+        document.addEventListener("DOMContentLoaded", function () {
+
+            tablaVehiculosModal = $('#tablaVehiculosModal').DataTable({
+                responsive: true,
+                ordering: true,
+                "ajax": {
+                    "url": '@Url.Action("ListarVehiculosSimples", "Gasto")',
+                    "type": "GET",
+                    "datatype": "json",
+                    "dataSrc": "data"
+                },
+                "columns": [
+                    { "data": "id_vehiculo" },
+                    { "data": "placa" },
+                    { "data": "modelo" },
+                    { "data": "color" },
+                    { "data": "año" },
+                    { "data": "precio_venta" },
+                    {
+                        "defaultContent": '<button type="button" class="btn btn-success btn-sm btn-seleccionar-vehiculo"><i class="fas fa-check"></i> Seleccionar</button>',
+                        "orderable": false, "searchable": false, "width": "100px"
+                    }
+
+                ],
+                "language": { "url": '//cdn.datatables.net/plug-ins/2.2.1/i18n/es-ES.json' }
+
+            });
+            $('#tablaVehiculosModal tbody').on('click', '.btn-seleccionar-vehiculo', function () {
+                const dataVehiculo = tablaVehiculosModal.row($(this).parents('tr')).data();
+
+                document.getElementById('txtIdVehiculoSeleccionada').value = dataVehiculo.id_vehiculo;
+                document.getElementById('txtVehiculoSeleccionado').value = `Modelo: ${dataVehiculo.modelo} (${dataVehiculo.placa}) | Año: ${dataVehiculo.año} `;
+
+                $('#modalBuscarVehiculo').modal('hide');
+            });
+
+        });
+
+
+    </script>
+}
+

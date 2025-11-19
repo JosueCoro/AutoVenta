@@ -6,7 +6,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@ViewBag.Title - Mi aplicación ASP.NET</title>
+    <title>@ViewBag.Title - Auto Venta Don Coro</title>
 
     <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
     <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
@@ -31,10 +31,8 @@
         <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
 
             <a class="sidebar-brand d-flex align-items-center justify-content-center" href="index.html">
-                <!--<div class="sidebar-brand-icon rotate-n-15">
-            <i class="fas fa-laugh-wink"></i>
-        </div>-->
-                <div class="sidebar-brand-text mx-3">Carsys AutoVenta</div>
+                
+                <div class="sidebar-brand-text mx-3">Auto Venta</div>
             </a>
 
 
@@ -276,7 +274,24 @@
 
 
 
-
+            @if (TienePermiso("Visualizar Ganancias por Ventas"))
+            {
+                <li class="nav-item active">
+                    <a class="nav-link" href="@Url.Action("RepoeGananciaVenta", "Reporte")">
+                        <i class="fas fa-fw fa-chart-area"></i>
+                        <span>Reporte de Ganancia de Venta</span>
+                    </a>
+                </li>
+            }
+            @if (TienePermiso("Visualizar Ganancias por Vehiculo"))
+            {
+                <li class="nav-item active">
+                    <a class="nav-link" href="@Url.Action("RepoeGananciaVehiculo", "Reporte")">
+                        <i class="fas fa-fw fa-chart-area"></i>
+                        <span>Reporte de ganancias por Vehiculo</span>
+                    </a>
+                </li>
+            }
 
 
             <!-- Divider -->

@@ -1,4 +1,5 @@
-﻿using CapaEntidad;
+﻿using CapaDato;
+using CapaEntidad;
 using CapaNegocio;
 using CapaPresentacion.Filtros;
 using System;
@@ -34,6 +35,35 @@ namespace CapaPresentacion.Controllers
             lista.Insert(0, new Usuario { id_usuario = 0, nombre = "TODOS", apellido = "LOS USUARIOS" });
 
             return Json(new { data = lista }, JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpGet]
+        public JsonResult ListarUsuarios2()
+        {
+            try
+            {
+                List<Usuario> lista = cnUsuario.Listar();
+
+                var listaMapeada = lista.Select(v => new
+                {
+                    v.id_usuario,
+                    v.nombre,
+                    v.apellido,
+                    v.ci,
+                    v.correo,
+                    //mostrar el nombre del rol
+                    nombre_rol = v.oRol != null ? v.oRol.nombre : string.Empty
+
+
+
+
+                }).ToList();
+                return Json(new { data = listaMapeada }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new { data = new List<object>(), error = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
         }
 
 

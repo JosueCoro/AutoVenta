@@ -10,6 +10,103 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
+<div class="card shadow mb-4">
+    <div class="card-header bg-dark text-white">
+        <i class="fas fa-history"></i> Consulta de Bitácora del Sistema
+    </div>
+    <div class="card-body">
+
+        <div class="row mb-4 border p-3 rounded bg-light">
+            <h5 class="text-primary">Asociar Bitacora a :</h5>
+            <div class="col-sm-6">
+                <label for="txtUsuarioSeleccionado" class="form-label">Usuario</label>
+                <div class="input-group">
+                    <input type="hidden" id="txtIdUsuarioSeleccionada" value="0" />
+                    <input type="text" class="form-control" id="txtUsuarioSeleccionado" placeholder="Seleccione un Usuario" readonly />
+                    <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modalBuscarUsuario">
+                        <i class="fas fa-search"></i> Buscar Usuario
+                    </button>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+
+    <div class="card-body">
+        <h5 class="mb-3">Filtros de Búsqueda</h5>
+        <div class="row mb-4 g-3 align-items-end p-2 border rounded bg-light">
+
+            <div class="col-md-3">
+                <label for="txtFechaInicio" class="form-label">Fecha Inicio</label>
+                <div class="input-group">
+                    <input type="text" class="form-control datepicker" id="txtFechaInicio" readonly>
+                    <span class="input-group-text"><i class="fas fa-calendar"></i></span>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <label for="txtFechaFin" class="form-label">Fecha Fin</label>
+                <div class="input-group">
+                    <input type="text" class="form-control datepicker" id="txtFechaFin" readonly>
+                    <span class="input-group-text"><i class="fas fa-calendar"></i></span>
+                </div>
+            </div>
+
+            <div class="col-md-2">
+                <button type="button" class="btn btn-primary w-100" onclick="inicializarTabla()">
+                    <i class="fas fa-search"></i> Buscar
+                </button>
+            </div>
+        </div>
+
+        <h5 class="mt-4 mb-3">Resultados de la Auditoría</h5>
+        <table id="tablaBitacora" class="display cell-border w-100" style="width:100%">
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Hora</th>
+                    <th>Acción Realizada</th>
+                    <th>Usuario Responsable</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="modal fade" id="modalBuscarUsuario" tabindex="-1" aria-labelledby="modalBuscarUsuarioLabel" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title" id="modalBuscarUsuarioLabel">Buscar Usuario para ver Bitacora</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <table id="tablaUsuariosModal" class="display cell-border w-100" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>ID Usuario</th>
+                            <th>Nombre</th>
+                            <th>Apellido</th>
+                            <th>CI</th>
+                            <th>Correo</th>
+                            <th>Rol</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/2.0.8/js/jquery.dataTables.js"></script>
@@ -17,28 +114,14 @@
 
     <script>
         var tabladata;
+        var tablaUsuariosModal;
 
-        async function cargarUsuariosFiltro() {
-            const ddlUsuario = document.getElementById("cboUsuario");
-
-            ddlUsuario.innerHTML = '<option value="0">Cargando...</option>';
-
-            try {
-                const response = await fetch('@Url.Action("ListarUsuarios", "Bitacora")', { method: 'GET' });
-                const data = await response.json();
-
-                ddlUsuario.innerHTML = '';
-                data.data.forEach(usuario => {
-                    const option = document.createElement('option');
-                    option.value = usuario.id_usuario;
-                    option.textContent = usuario.id_usuario === 0
-                        ? "TODOS LOS USUARIOS"
-                        : `${usuario.nombre} ${usuario.apellido}`;
-                    ddlUsuario.appendChild(option);
-                });
-
-            } catch (error) {
-                ddlUsuario.innerHTML = '<option value="0">Error al cargar usuarios</option>';
+        function ResetearFormularioPrincipal() {
+            document.getElementById("txtIdUsuarioSeleccionada").value = "0";
+            document.getElementById("txtUsuarioSeleccionado").value = "";
+           // LimpiarCamposItem();
+            if (tablaUsuariosModal) {
+                tablaUsuariosModal.ajax.reload(null, false);
             }
         }
 
@@ -46,7 +129,7 @@
             if ($.fn.DataTable.isDataTable('#tablaBitacora')) {
                 tabladata.ajax.reload();
             } else {
-                inicializarTabla();
+                //inicializarTabla();
             }
         }
 
@@ -69,10 +152,10 @@
                     "data": function (d) {
                         d.fechaInicio = $("#txtFechaInicio").val();
                         d.fechaFin = $("#txtFechaFin").val();
-                        d.idUsuario = $("#cboUsuario").val();
+                        d.idUsuario = $("#txtIdUsuarioSeleccionada").val();
                     }
                 },
-                
+
                 "columns": [
                     {
                         "data": "fecha",
@@ -121,6 +204,32 @@
 
         document.addEventListener('DOMContentLoaded', function () {
 
+            tablaUsuariosModal = $('#tablaUsuariosModal').DataTable({
+                responsive: true,
+                ordering: true,
+                "ajax": {
+                    "url": '@Url.Action("ListarUsuarios2", "Bitacora")',
+                    "type": "GET",
+                    "datatype": "json",
+                    "dataSrc": "data"
+                },
+                "columns": [
+                    { "data": "id_usuario" },
+                    { "data": "nombre" },
+                    { "data": "apellido" },
+                    { "data": "ci" },
+                    { "data": "correo" },
+                    { "data": "nombre_rol" },
+                    {
+                        "defaultContent": '<button type="button" class="btn btn-success btn-sm btn-seleccionar-usuario"><i class="fas fa-check"></i> Seleccionar</button>',
+                        "orderable": false, "searchable": false, "width": "100px"
+                    }
+
+                ],
+                "language": { "url": '//cdn.datatables.net/plug-ins/2.2.1/i18n/es-ES.json' }
+
+            });
+
             $(".datepicker").datepicker({
                 dateFormat: "yy-mm-dd",
                 changeMonth: true,
@@ -129,67 +238,24 @@
                 monthNamesShort: ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"]
             });
 
+            $('#tablaUsuariosModal tbody').on('click', '.btn-seleccionar-usuario', function () {
+                const dataUser = tablaUsuariosModal.row($(this).parents('tr')).data();
+
+                document.getElementById('txtIdUsuarioSeleccionada').value = dataUser.id_usuario;
+                document.getElementById('txtUsuarioSeleccionado').value = `Nombre: ${dataUser.nombre} (${dataUser.apellido}) | CI: ${dataUser.ci} `;
+
+                $('#modalBuscarUsuario').modal('hide');
+            });
+
             const today = new Date().toISOString().substring(0, 10);
             $("#txtFechaInicio").val(today);
             $("#txtFechaFin").val(today);
 
-            cargarUsuariosFiltro();
+            //cargarUsuariosFiltro();
 
-            inicializarTabla();
+            //inicializarTabla();
         });
+
+
     </script>
 }
-<div class="card shadow mb-4">
-    <div class="card-header bg-dark text-white">
-        <i class="fas fa-history"></i> Consulta de Bitácora del Sistema
-    </div>
-
-    <div class="card-body">
-        <h5 class="mb-3">Filtros de Búsqueda</h5>
-        <div class="row mb-4 g-3 align-items-end p-2 border rounded bg-light">
-
-            <div class="col-md-3">
-                <label for="txtFechaInicio" class="form-label">Fecha Inicio</label>
-                <div class="input-group">
-                    <input type="text" class="form-control datepicker" id="txtFechaInicio" readonly>
-                    <span class="input-group-text"><i class="fas fa-calendar"></i></span>
-                </div>
-            </div>
-
-            <div class="col-md-3">
-                <label for="txtFechaFin" class="form-label">Fecha Fin</label>
-                <div class="input-group">
-                    <input type="text" class="form-control datepicker" id="txtFechaFin" readonly>
-                    <span class="input-group-text"><i class="fas fa-calendar"></i></span>
-                </div>
-            </div>
-
-            <div class="col-md-4">
-                <label for="cboUsuario" class="form-label">Realizado por:</label>
-                <select id="cboUsuario" class="form-control">
-                </select>
-            </div>
-
-            <div class="col-md-2">
-                <button type="button" class="btn btn-primary w-100" onclick="inicializarTabla()">
-                    <i class="fas fa-search"></i> Buscar
-                </button>
-            </div>
-        </div>
-
-        <h5 class="mt-4 mb-3">Resultados de la Auditoría</h5>
-        <table id="tablaBitacora" class="display cell-border w-100" style="width:100%">
-            <thead>
-                <tr>
-                    <th>Fecha</th>
-                    <th>Hora</th>
-                    <th>Acción Realizada</th>
-                    <th>Usuario Responsable</th>
-                </tr>
-            </thead>
-            <tbody>
-            </tbody>
-        </table>
-    </div>
-</div>
-

@@ -19,7 +19,6 @@ namespace CapaPresentacion.Controllers
             return View();
         }
 
-        //reporte de ventas definir una fecha inicio y fecha fin
         [HttpGet]
         public JsonResult ReporteVenta(string fechaInicio, string fechaFin)
         {
@@ -34,6 +33,18 @@ namespace CapaPresentacion.Controllers
             {
                 return Json(new { data = new List<object>(), resultado = false, mensaje = ex.Message }, JsonRequestBehavior.AllowGet);
             }
+        }
+
+        [ValidarPermisos(NombrePermiso = "Visualizar Ganancias por Ventas")]
+        public ActionResult RepoeGananciaVenta()
+        {
+            return View();
+        }
+
+        [ValidarPermisos(NombrePermiso = "Visualizar Ganancias por Vehiculo")]
+        public ActionResult RepoeGananciaVehiculo()
+        {
+            return View();
         }
     }
 }

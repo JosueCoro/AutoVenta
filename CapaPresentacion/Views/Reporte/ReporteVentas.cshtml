@@ -1,11 +1,11 @@
-﻿
-@{
+﻿@{
     ViewBag.Title = "ReporteVentas";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" />
 <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/2.0.8/css/jquery.dataTables.css" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -36,7 +36,7 @@
             </div>
 
             <div class="col-md-3">
-                <button type="button" class="btn btn-primary w-100" onclick="inicializarTabla()">
+                <button type="button" class="btn btn-primary w-100" id="btnBuscarReporte">
                     <i class="fas fa-search"></i> Buscar Reporte
                 </button>
             </div>
@@ -76,9 +76,9 @@
 </div>
 
 @section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/2.0.8/js/jquery.dataTables.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
 
@@ -120,7 +120,14 @@
                 "columns": [
                     { "data": "id_venta" },
                     { "data": "NombreUsuario" },
-                    { "data": "fecha" },
+                    {
+                        "data": "fecha", // Nombre del campo enviado por el servidor
+                        "render": function (data) {
+                            // Suponiendo que 'data' llega como "4/11/2025 00:00:00"
+                            // Usamos split(' ') para dividir por espacio y tomar el primer elemento (la fecha)
+                            return data.split(' ')[0];
+                        }
+                    },
                     { "data": "NombreCliente" },
                     { "data": "CiNitCliente" },
                     { "data": "VehiculosVendidos" },
@@ -145,6 +152,7 @@
                     "sEmptyTable": "Utilice el botón 'Buscar Reporte' para cargar las ventas.",
                     "url": '//cdn.datatables.net/plug-ins/2.2.1/i18n/es-ES.json',
                 },
+                //"lengthMenu": [[5, 10, 25, 50, -1], [5, 10, 25, 50, "Todos"]],
                 "footerCallback": function (row, data, start, end, display) {
                     var api = this.api();
 
@@ -255,7 +263,7 @@
             // Swal.fire('¡Éxito!', 'Reporte PDF generado correctamente.', 'success');
         }
 
-        
+
         document.addEventListener('DOMContentLoaded', function () {
 
             $(".datepicker").datepicker({
@@ -270,8 +278,14 @@
             $("#txtFechaInicio").val(today);
             $("#txtFechaFin").val(today);
 
+            $("#btnBuscarReporte").on("click", function () {
+                inicializarTabla();
+            });
+            $(".input-group-text").on("click", function () {
+                $(this).prev('input[type="text"]').focus(); // Enfoca el input anterior para abrir el datepicker
+            });
+
 
         });
     </script>
 }
-
