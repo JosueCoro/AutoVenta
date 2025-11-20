@@ -1,5 +1,4 @@
-﻿
-@{
+﻿@{
     ViewBag.Title = "Reporte Vehiculo";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
@@ -16,22 +15,90 @@
         <i class="fas fa-money-bill-wave"></i> Reporte de Ganancias de un vehiculo
     </div>
 
-    <div class="card-body">
+    <div class="row mb-4 border p-3 rounded bg-light">
+        <h5 class="text-primary">Asociar Reporte a:</h5>
+        <div class="col-sm-6">
+            <label for="txtVehiculoSeleccionado" class="form-label">Vehiculo</label>
+            <div class="input-group">
+                <input type="hidden" id="txtIdVehiculoSeleccionada" value="0" />
+                <input type="text" class="form-control" id="txtVehiculoSeleccionado" placeholder="Seleccione un Vehiculo" readonly />
+                <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modalBuscarVehiculo">
+                    <i class="fas fa-search"></i> Buscar Vehiculo
+                </button>
+            </div>
+        </div>
+        <div class="col-sm-6 d-flex align-items-end">
+            <button type="button" class="btn btn-info" onclick="GenerarReporteVehiculo()"><i class="fas fa-file-invoice"></i> Generar Reporte</button>
+        </div>
+    </div>
 
-        <div class="row mb-4 border p-3 rounded bg-light">
-            <h5 class="text-primary">Asociar Reporte a:</h5>
-            <div class="col-sm-6">
-                <label for="txtVehiculoSeleccionado" class="form-label">Vehiculo</label>
-                <div class="input-group">
-                    <input type="hidden" id="txtIdVehiculoSeleccionada" value="0" />
-                    <input type="text" class="form-control" id="txtVehiculoSeleccionado" placeholder="Seleccione un Vehiculo" readonly />
-                    <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modalBuscarVehiculo">
-                        <i class="fas fa-search"></i> Buscar Vehiculo
-                    </button>
+    <div id="resultadoReporteVehiculo" style="display:none;">
+        <hr />
+        <div class="row mb-3">
+            <div class="col-12 text-end">
+                <button type="button" class="btn btn-danger" onclick="PDFReporteVehiculo()">
+                    <i class="fas fa-file-pdf"></i> Descargar PDF
+                </button>
+            </div>
+        </div>
+        <hr />
+        <div class="row">
+            <div class="col-12 mb-3">
+                <h4 class="text-primary"><i class="fas fa-car"></i> Detalle del Vehículo: <span id="lblModeloPlaca"></span></h4>
+                <span class="badge bg-secondary" id="lblEstadoVenta"></span>
+            </div>
+        </div>
+
+        <h4 class="text-secondary mt-4 mb-3"><i class="fas fa-list-alt"></i> Desglose de Gastos del Vehículo</h4>
+        <table id="tablaGastosDetalleVehiculo" class="display cell-border w-100" style="width:100%">
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Tipo Gasto</th>
+                    <th>Descripción</th>
+                    <th>Monto (Bs.)</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+            <tfoot>
+                <tr class="bg-warning">
+                    <th colspan="3" class="text-end">TOTAL GASTOS ACUMULADOS:</th>
+                    <th id="lblGastosTotalesAcumulados" class="text-end fw-bold">Bs. 0.00</th>
+                </tr>
+            </tfoot>
+        </table>
+
+        <hr />
+        <h4 class="text-success mb-3"><i class="fas fa-dollar-sign"></i> Resumen Financiero</h4>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="alert alert-info">
+                    <strong>Precio Compra:</strong> <span id="lblPrecioCompra"></span>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="alert alert-warning">
+                    <strong>Gastos Acumulados:</strong> <span id="lblGastosAcumulados"></span>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="alert alert-success">
+                    <strong>Precio Venta:</strong> <span id="lblPrecioVenta"></span>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="alert alert-success">
+                    <strong>GANANCIA NETA:</strong> <span id="lblGananciaNetaVehiculo"></span>
                 </div>
             </div>
         </div>
 
+        <div class="row mt-3">
+            <div class="col-12">
+                <p class="text-muted">Asociado a Venta: <span id="lblVentaAsociada"></span></p>
+            </div>
+        </div>
 
     </div>
 
@@ -67,28 +134,31 @@
 </div>
 
 
-
-
-
 @section Scripts{
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
     <script>
         var tablaVehiculosModal;
+        var tablaGastosDetalleVehiculo;
+        var reporteVehiculoActual = null;
 
         function ResetearFormularioPrincipal() {
             document.getElementById("txtIdVehiculoSeleccionada").value = "0";
             document.getElementById("txtVehiculoSeleccionado").value = "";
-            LimpiarCamposItem();
             if (tablaVehiculosModal) {
                 tablaVehiculosModal.ajax.reload(null, false);
             }
+            $('#resultadoReporteVehiculo').hide();
         }
+
         document.addEventListener("DOMContentLoaded", function () {
 
+            // 1. Inicialización de tablaVehiculosModal (Buscar Vehículo)
             tablaVehiculosModal = $('#tablaVehiculosModal').DataTable({
                 responsive: true,
                 ordering: true,
                 "ajax": {
-                    "url": '@Url.Action("ListarVehiculosSimples", "Gasto")',
+                    "url": '@Url.Action("ListarVehiculosSimples", "Reporte")',
                     "type": "GET",
                     "datatype": "json",
                     "dataSrc": "data"
@@ -104,11 +174,41 @@
                         "defaultContent": '<button type="button" class="btn btn-success btn-sm btn-seleccionar-vehiculo"><i class="fas fa-check"></i> Seleccionar</button>',
                         "orderable": false, "searchable": false, "width": "100px"
                     }
-
                 ],
                 "language": { "url": '//cdn.datatables.net/plug-ins/2.2.1/i18n/es-ES.json' }
-
             });
+
+            // 2. Inicialización de tablaGastosDetalleVehiculo (Detalle del Reporte)
+            tablaGastosDetalleVehiculo = $('#tablaGastosDetalleVehiculo').DataTable({
+                responsive: true,
+                ordering: true,
+                searching: false,
+                paging: false,
+                info: false,
+                "language": { "url": '//cdn.datatables.net/plug-ins/2.2.1/i18n/es-ES.json' },
+                "columns": [
+                    {
+                        "data": "fecha",
+                        "render": function (data) {
+                            if (data === null) return '';
+
+                            var timestamp = parseInt(data.substring(6, data.length - 2));
+                            var date = new Date(timestamp);
+                            var day = date.getDate().toString().padStart(2, '0');
+                            var month = (date.getMonth() + 1).toString().padStart(2, '0');
+                            var year = date.getFullYear();
+
+                            return `${day}/${month}/${year}`;
+                        }
+                    },
+                    { "data": "TipoGasto" },
+                    { "data": "descripcion" },
+                    { "data": "monto", "render": function (data) { return `Bs. ${parseFloat(data).toFixed(2)}`; } }
+                ],
+                "order": [[0, 'desc']]
+            });
+
+            // --- MANEJO DE EVENTOS ---
             $('#tablaVehiculosModal tbody').on('click', '.btn-seleccionar-vehiculo', function () {
                 const dataVehiculo = tablaVehiculosModal.row($(this).parents('tr')).data();
 
@@ -116,11 +216,194 @@
                 document.getElementById('txtVehiculoSeleccionado').value = `Modelo: ${dataVehiculo.modelo} (${dataVehiculo.placa}) | Año: ${dataVehiculo.año} `;
 
                 $('#modalBuscarVehiculo').modal('hide');
+                $('#resultadoReporteVehiculo').hide();
             });
-
         });
 
+        // ----------------------------------------------------------------------
+        // FUNCIÓN GENERAR REPORTE DE VEHÍCULO
+        // ----------------------------------------------------------------------
+        async function GenerarReporteVehiculo() {
+            const idVehiculo = parseInt(document.getElementById('txtIdVehiculoSeleccionada').value);
 
+            if (idVehiculo === 0) {
+                Swal.fire('Atención', 'Debe seleccionar un Vehículo primero.', 'warning');
+                return;
+            }
+
+            Swal.fire({
+                title: "Generando Reporte...",
+                html: "Calculando rentabilidad y costos asociados...",
+                allowOutsideClick: false,
+                didOpen: () => { Swal.showLoading(); }
+            });
+
+            try {
+                const response = await fetch('@Url.Action("ObtenerReporteVehiculoRentabilidad", "Reporte")', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json; charset=utf-8' },
+                    body: JSON.stringify({ idVehiculo: idVehiculo })
+                });
+
+                if (!response.ok) throw new Error("Error en la petición de reporte.");
+
+                const data = await response.json();
+
+                if (data.resultado && data.reporte) {
+                    const reporte = data.reporte;
+                    reporteVehiculoActual = reporte;
+
+                    // 1. Mostrar Desglose de Costos
+
+                    // Actualizar fila de totales bajo la tabla de gastos
+                    document.getElementById('lblGastosTotalesAcumulados').textContent = `Bs. ${reporte.TotalGastosVehiculo.toFixed(2)}`;
+
+                    // Mostrar Resumen Final (Orden corregido en el HTML)
+                    document.getElementById('lblPrecioCompra').textContent = `Bs. ${reporte.precio_compra.toFixed(2)}`;
+                    document.getElementById('lblGastosAcumulados').textContent = `Bs. ${reporte.TotalGastosVehiculo.toFixed(2)}`;
+
+                    const precioVenta = reporte.precio_venta !== null ? `Bs. ${reporte.precio_venta.toFixed(2)}` : 'N/A';
+                    document.getElementById('lblPrecioVenta').textContent = precioVenta;
+
+                    document.getElementById('lblGananciaNetaVehiculo').textContent = `Bs. ${reporte.GananciaNetaExacta.toFixed(2)}`;
+
+                    document.getElementById('lblModeloPlaca').textContent = `${reporte.modelo} (${reporte.placa})`;
+                    document.getElementById('lblEstadoVenta').textContent = reporte.estado.toUpperCase();
+
+                    const ventaInfo = reporte.IdVentaAsociada !== null
+                        ? `Venta N° ${reporte.IdVentaAsociada} | Cliente: ${reporte.ClienteAsociado}`
+                        : 'No ha sido vendido.';
+                    document.getElementById('lblVentaAsociada').textContent = ventaInfo;
+
+
+                    // 2. Mostrar Detalle de Gastos
+                    tablaGastosDetalleVehiculo.clear().rows.add(reporte.DetalleGastos).draw();
+
+                    $('#resultadoReporteVehiculo').show();
+                    Swal.close();
+                } else {
+                    Swal.fire('Error', data.mensaje || 'No se pudo obtener el reporte de rentabilidad del vehículo.', 'error');
+                }
+            } catch (error) {
+                Swal.fire('Error', 'Ocurrió un error inesperado al generar el reporte.', 'error');
+                console.error(error);
+            }
+        }
+
+        // ----------------------------------------------------------------------
+        // FUNCIÓN DESCARGAR PDF (REPORTE DE VEHÍCULO) - ORDEN CORREGIDO
+        // ----------------------------------------------------------------------
+        function PDFReporteVehiculo() {
+            if (!reporteVehiculoActual) {
+                Swal.fire('Error', 'No hay reporte de vehículo generado para descargar.', 'error');
+                return;
+            }
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('p', 'mm', 'a4');
+            let y = 10;
+            const reporte = reporteVehiculoActual;
+            const precioVentaDisplay = reporte.precio_venta !== null ? `Bs. ${reporte.precio_venta.toFixed(2)}` : 'N/A';
+
+            // --- ENCABEZADO Y RESUMEN DE VEHÍCULO ---
+            doc.setFontSize(18);
+            doc.text('REPORTE DE RENTABILIDAD POR VEHÍCULO', 105, y, { align: 'center' });
+            y += 10;
+
+            doc.setFontSize(14);
+            doc.setFont(undefined, 'bold');
+            doc.text(`Vehículo: ${reporte.modelo} (${reporte.placa})`, 10, y);
+            doc.setFont(undefined, 'normal');
+            doc.text(`Estado: ${reporte.estado.toUpperCase()}`, 180, y, { align: 'right' });
+            y += 10;
+
+            // --- DETALLE DE GASTOS (PRIMERO) ---
+            doc.setFontSize(14);
+            doc.text('DESGLOSE DE GASTOS', 10, y);
+            y += 5;
+
+            const detailHeaders = [['Fecha', 'Tipo Gasto', 'Descripción', 'Monto (Bs.)']];
+            const detailBody = reporte.DetalleGastos.map(g => {
+                let formattedDate = '';
+                if (g.fecha && typeof g.fecha === 'string' && g.fecha.startsWith('/Date')) {
+                    var timestamp = parseInt(g.fecha.substring(6, g.fecha.length - 2));
+                    var date = new Date(timestamp);
+                    var day = date.getDate().toString().padStart(2, '0');
+                    var month = (date.getMonth() + 1).toString().padStart(2, '0');
+                    var year = date.getFullYear();
+                    formattedDate = `${day}/${month}/${year}`;
+                } else if (g.fecha) {
+                    formattedDate = g.fecha.substring(0, 10);
+                }
+
+                return [
+                    formattedDate,
+                    g.TipoGasto,
+                    g.descripcion,
+                    g.monto.toFixed(2)
+                ];
+            });
+
+            doc.autoTable({
+                head: detailHeaders,
+                body: detailBody,
+                startY: y,
+                theme: 'striped',
+                styles: { fontSize: 10, cellPadding: 2 },
+                headStyles: { fillColor: [100, 100, 100] },
+                didDrawPage: function (data) {
+                    y = data.cursor.y + 5;
+                }
+            });
+            y = doc.autoTable.previous.finalY + 2;
+
+            // --- FILA TOTAL DE GASTOS ---
+            doc.setFontSize(12);
+            doc.setFont(undefined, 'bold');
+            doc.text(`TOTAL GASTOS ACUMULADOS: Bs. ${reporte.TotalGastosVehiculo.toFixed(2)}`, 180, y, { align: 'right' });
+            y += 8;
+
+            // --- RESUMEN FINAL (SEGUNDO) ---
+            doc.setFontSize(14);
+            doc.setFont(undefined, 'bold');
+            doc.text('RESUMEN FINANCIERO', 10, y);
+            y += 5;
+
+            const summaryData = [
+                ['Precio Compra', 'Gastos Acumulados', 'Precio Venta (si aplica)', 'GANANCIA NETA'],
+                [`Bs. ${reporte.precio_compra.toFixed(2)}`,
+                `Bs. ${reporte.TotalGastosVehiculo.toFixed(2)}`,
+                precioVentaDisplay,
+                `Bs. ${reporte.GananciaNetaExacta.toFixed(2)}`]
+            ];
+
+            doc.autoTable({
+                head: [summaryData[0]],
+                body: [summaryData[1]],
+                startY: y,
+                theme: 'grid',
+                styles: { fontSize: 10, cellPadding: 2 },
+                headStyles: { fillColor: [41, 128, 185], textColor: 255 },
+                columnStyles: { 3: { fillColor: [144, 238, 144] } }
+            });
+            y = doc.autoTable.previous.finalY + 10;
+
+
+            // --- INFORMACIÓN DE VENTA ---
+            doc.setFontSize(12);
+            doc.setFont(undefined, 'bold');
+            doc.text('INFORMACIÓN DE VENTA ASOCIADA', 10, y);
+            y += 7;
+
+            const ventaInfo = reporte.IdVentaAsociada !== null
+                ? `Venta N° ${reporte.IdVentaAsociada} | Cliente: ${reporte.ClienteAsociado}`
+                : 'Vehículo NO VENDIDO';
+
+            doc.setFont(undefined, 'normal');
+            doc.text(ventaInfo, 10, y);
+            y += 10;
+
+            doc.save(`Reporte_Vehiculo_${reporte.placa}.pdf`);
+        }
     </script>
 }
-

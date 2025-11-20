@@ -104,6 +104,7 @@
     <Compile Include="CN_Pago.cs" />
     <Compile Include="CN_Permiso.cs" />
     <Compile Include="CN_Recursos.cs" />
+    <Compile Include="CN_Reporte.cs" />
     <Compile Include="CN_Rol.cs" />
     <Compile Include="CN_TipoGasto.cs" />
     <Compile Include="CN_TipoPago.cs" />

@@ -108,6 +108,8 @@
     <Compile Include="ReporteCostoVehiculoDTO.cs" />
     <Compile Include="ReporteDashboard.cs" />
     <Compile Include="GastoVehiculoReporte.cs" />
+    <Compile Include="ReporteVehiculoRentabilidad.cs" />
+    <Compile Include="ReporteVentaGanancia.cs" />
     <Compile Include="ResumenCostoVehiculo.cs" />
     <Compile Include="Rol.cs" />
     <Compile Include="TipoGasto.cs" />
