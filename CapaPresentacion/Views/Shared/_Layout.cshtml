@@ -59,7 +59,7 @@
             {
                 <hr class="sidebar-divider">
                 <div class="sidebar-heading">
-                    Gestion Comercial
+                    Comercial
                 </div>
             }
 
@@ -251,14 +251,16 @@
 
             @{
                 bool tienePermisosReporte =
-                    TienePermiso("Visualizar Reportes");
+                  TienePermiso("Visualizar Reportes") ||
+                  TienePermiso("Visualizar Ganancias por Ventas") ||
+                  TienePermiso("Visualizar Ganancias por Vehiculo");
             }
 
             @if (tienePermisosReporte)
             {
                 <hr class="sidebar-divider">
                 <div class="sidebar-heading">
-                    Reportes
+                    REPORTES
                 </div>
             }
 
@@ -267,19 +269,17 @@
                 <li class="nav-item active">
                     <a class="nav-link" href="@Url.Action("ReporteVentas", "Reporte")">
                         <i class="fas fa-fw fa-chart-area"></i>
-                        <span>Reporte de Ventas</span>
+                        <span>Ventas por Periodo</span>
                     </a>
                 </li>
             }
-
-
 
             @if (TienePermiso("Visualizar Ganancias por Ventas"))
             {
                 <li class="nav-item active">
                     <a class="nav-link" href="@Url.Action("RepoeGananciaVenta", "Reporte")">
-                        <i class="fas fa-fw fa-chart-area"></i>
-                        <span>Reporte de Ganancia de Venta</span>
+                        <i class="fas fa-fw fa-dollar-sign"></i>
+                        <span>Rentabilidad por Venta</span>
                     </a>
                 </li>
             }
@@ -287,11 +287,13 @@
             {
                 <li class="nav-item active">
                     <a class="nav-link" href="@Url.Action("RepoeGananciaVehiculo", "Reporte")">
-                        <i class="fas fa-fw fa-chart-area"></i>
-                        <span>Reporte de ganancias por Vehiculo</span>
+                        <i class="fas fa-fw fa-car"></i>
+                        <span>Rentabilidad por Vehículo</span>
                     </a>
                 </li>
             }
+
+
 
 
             <!-- Divider -->
